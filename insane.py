@@ -18,19 +18,7 @@ from model import kalman_basic
 from openai import OpenAI
 import json
 from streamlit_autorefresh import st_autorefresh
-
-
-# ----------------------------------------------------
-# LOAD SNAPSHOT SIGNAL HISTORY (non-repainting)
-# ----------------------------------------------------
-def load_frozen_signals(ticker):
-    path = f"signal_history/{ticker}.json"
-    try:
-        with open(path, "r") as f:
-            return json.load(f)
-    except:
-        return []
-
+from daily_engine import load_ticker_history, snapshot_all_signals_first_time 
 
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -360,9 +348,15 @@ if st.session_state.run_model:
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
             else:
+                frozen = load_ticker_history(ticker)
+                if len(frozen) == 0:
+                    df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
+                    df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+                    snapshot_all_signals_first_time(ticker, df)
+                    frozen = load_ticker_history(ticker)
+                
                 df["Turn_Up"] = False
                 df["Turn_Down"] = False
-                frozen = load_frozen_signals(ticker)
                 for record in frozen:
                     date = record["date"]
                     mask = df.index.strftime("%Y-%m-%d") == date

@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import time
 import os
+import pytz 
 
 # ============================================================
 #  SNAPSHOT LEDGER — ONE JSON PER TICKER (FULL FLIP HISTORY)
@@ -64,8 +65,12 @@ def snapshot_all_signals_first_time(ticker, df):
         }
 
         history.append(record)
-
-    save_ticker_history(ticker, history)
+    
+    
+    cst = pytz.timezone('America/Chicago')
+    now_cst = datetime.now(cst)
+    if now_cst.hour > 15:
+        save_ticker_history(ticker, history)
 
 def snapshot_new_signals_only(ticker, df):
     history = load_ticker_history(ticker)
