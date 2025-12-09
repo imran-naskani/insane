@@ -79,7 +79,7 @@ def compute_vwap_with_bands(df, num_dev_up=2.0, num_dev_dn=-2.0):
     upper = vwap + num_dev_up * deviation
     lower = vwap + num_dev_dn * deviation
 
-    return vwap, upper, lower
+    return upper, vwap, lower
 
 # ----------------------------------------------------
 #  SAFE PRICE DOWNLOADER (YFINANCE WITHOUT MULTIINDEX)
@@ -213,6 +213,9 @@ def add_features(df, p):
     ).std()
 
     bb = ta.volatility.BollingerBands(df["Close"], window=p["bollinger_length"], window_dev=2)
+    df["BB_Upper"] = bb.bollinger_hband()
+    df["BB_Mid"]   = bb.bollinger_mavg()
+    df["BB_Lower"] = bb.bollinger_lband()
     df["BB_Width"] = bb.bollinger_wband()
 
     # -------- Volume --------
@@ -231,7 +234,7 @@ def add_features(df, p):
     df["Gap"] = (df["Open"] - df["Close"].shift(1)) / df["Close"].shift(1)
     df["Candle_Body"] = (df["Close"] - df["Open"]) / (df["High"] - df["Low"] + 1e-9)
 
-    df["VWAP"], df["VWAP_Upper"], df["VWAP_Lower"] = compute_vwap_with_bands(df)
+    df["VWAP_Upper"], df["VWAP"], df["VWAP_Lower"] = compute_vwap_with_bands(df)
 
     return df
 

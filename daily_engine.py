@@ -4,6 +4,119 @@ from model import kalman_basic
 from datetime import datetime
 import json
 import time
+import os
+
+# ============================================================
+#  SNAPSHOT LEDGER — ONE JSON PER TICKER (FULL FLIP HISTORY)
+# ============================================================
+
+def ensure_history_folder():
+    os.makedirs("signal_history", exist_ok=True)
+
+def load_ticker_history(ticker):
+    ensure_history_folder()
+    filepath = f"signal_history/{ticker}.json"
+
+    if not os.path.exists(filepath):
+        return []  # no history yet
+
+    with open(filepath, "r") as f:
+        return json.load(f)
+
+def save_ticker_history(ticker, history_list):
+    ensure_history_folder()
+    filepath = f"signal_history/{ticker}.json"
+
+    with open(filepath, "w") as f:
+        json.dump(history_list, f, indent=4)
+
+def snapshot_all_signals_first_time(ticker, df):
+    history = []
+    last_signal = None
+
+    for idx, row in df.iterrows():
+
+        # Detect REAL flips (ignore repeated up/down)
+        if row["Turn_Up"]:
+            if last_signal == "UP":
+                continue
+            signal_type = "UP"
+            last_signal = "UP"
+
+        elif row["Turn_Down"]:
+            if last_signal == "DOWN":
+                continue
+            signal_type = "DOWN"
+            last_signal = "DOWN"
+
+        else:
+            continue
+
+        # Full detail flip record
+        record = {
+            "date": idx.strftime("%Y-%m-%d"),
+            "signal": signal_type,
+            "turn_up": bool(row["Turn_Up"]),
+            "turn_down": bool(row["Turn_Down"]),
+            "close": float(row["Close"]),
+            "smooth": float(row["Smooth"]),
+            "slope": float(row["Slope"])
+        }
+
+        history.append(record)
+
+    save_ticker_history(ticker, history)
+
+def snapshot_new_signals_only(ticker, df):
+    history = load_ticker_history(ticker)
+
+    # FIRST RUN EVER → save full flip history
+    if len(history) == 0:
+        snapshot_all_signals_first_time(ticker, df)
+        return
+
+    last_saved_signal = history[-1]["signal"]
+    last_saved_date = history[-1]["date"]
+
+    # Append only REAL flips after last saved date
+    for idx, row in df.iterrows():
+        date_str = idx.strftime("%Y-%m-%d")
+        if date_str <= last_saved_date:
+            continue
+
+        # Detect REAL flip
+        if row["Turn_Up"]:
+            if last_saved_signal == "UP":
+                continue
+            signal_type = "UP"
+
+        elif row["Turn_Down"]:
+            if last_saved_signal == "DOWN":
+                continue
+            signal_type = "DOWN"
+
+        else:
+            continue  # no flip
+
+        # Build detail record
+        record = {
+            "date": date_str,
+            "signal": signal_type,
+            "turn_up": bool(row["Turn_Up"]),
+            "turn_down": bool(row["Turn_Down"]),
+            "close": float(row["Close"]),
+            "smooth": float(row["Smooth"]),
+            "slope": float(row["Slope"])
+        }
+
+        # Append + update last_saved_signal
+        history.append(record)
+        last_saved_signal = signal_type
+
+    save_ticker_history(ticker, history)
+
+
+
 
 # ----------------------------------------------------
 # 1) Load S&P500 List (static file or online)
@@ -70,7 +183,8 @@ def run_daily_engine():
 
             df = compute_signals(df)
             today = df.index[-1]
-
+            snapshot_new_signals_only(ticker, df)
+            
             if df["Turn_Up"].iloc[-1]:
                 long_signals.append(ticker)
 
