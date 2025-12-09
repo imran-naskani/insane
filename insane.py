@@ -14,7 +14,7 @@ from backtest_same_day_close import generate_trade_log, compute_trade_stats
 from backtest_next_day_open import generate_trade_log_next_open
 from backtest_intraday_same_bar_close import backtest_intraday_close
 from backtest_intraday_next_bar_open import backtest_intraday_next_open
-from model import kalman_basic
+from model import secret_sauce
 from openai import OpenAI
 import json
 from streamlit_autorefresh import st_autorefresh
@@ -326,7 +326,7 @@ if st.session_state.run_model:
             # ------------------------------------------------------------
             # 2) COMPUTE KALMAN SIGNALS
             # ------------------------------------------------------------
-            df["Smooth"], df["Slope"] = kalman_basic(df["Close"])
+            df["Smooth"], df["Slope"] = secret_sauce(df["Close"])
             df["price_delta"] = df["Close"] - df["Smooth"]
 
             slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()

@@ -63,7 +63,7 @@ df = main_df.copy()
 #     slope = np.gradient(smooth)
 #     return smooth, slope
 
-def kalman_basic(close):
+def secret_sauce(close):
     kf = KalmanFilter(
         transition_matrices=[1],
         observation_matrices=[1],

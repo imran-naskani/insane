@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-from model import kalman_basic
+from model import secret_sauce
 from datetime import datetime
 import json
 import time
@@ -135,11 +135,11 @@ TICKERS = sorted(sp500['Symbol'].unique())
 TICKERS += ["SPY", "QQQ", "^GSPC", "^IXIC", "^RUT", "^VIX"]
 
 # ----------------------------------------------------
-# 2) Function: Run Kalman & Signals
+# 2) Function: Run Model & Signals
 # ----------------------------------------------------
 def compute_signals(df):
     df = df.dropna().copy()
-    df["Smooth"], df["Slope"] = kalman_basic(df["Close"])
+    df["Smooth"], df["Slope"] = secret_sauce(df["Close"])
     df["price_delta"] = df["Close"] - df["Smooth"]
 
     # Slope strength bands
