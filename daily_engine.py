@@ -11,6 +11,14 @@ import pytz
 #  SNAPSHOT LEDGER — ONE JSON PER TICKER (FULL FLIP HISTORY)
 # ============================================================
 
+def get_existing_history_tickers():
+    ensure_history_folder()
+    return [
+        f.replace(".json", "")
+        for f in os.listdir("signal_history")
+        if f.endswith(".json")
+    ]
+
 def ensure_history_folder():
     os.makedirs("signal_history", exist_ok=True)
 
@@ -128,11 +136,18 @@ def snapshot_new_signals_only(ticker, df):
 # ----------------------------------------------------
 sp500_url = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.csv"
 sp500 = pd.read_csv(sp500_url)
-TICKERS = sorted(sp500['Symbol'].unique())
 
 
-# Optional: add SPY, QQQ
-TICKERS += ["SPY", "QQQ", "^GSPC", "^IXIC", "^RUT", "^VIX"]
+# TICKERS = sorted(sp500['Symbol'].unique())
+# # Optional: add SPY, QQQ
+# TICKERS += ["SPY", "QQQ", "^GSPC", "^IXIC", "^RUT", "^VIX"]
+
+base_tickers = set(sp500['Symbol'].unique())
+extra_tickers = {"SPY", "QQQ", "^GSPC", "^IXIC", "^RUT", "^VIX"}
+history_tickers = set(get_existing_history_tickers())
+
+TICKERS = sorted(base_tickers | extra_tickers | history_tickers)
+
 
 # ----------------------------------------------------
 # 2) Function: Run Model & Signals

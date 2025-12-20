@@ -51,35 +51,217 @@ def compute_frama(series, window=16, fc=1, sc=200):
     return pd.Series(frama, index=series.index)
 
 
-def compute_vwap_with_bands(df, num_dev_up=2.0, num_dev_dn=-2.0):
+# ---------------------------------------------------------
+# 1) TOS RSI With Divergence
+# ---------------------------------------------------------
+def compute_tos_rsi(df, n=14, over_bought=70, over_sold=30):
     """
-    Exact ThinkOrSwim VWAP + Standard Deviation Bands
-    VWAP resets daily.
+    Exact ThinkOrSwim-style RSI:
+    NetChgAvg = ExpAverage(c - c[1], n)
+    TotChgAvg = ExpAverage(|c - c[1]|, n)
+    RSI       = 50 * (NetChgAvg / TotChgAvg + 1)
     """
-    # Typical price (same as TOS 'vwap')
+    c = df["Close"].astype(float)
+
+    # price change
+    delta = c.diff()
+
+    # TOS ExpAverage = EMA with alpha = 2/(n+1)
+    net_chg_avg = delta.ewm(span=n, adjust=False).mean()
+    tot_chg_avg = delta.abs().ewm(span=n, adjust=False).mean()
+
+    chg_ratio = np.where(tot_chg_avg != 0, net_chg_avg / tot_chg_avg, 0.0)
+    rsi = 50 * (chg_ratio + 1)
+
+    out = pd.DataFrame(index=df.index)
+    out["TOS_RSI"] = rsi
+    out["OverBought"] = over_bought
+    out["OverSold"] = over_sold
+
+    return out
+
+# ---------------------------------------------------------
+# 1) EXACT TOS MODIFIED ATR
+# ---------------------------------------------------------
+def tos_atr_modified(df, atr_period=10):
+    high = df["High"].values.astype(float)
+    low  = df["Low"].values.astype(float)
+    close = df["Close"].values.astype(float)
+    n = len(df)
+
+    # ----- HiLo -----
+    hl = high - low
+    sma_hl = pd.Series(hl).rolling(atr_period).mean().values
+
+    # TOS behavior: if SMA not ready, just use hl (no NaNs)
+    hilo = np.where(np.isnan(sma_hl), hl, np.minimum(hl, 1.5 * sma_hl))
+
+    # ----- HRef / LRef -----
+    href = np.zeros(n)
+    lref = np.zeros(n)
+
+    for i in range(1, n):
+        # HRef
+        if low[i] <= high[i-1]:
+            href[i] = high[i] - close[i-1]
+        else:
+            href[i] = (high[i] - close[i-1]) - 0.5 * (low[i] - high[i-1])
+
+        # LRef
+        if high[i] >= low[i-1]:
+            lref[i] = close[i-1] - low[i]
+        else:
+            lref[i] = (close[i-1] - low[i]) - 0.5 * (low[i-1] - high[i])
+
+    # ----- True Range -----
+    # After the HiLo fix, none of these should be NaN
+    tr = np.maximum(hilo, np.maximum(href, lref))
+
+    # ----- Wilder-style ATR, TOS-style init -----
+    atr = np.full(n, np.nan)
+    if n > 1:
+        atr[1] = tr[1]  # seed with first TR
+
+    alpha = 1.0 / atr_period
+    for i in range(2, n):
+        atr[i] = atr[i-1] + alpha * (tr[i] - atr[i-1])
+
+    return pd.Series(atr, index=df.index, name="TOS_ATR")
+
+# ---------------------------------------------------------
+# 2) FULL TOS TRAILING STOP (STATE MACHINE)
+# ---------------------------------------------------------
+def tos_trailing_stop(df, atr_period=10, atr_factor=1.5, first_trade="long"):
+    atr = tos_atr_modified(df, atr_period).values
+    close = df["Close"].values.astype(float)
+    n = len(df)
+
+    loss  = atr_factor * atr
+    state = np.full(n, "init", dtype=object)
+    trail = np.full(n, np.nan)
+
+    for i in range(1, n):
+        # INIT: first bar with non-NaN loss starts the system
+        if state[i-1] == "init":
+            if not np.isnan(loss[i]):
+                if first_trade == "long":
+                    state[i] = "long"
+                    trail[i] = close[i] - loss[i]
+                else:
+                    state[i] = "short"
+                    trail[i] = close[i] + loss[i]
+            else:
+                state[i] = "init"
+                trail[i] = np.nan
+            continue
+
+        prev_state = state[i-1]
+        prev_trail = trail[i-1]
+
+        if prev_state == "long":
+            if close[i] > prev_trail:
+                state[i] = "long"
+                trail[i] = max(prev_trail, close[i] - loss[i])
+            else:
+                state[i] = "short"
+                trail[i] = close[i] + loss[i]
+        else:  # prev_state == "short"
+            if close[i] < prev_trail:
+                state[i] = "short"
+                trail[i] = min(prev_trail, close[i] + loss[i])
+            else:
+                state[i] = "long"
+                trail[i] = close[i] - loss[i]
+
+    # ---- Buy / Sell when state flips ----
+    buy  = np.zeros(n, dtype=bool)
+    sell = np.zeros(n, dtype=bool)
+
+    for i in range(1, n):
+        buy[i]  = (state[i] == "long"  and state[i-1] != "long")
+        sell[i] = (state[i] == "short" and state[i-1] != "short")
+
+    return pd.DataFrame(
+        {
+            "TOS_ATR": atr,
+            "TOS_Trail": trail,
+            "TOS_State": state,
+            "TOS_Buy": buy,
+            "TOS_Sell": sell,
+        },
+        index=df.index,
+    )
+
+
+
+# def compute_vwap_with_bands(df, num_dev_up=2.0, num_dev_dn=-2.0):
+#     """
+#     Exact ThinkOrSwim VWAP + Standard Deviation Bands
+#     VWAP resets daily.
+#     """
+#     # Typical price (same as TOS 'vwap')
+#     tp = (df["High"] + df["Low"] + df["Close"]) / 3
+
+#     # Daily grouping
+#     g = df.index.date
+
+#     # Cumulative sums per day
+#     vol_cum = df["Volume"].groupby(g).cumsum()
+#     tp_vol_cum = (tp * df["Volume"]).groupby(g).cumsum()
+#     tp2_vol_cum = ((tp ** 2) * df["Volume"]).groupby(g).cumsum()
+
+#     # VWAP
+#     vwap = tp_vol_cum / vol_cum
+
+#     # Volume-weighted variance
+#     variance = (tp2_vol_cum / vol_cum) - (vwap ** 2)
+#     variance = variance.clip(lower=0)  # prevent negative due to FP error
+
+#     deviation = np.sqrt(variance)
+
+#     upper = vwap + num_dev_up * deviation
+#     lower = vwap + num_dev_dn * deviation
+
+#     return upper, vwap, lower
+
+def compute_vwap_with_bands(df, num_dev_up=2.0, num_dev_dn=-2.0, anchor="DAY"):
     tp = (df["High"] + df["Low"] + df["Close"]) / 3
 
-    # Daily grouping
-    g = df.index.date
+    # --- FIX ZERO VOLUME ---
+    vol = df["Volume"].replace(0, 1)   # essential for indices like SPX
 
-    # Cumulative sums per day
-    vol_cum = df["Volume"].groupby(g).cumsum()
-    tp_vol_cum = (tp * df["Volume"]).groupby(g).cumsum()
-    tp2_vol_cum = ((tp ** 2) * df["Volume"]).groupby(g).cumsum()
+    # --- anchor periods ---
+    if anchor == "DAY":
+        period = df.index.date
+    elif anchor == "WEEK":
+        period = df.index.to_period("W").astype(str)
+    elif anchor == "MONTH":
+        period = df.index.to_period("M").astype(str)
 
-    # VWAP
-    vwap = tp_vol_cum / vol_cum
+    # --- cumulative values ---
+    vol_sum = vol.groupby(period).cumsum()
+    vol_tp_sum = (vol * tp).groupby(period).cumsum()
+    vol_tp2_sum = (vol * (tp ** 2)).groupby(period).cumsum()
 
-    # Volume-weighted variance
-    variance = (tp2_vol_cum / vol_cum) - (vwap ** 2)
-    variance = variance.clip(lower=0)  # prevent negative due to FP error
+    # --- VWAP ---
+    vwap = vol_tp_sum / vol_sum
 
+    # --- STD DEV ---
+    variance = (vol_tp2_sum / vol_sum) - (vwap ** 2)
+    variance = variance.clip(lower=0)
     deviation = np.sqrt(variance)
 
     upper = vwap + num_dev_up * deviation
     lower = vwap + num_dev_dn * deviation
 
+    # --- Remove first bar of each day/month/week ---
+    first_idx = df.index.to_series().groupby(period).head(1).index
+    vwap.loc[first_idx] = np.nan
+    upper.loc[first_idx] = np.nan
+    lower.loc[first_idx] = np.nan
+
     return upper, vwap, lower
+
 
 # ----------------------------------------------------
 #  SAFE PRICE DOWNLOADER (YFINANCE WITHOUT MULTIINDEX)
@@ -165,7 +347,7 @@ def get_market_context(start, end):
 # ----------------------------------------------------
 #  Core Feature Engineering
 # ----------------------------------------------------
-def add_features(df, p):
+def add_features(df, p, timeframe=None):
 
     # -------- Trend --------
     df["SMA_Short"] = df["Close"].rolling(p["sma_short"]).mean()
@@ -233,8 +415,20 @@ def add_features(df, p):
     # -------- Candle Structure --------
     df["Gap"] = (df["Open"] - df["Close"].shift(1)) / df["Close"].shift(1)
     df["Candle_Body"] = (df["Close"] - df["Open"]) / (df["High"] - df["Low"] + 1e-9)
+    
+    # -------- VWAP --------
+    if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+        df["VWAP_Upper"], df["VWAP"], df["VWAP_Lower"] = compute_vwap_with_bands(df)
 
-    df["VWAP_Upper"], df["VWAP"], df["VWAP_Lower"] = compute_vwap_with_bands(df)
+    # -------- TOS ATR --------
+    tos = tos_trailing_stop(df, atr_period=5, atr_factor=1.5)
+    df["TOS_Trail"] = tos["TOS_Trail"]
+
+
+    # # -------- TOS RSI With Divergence  --------
+    tos_rsi = compute_tos_rsi(df, 9, 70, 30)
+    df["TOS_RSI"]      = tos_rsi["TOS_RSI"]
+
 
     return df
 
@@ -246,7 +440,7 @@ def build_feature_dataset(ticker, start_date="2010-01-01", end_date=None, timefr
 
     ohlcv = download_price(ticker, start_date, end_date, timeframe=timeframe)
 
-    feat  = add_features(ohlcv.copy(), feature_params)
+    feat  = add_features(ohlcv.copy(), feature_params, timeframe=timeframe)
 
     market = get_market_context(start_date, end_date)
     market = market.reindex(feat.index)

@@ -38,6 +38,39 @@ if "run_model" not in st.session_state:
 st.set_page_config(page_title="INSANE Trading Model", layout="wide")
 
 # ----------------------------------------------------
+# GLOBAL CSS (DARK THEME SAFE)
+# ----------------------------------------------------
+st.markdown("""
+<style>
+/* Index cards – dark theme safe */
+.index-card {
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.index-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e0e0e0;
+}
+
+.index-signal {
+    font-size: 15px;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+.index-date {
+    font-size: 11px;
+    color: #9e9e9e;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ----------------------------------------------------
 # TITLE
 # ----------------------------------------------------
 st.markdown("<h1 id='MainTitle'>📈 INSANE — Intelligent Statistical Algorithm for Navigating Equities</h1>", unsafe_allow_html=True)
@@ -122,17 +155,19 @@ with chat_col:
         def show_index(name, obj):
             signal = obj["signal"]
             date = obj["date"]
+
             color = (
-                "green" if signal == "LONG"
-                else "red" if signal == "SHORT"
-                else "gray"
+                "#4CAF50" if signal == "LONG"
+                else "#F44336" if signal == "SHORT"
+                else "#B0BEC5"
             )
+
             st.markdown(
                 f"""
-                <div style="padding:8px; border-radius:6px; background:#f5f5f5; margin-bottom:6px;">
-                    <b>{name}:</b> 
-                    <span style="color:{color}; font-weight:bold">{signal}</span>
-                    <br><small>Last signal date: {date}</small>
+                <div class="index-card">
+                    <div class="index-title">{name}</div>
+                    <div class="index-signal" style="color:{color};">{signal}</div>
+                    <div class="index-date">Last signal: {date}</div>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -143,6 +178,7 @@ with chat_col:
         show_index("S&P 500 (SPX)", signals["spx"])
         show_index("NASDAQ Composite", signals["nasdaq"])
         show_index("Russell 2000", signals["russell"])
+
 
     except Exception:
         st.warning("Daily signals not found. Run daily_engine.py first.")
@@ -315,25 +351,25 @@ if st.session_state.run_model:
             df = add_all_labels(data)
             df = df[df.index >= pd.to_datetime(start_date_user).tz_localize(df.index.tz)]
 
-            # Columns we do NOT consider as indicators
-            exclude_cols = ["Open", "High", "Low", "Close", "Volume", 
-                            "Smooth", "Slope", "price_delta", 
-                            "Slope_Pos", "Slope_Neg", "Turn_Up", "Turn_Down"]
-
-            indicator_cols = [col for col in df.columns if col not in exclude_cols and df[col].dtype != 'O']
-
-
+            
             # ------------------------------------------------------------
             # 2) COMPUTE KALMAN SIGNALS
             # ------------------------------------------------------------
-            df["Smooth"], df["Slope"] = secret_sauce(df["Close"])
+            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                # price = (df['High'] + df['Low']) / 2
+                price = df['Close']
+            else:
+                price = df['Close']
+                
+            df["Smooth"], df["Slope"] = secret_sauce(price)
             df["price_delta"] = df["Close"] - df["Smooth"]
 
             slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()
             slope_vals = [round(x / 0.25) * 0.25 for x in slope_q]
+            print(slope_vals)
 
             df["Slope_Neg"] = (
-                (df["Slope"] < (slope_vals[0] + slope_vals[1]) / 2) &
+                (df["Slope"] < (slope_vals[0] + slope_vals[1])/2) & # ) / 2
                 (df["Close"] < df["Smooth"]) &
                 (df["Slope"] < df["Slope"].shift(1))
             )
@@ -343,7 +379,45 @@ if st.session_state.run_model:
                 (df["Close"] > df["Smooth"]) &
                 (df["Slope"] > df["Slope"].shift(1))
             )
+            
+            # if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            #     q_roll = 120
+            # else: 
+            #     q_roll = 252
 
+            # df["q05"] = df["Slope"].expanding().quantile(0.05)
+            # df["q35"] = df["Slope"].expanding().quantile(0.35)
+            # df["q50"] = df["Slope"].expanding().quantile(0.50)
+            # df["q65"] = df["Slope"].expanding().quantile(0.65)
+            # df["q95"] = df["Slope"].expanding().quantile(0.95)
+            
+            # df["Slope_Neg"] = (
+            #     (df["Slope"] < (df["q05"] + df["q35"]) / 2) &
+            #     (df["Close"] < df["Smooth"]) &
+            #     (df["Slope"] < df["Slope"].shift(1))
+            # )
+
+            # df["Slope_Pos"] = (
+            #     (df["Slope"] > (df["q65"] + df["q95"]) / 2) &
+            #     (df["Close"] > df["Smooth"]) &
+            #     (df["Slope"] > df["Slope"].shift(1))
+            # )
+
+            # df["Slope_Neg"] = (
+            #     ((df["Slope"] < (df["q95"]) ) &
+            #     (df["Slope"].shift(1) > (df["q95"].shift(1)))) | 
+            #     ((df["Slope"].shift(1) < (df["Slope"])))
+
+            # )
+
+            # df["Slope_Pos"] = (
+            #     ((df["Slope"] > (df["q05"])) &
+            #     (df["Slope"].shift(1) < (df["q05"].shift(1)))) |
+            #     ((df["Slope"].shift(1) > (df["Slope"])))
+            # )
+            
+            # df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
+            # df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
             if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
@@ -403,7 +477,9 @@ if st.session_state.run_model:
                         ((df["High"] >= df["VWAP_Upper"]) &
                         (df["Close"] < df["VWAP_Upper"])) | 
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                        (df["Close"] < df["VWAP"]))
+                        (df["Close"] < df["VWAP"])) |
+                        ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
+                        (df["Low"] < df["TOS_Trail"]))
                     )
                 )
 
@@ -412,7 +488,9 @@ if st.session_state.run_model:
                     (((df["Low"] <= df["VWAP_Lower"]) &
                     (df["Close"] > df["VWAP_Lower"])) |
                     ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                    (df["Close"] > df["VWAP"])))
+                    (df["Close"] > df["VWAP"]))) | 
+                    ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                    (df["High"] > df["TOS_Trail"]))
                 )
 
             else:
@@ -422,7 +500,10 @@ if st.session_state.run_model:
                     (df["Close"].shift(1) >= df["BB_Upper"].shift(1)) & 
                     ((df["High"] <= df["BB_Upper"]) | 
                     (df["Close"] <= df["BB_Upper"]))
-                )
+                ) 
+                # | ((df["Position"] == 1) & 
+                #     (df["Slope"] >= df['q65'])  
+                #     )
 
                 df["Sell_Short"] = (
                     (df["Position"] == -1) &
@@ -430,7 +511,10 @@ if st.session_state.run_model:
                     (df["Close"].shift(1) <= df["BB_Lower"].shift(1)) &
                     ((df["Low"] >= df["BB_Lower"]) |
                     (df["Close"] >= df["BB_Lower"]))
-                )
+                ) 
+                # | ((df["Position"] == -1) & 
+                #     (df["Slope"] <= df['q35'])  
+                #     )
             
             df["Sell_Long"]  = df["Sell_Long"].fillna(False)
             df["Sell_Short"] = df["Sell_Short"].fillna(False)
@@ -485,8 +569,8 @@ if st.session_state.run_model:
             df.loc[df["Turn_Up"], "Sell_Long_Plot"] = False
             df.loc[df["Turn_Down"], "Sell_Short_Plot"] = False
             
-            print(df[['Close','Turn_Up','Turn_Down','Sell_Long','Sell_Short','Sell_Long_Plot','Sell_Short_Plot','Position']].tail(20))
-
+            print(df[['Close','Turn_Up','Turn_Down','Sell_Long','Sell_Short','Sell_Long_Plot','Sell_Short_Plot','Position']].head(10))
+            # print(default_start, start_date_user, extended_start)
             # ------------------------------------------------------------
             # 3) PRICE vs MOMENTUM — INTERACTIVE PLOT
             # ------------------------------------------------------------
@@ -495,23 +579,34 @@ if st.session_state.run_model:
             # if timeframe in ["5m", "15m", "30m", "1h", "4h"]: 
             #     df = df.iloc[:-1]
             # # x = np.arange(len(df))
+            # Columns we do NOT consider as indicators
+            exclude_cols = ["Open", "High", "Low", "Close", "Volume", 
+                            "Smooth",  "price_delta", 
+                            "Slope_Pos", "Slope_Neg", "Turn_Up", "Turn_Down"] #"Slope",
 
-            # selected_indicators = st.multiselect(
-            #     "Select indicators to overlay:",
-            #     indicator_cols,
-            #     default=[]
-            # )
+            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower',]
+            else:
+                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long',]
+            print(indicator_cols)
+
+            selected_indicators = st.multiselect(
+                "Select indicators to overlay:",
+                indicator_cols,
+                default=[]
+            )
 
             fig = make_subplots(
-                rows=2,
+                rows=3,
                 cols=1,
                 shared_xaxes=True,
                 vertical_spacing=0.03,
-                row_heights=[0.7, 0.3],
-                # specs=[
-                #     [{"secondary_y": True}],   # Row 1: price + predictions + indicators
-                #     [{"secondary_y": False}]   # Row 2: volume only
-                # ],
+                row_heights=[0.60, 0.20, 0.20],
+                specs=[
+                    [{"secondary_y": True}],   # Row 1 → Candles + ATR
+                    [{"secondary_y": False}],  # Row 2 → Volume
+                    [{"secondary_y": False}]   # Row 3 → RSI
+                ],
             )
 
             # -------------------------------
@@ -520,17 +615,17 @@ if st.session_state.run_model:
             fig.add_trace(
                 go.Candlestick(
                     x=df.index,
-                    open=df["Open"],
                     high=df["High"],
-                    low=df["Low"],
+                    open=df["Open"],
                     close=df["Close"],
+                    low=df["Low"],
                     name="Candles",
                     increasing_line_color="green",
                     decreasing_line_color="red",
                     increasing_fillcolor="rgba(0, 180, 0, 0.7)",
                     decreasing_fillcolor="rgba(220, 0, 0, 0.7)"
                 ),
-                row=1, col=1#, secondary_y=False
+                row=1, col=1, secondary_y=False
             )
 
             # -------------------------------
@@ -544,7 +639,63 @@ if st.session_state.run_model:
                     name="Predicted Momentum",
                     line=dict(color="orange", width=2)
                 ),
-                row=1, col=1#, secondary_y=False
+                row=1, col=1, secondary_y=False
+            )
+            
+            # -------------------------------
+            # ATR Trailing STOP LEVELS
+            # -------------------------------
+            fig.add_trace(
+                go.Scatter(
+                    x=df.index,
+                    y=df["TOS_Trail"],
+                    mode="markers",
+                    name="Support/Resistance",
+                    # line=dict(width=2) #color="orange", 
+                    marker=dict(
+                        size=6,
+                        color="magenta",     # optional
+                        symbol="circle"   # or "square", "diamond", "triangle-up"...
+                    )
+                ),
+                row=1, col=1, secondary_y=False
+            )   
+
+            # 
+            # -------------------------------
+            # 3) RSI - Overbought / Oversold reference lines
+            # -------------------------------
+            # RSI line
+            fig.add_trace(
+                go.Scatter(
+                    x=df.index,
+                    y=df["TOS_RSI"],
+                    mode="lines",
+                    name="TOS_RSI",
+                    line=dict(width=2, color="lightgreen")
+                ),
+                row=3, col=1
+            )
+            fig.add_trace(
+                go.Scatter(
+                    x=df.index,
+                    y=[70] * len(df),
+                    mode="lines",
+                    line=dict(width=1, dash="dash", color="orange"),
+                    name="Overbought"
+                ),
+                row=3, col=1
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=df.index,
+                    y=[30] * len(df),
+                    mode="lines",
+                    line=dict(width=1, dash="dash", color="cyan"),
+                    name="Oversold"
+                ),
+                row=3, col=1
             )
 
             # -------------------------------
@@ -577,11 +728,11 @@ if st.session_state.run_model:
                 x=sell_longs.index,
                 y=sell_longs["High"],
                 mode="markers",
-                name="Warning - Take Profit",
+                name="Exit Warning",
                 marker=dict(
                     symbol="triangle-down",
                     size=14,
-                    color="orange",
+                    color="white",
                     line=dict(width=1, color="black")
                 )
             )
@@ -613,29 +764,31 @@ if st.session_state.run_model:
                 x=sell_shorts.index,
                 y=sell_shorts["Low"],
                 mode="markers",
-                name="Warning - Take profit",
+                name="Exit Warning",
                 marker=dict(
                     symbol="triangle-up",
                     size=14,
-                    color="orange",
+                    color="white",
                     line=dict(width=1, color="black")
                 )
             )
 
-            # # ---------------------------------------
-            # # Add Selected Indicators to the Chart
-            # # ---------------------------------------
-            # for ind in selected_indicators:
-            #     fig.add_trace(
-            #         go.Scatter(
-            #             x=df.index,
-            #             y=df[ind],
-            #             mode="lines",
-            #             name=ind,
-            #             line=dict(width=2)
-            #         ),
-            #         row=1, col=1#, secondary_y=False
-            #     )
+            # ---------------------------------------
+            # Add Selected Indicators to the Chart
+            # ---------------------------------------
+            for ind in selected_indicators:
+                df[ind] = df[ind].replace(0, np.nan)
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=df[ind],
+                        mode="lines",
+                        name=ind,
+                        line=dict(width=2)
+                    ),
+                    row=1, col=1#, 
+                    # secondary_y=True
+                )
 
             # -------------------------------
             # 4) VOLUME BARS
@@ -656,27 +809,60 @@ if st.session_state.run_model:
             # 5) Layout Settings
             # -------------------------------
             fig.update_layout(
-                height=650,
+                hovermode="x unified",    # shared vertical line
+                hoverlabel=dict(
+                    bgcolor="rgba(30,30,30,0.7)",
+                    bordercolor="rgba(255,255,255,0.3)",
+                    font_size=12,
+                ),
+                hoverdistance=5,
+                spikedistance=-1,
+                height=950,
                 showlegend=True,
-                dragmode="zoom",
+                dragmode="pan",
                 xaxis=dict(
-                    rangeslider=dict(visible=True),
+                    # rangeslider=dict(visible=True),
                     type="date"
                 ),
                 yaxis=dict(fixedrange=False),
                 template="plotly_white",
-                margin=dict(l=20, r=20, t=20, b=20),
+                # margin=dict(l=20, r=20, t=20, b=20),
+                margin=dict(t=60, b=60),
+                legend=dict(
+                    orientation="h",      # horizontal legend
+                    yanchor="bottom",
+                    y=-0.15,               # move it below the chart
+                    xanchor="center",
+                    x=0.5
+                    ),
+                )
+            # Moves unified tooltip to the top outside the figure
+            fig.update_layout(
+                hoverlabel=dict(
+                    align="left",
+                ),
+                margin=dict(t=120)  # give space above
             )
 
             if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
                 # 🚀 ADD RANGE BREAKS HERE (right after layout)
-                fig.update_xaxes(
-                    rangebreaks=[
-                        dict(bounds=["sat", "mon"]),          # skip weekends
-                        dict(bounds=[19, 24], pattern="hour"),  # skip overnight hours
-                        dict(bounds=[0, 3], pattern="hour")
-                    ]
-                )
+                if ticker in ["^GSPC", "^IXIC", "^RUT", "^VIX", "^DJI"]:
+                    # Market Indices have different trading hours (9:30am - 4:00pm EST)
+                    fig.update_xaxes(
+                        rangebreaks=[
+                            dict(bounds=["sat", "mon"]),          # skip weekends
+                            dict(bounds=[15.1, 24], pattern="hour"),  # skip overnight hours
+                            dict(bounds=[0, 8.5], pattern="hour")
+                        ]
+                    )
+                else:
+                    fig.update_xaxes(
+                        rangebreaks=[
+                            dict(bounds=["sat", "mon"]),          # skip weekends
+                            dict(bounds=[19.05, 24], pattern="hour"),  # skip overnight hours
+                            dict(bounds=[0, 3], pattern="hour")
+                        ]
+                    )
 
                 # (Optional) set on the second row as well:
                 fig.update_xaxes(
@@ -687,6 +873,33 @@ if st.session_state.run_model:
                     ],
                     row=2, col=1
                 )
+
+        
+                # Count x-axes in the figure (price, volume, RSI = usually 3)
+                xaxes = [ax for ax in fig.layout if ax.startswith("xaxis")]
+                fig.update_traces(
+                    hoverinfo="text",
+                    hovertemplate="%{y:.2f}",
+                    row=3, col=1
+                )
+                
+                for ax in xaxes:
+                    fig.layout[ax].update(
+                        showspikes=True,
+                        spikemode="across",
+                        spikesnap="cursor",
+                        spikethickness=1,
+                        spikedash="dot",
+                        spikecolor="rgba(180,180,180,0.8)"
+                    )
+
+                fig.update_traces(
+                    hoverinfo="text",
+                    hovertemplate="%{y:.2f}",
+                    row=3, col=1
+                )
+
+            fig.update_xaxes(rangeslider_visible=False)
 
             st.plotly_chart(fig, use_container_width=True)
 
@@ -781,7 +994,7 @@ if st.session_state.run_model:
             fig_eq.update_layout(
                 height=400,
                 dragmode="zoom",
-                xaxis=dict(title="Date", rangeslider=dict(visible=True), type="date", fixedrange=False),
+                xaxis=dict(title="Date", rangeslider=dict(visible=True, thickness=0.05), type="date", fixedrange=False),
                 yaxis=dict(title="Equity ($)", fixedrange=False),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
                 template="plotly_white"
