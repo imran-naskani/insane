@@ -17,8 +17,11 @@ from backtest_intraday_next_bar_open import backtest_intraday_next_open
 from model import secret_sauce
 from openai import OpenAI
 import json
+import glob
 from streamlit_autorefresh import st_autorefresh
-from daily_engine import load_ticker_history, snapshot_all_signals_first_time 
+from daily_engine import load_ticker_history, snapshot_all_signals_first_time
+import os
+
 
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -121,35 +124,122 @@ with chat_col:
     st.markdown("<div class='signal-header'>📅 Daily Market Signals (@ 3PM CST)</div>", unsafe_allow_html=True)
 
     try:
-        with open("daily_signals.json", "r") as f:
-            signals = json.load(f)
+        # with open("daily_signals.json", "r") as f:
+        #     signals = json.load(f)
+        
+        # --------------------------------------------------
+        # LOAD DAILY CLOSES (LATEST DAY)
+        # --------------------------------------------------
+        with open("daily_closes.json", "r") as f:
+            daily_data = json.load(f)
+        today_date = daily_data["date"]
+        today_closes = daily_data["closes"]
+        st.write(f"**Last Update:** {today_date}")
 
-        st.write(f"**Last Update:** {signals['date']}")
+        # --------------------------------------------------
+        # LOAD SIGNAL HISTORY FILES
+        # --------------------------------------------------
+        signal_files = glob.glob("signal_history/*.json")
 
-        # Today's Stock Signals
+        long_rows = []
+        short_rows = []
+
+        index_signals = {}
+
+        INDEX_TICKERS = {
+            "SPY": "SPY",
+            "QQQ": "QQQ",
+            "^GSPC": "S&P 500 (SPX)",
+            "^IXIC": "NASDAQ Composite",
+            "^RUT": "Russell 2000",
+            "^VIX": "VIX"
+        }
+
+        for file in signal_files:
+            ticker = os.path.basename(file).replace(".json", "")
+
+            with open(file, "r") as f:
+                history = json.load(f)
+
+            # Ensure history is a non-empty list
+            if not isinstance(history, list) or len(history) == 0:
+                continue
+
+            last = history[-1]   # last flip only
+
+            signal = last["signal"]
+            signal_date = last["date"]
+            signal_close = last["close"]
+            today_close = today_closes.get(ticker)
+
+            # INDEX HANDLING
+            if ticker in INDEX_TICKERS:
+                index_signals[ticker] = {
+                    "signal": "LONG" if signal == "UP" else "SHORT",
+                    "date": signal_date
+                }
+                continue
+
+            # STOCK SIGNALS
+            delta = None
+            delta_pct = None
+
+            if today_close is not None and signal_close != 0:
+                if signal == "UP":        # LONG
+                    delta = today_close - signal_close
+                elif signal == "DOWN":    # SHORT
+                    delta = signal_close - today_close
+
+                delta = round(delta, 2)
+                delta_pct = round((delta / signal_close) * 100, 2)
+
+            row = {
+                "Ticker": ticker,
+                "Signal Date": signal_date,
+                "Signal Close": round(signal_close, 2),
+                "Today Close": round(today_close, 2) if today_close else None,
+                "Delta": delta,
+                "Delta %": delta_pct
+            }
+
+            if signal == "UP":
+                long_rows.append(row)
+            elif signal == "DOWN":
+                short_rows.append(row)
+
+        # --------------------------------------------------
+        # DISPLAY LONG SIGNALS
+        # --------------------------------------------------
         st.markdown("#### 🟢 Long Signals")
-        if signals["long"]:
-            # st.table(pd.DataFrame(signals["long"], columns=["Ticker"]))
+
+        if long_rows:
             st.dataframe(
-                pd.DataFrame(signals["long"], columns=["Ticker"]),
-                height=200,
-                use_container_width=True
+                pd.DataFrame(long_rows).sort_values("Signal Date", ascending=False),
+                use_container_width=True,
+                height=300,
+                hide_index=True
             )
         else:
-            st.write("No Long signals today.")
+            st.write("No Long signals.")
 
+        # --------------------------------------------------
+        # DISPLAY SHORT SIGNALS
+        # --------------------------------------------------
         st.markdown("#### 🔴 Short Signals")
-        if signals["short"]:
-            # st.table(pd.DataFrame(signals["short"], columns=["Ticker"]))
+
+        if short_rows:
             st.dataframe(
-                pd.DataFrame(signals["short"], columns=["Ticker"]),
-                height=200,
-                use_container_width=True
+                pd.DataFrame(short_rows).sort_values("Signal Date", ascending=False),
+                use_container_width=True,
+                height=300,
+                hide_index=True
             )
         else:
-            st.write("No Short signals today.")
+            st.write("No Short signals.")
 
+        # --------------------------------------------------
         # INDEX SIGNALS
+        # --------------------------------------------------
         st.markdown("### 📈 Index Trend Signals")
 
         def show_index(name, obj):
@@ -173,15 +263,69 @@ with chat_col:
                 unsafe_allow_html=True
             )
 
-        show_index("SPY", signals["spy"])
-        show_index("QQQ", signals["qqq"])
-        show_index("S&P 500 (SPX)", signals["spx"])
-        show_index("NASDAQ Composite", signals["nasdaq"])
-        show_index("Russell 2000", signals["russell"])
+        for tkr, name in INDEX_TICKERS.items():
+            if tkr in index_signals:
+                show_index(name, index_signals[tkr])
+
+    except Exception as e:
+        st.warning(f"Signal data not available: {e}")
+
+    #     # Today's Stock Signals
+    #     st.markdown("#### 🟢 Long Signals")
+    #     if signals["long"]:
+    #         # st.table(pd.DataFrame(signals["long"], columns=["Ticker"]))
+    #         st.dataframe(
+    #             pd.DataFrame(signals["long"], columns=["Ticker"]),
+    #             height=200,
+    #             use_container_width=True
+    #         )
+    #     else:
+    #         st.write("No Long signals today.")
+
+    #     st.markdown("#### 🔴 Short Signals")
+    #     if signals["short"]:
+    #         # st.table(pd.DataFrame(signals["short"], columns=["Ticker"]))
+    #         st.dataframe(
+    #             pd.DataFrame(signals["short"], columns=["Ticker"]),
+    #             height=200,
+    #             use_container_width=True
+    #         )
+    #     else:
+    #         st.write("No Short signals today.")
+
+    #     # INDEX SIGNALS
+    #     st.markdown("### 📈 Index Trend Signals")
+
+    #     def show_index(name, obj):
+    #         signal = obj["signal"]
+    #         date = obj["date"]
+
+    #         color = (
+    #             "#4CAF50" if signal == "LONG"
+    #             else "#F44336" if signal == "SHORT"
+    #             else "#B0BEC5"
+    #         )
+
+    #         st.markdown(
+    #             f"""
+    #             <div class="index-card">
+    #                 <div class="index-title">{name}</div>
+    #                 <div class="index-signal" style="color:{color};">{signal}</div>
+    #                 <div class="index-date">Last signal: {date}</div>
+    #             </div>
+    #             """,
+    #             unsafe_allow_html=True
+    #         )
+
+    #     show_index("SPY", signals["spy"])
+    #     show_index("QQQ", signals["qqq"])
+    #     show_index("S&P 500 (SPX)", signals["spx"])
+    #     show_index("NASDAQ Composite", signals["nasdaq"])
+    #     show_index("Russell 2000", signals["russell"])
 
 
-    except Exception:
-        st.warning("Daily signals not found. Run daily_engine.py first.")
+    # except Exception:
+    #     st.warning("Daily signals not found. Run daily_engine.py first.")
 
     # -----------------------------------------------------------
     # CHATBOT (BELOW DAILY SIGNALS)

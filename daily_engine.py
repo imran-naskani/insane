@@ -129,8 +129,6 @@ def snapshot_new_signals_only(ticker, df):
     save_ticker_history(ticker, history)
 
 
-
-
 # ----------------------------------------------------
 # 1) Load S&P500 List (static file or online)
 # ----------------------------------------------------
@@ -186,6 +184,7 @@ def run_daily_engine():
 
     long_signals = []
     short_signals = []
+    daily_closes = []
     last_signal = {}    
     today = None
 
@@ -204,6 +203,17 @@ def run_daily_engine():
             df = compute_signals(df)
             today = df.index[-1]
             snapshot_new_signals_only(ticker, df)
+
+            # -------------------------------
+            # SAVE DAILY CLOSE (NEW)
+            # -------------------------------
+            latest_close = float(df["Close"].iloc[-1])
+
+            daily_closes.append({
+                "date": today.strftime("%Y-%m-%d"),
+                "ticker": ticker,
+                "close": latest_close
+            })
             
             if df["Turn_Up"].iloc[-1]:
                 long_signals.append(ticker)
@@ -248,6 +258,19 @@ def run_daily_engine():
         print("No tickers processed. Aborting.")
         return
     
+    # ----------------------------------------------------
+    # SAVE LATEST DAILY CLOSES (OVERWRITE ONLY)
+    # ----------------------------------------------------
+    latest_daily_closes = {
+        "date": today.strftime("%Y-%m-%d"),
+        "closes": {
+            rec["ticker"]: rec["close"] for rec in daily_closes
+        }
+    }
+
+    with open("daily_closes.json", "w") as f:
+        json.dump(latest_daily_closes, f, indent=4)
+
     # ----------------------------------------------------
     # SAVE RESULT
     # ----------------------------------------------------
