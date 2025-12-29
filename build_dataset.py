@@ -332,12 +332,12 @@ def trend_slope(series):
 # ----------------------------------------------------
 #  Market Context (VIX + SPY)
 # ----------------------------------------------------
-def get_market_context(start, end):
+def get_market_context(start, end, timeframe):
 
-    vix = download_price("^VIX", start, end)
+    vix = download_price("^VIX", start, end, timeframe)
     vix = vix.rename(columns={"Close": "VIX_Close"})[["VIX_Close"]]
 
-    spy = download_price("SPY", start, end)
+    spy = download_price("SPY", start, end, timeframe)
     spy["SPY_Return"] = spy["Close"].pct_change()
     spy["SPY_Volatility_20"] = spy["Close"].pct_change().rolling(20).std()
 
@@ -442,7 +442,7 @@ def build_feature_dataset(ticker, start_date="2010-01-01", end_date=None, timefr
 
     feat  = add_features(ohlcv.copy(), feature_params, timeframe=timeframe)
 
-    market = get_market_context(start_date, end_date)
+    market = get_market_context(start_date, end_date, timeframe=timeframe)
     market = market.reindex(feat.index)
 
     out = feat.join(market)

@@ -495,7 +495,6 @@ if st.session_state.run_model:
             df = add_all_labels(data)
             df = df[df.index >= pd.to_datetime(start_date_user).tz_localize(df.index.tz)]
 
-            
             # ------------------------------------------------------------
             # 2) COMPUTE KALMAN SIGNALS
             # ------------------------------------------------------------
@@ -729,9 +728,9 @@ if st.session_state.run_model:
                             "Slope_Pos", "Slope_Neg", "Turn_Up", "Turn_Down"] #"Slope",
 
             if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower',]
+                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower', 'VIX']
             else:
-                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long',]
+                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VIX']
             print(indicator_cols)
 
             selected_indicators = st.multiselect(
@@ -751,6 +750,13 @@ if st.session_state.run_model:
                     [{"secondary_y": False}],  # Row 2 → Volume
                     [{"secondary_y": False}]   # Row 3 → RSI
                 ],
+            )
+
+            fig.update_yaxes(
+                title_text="VIX",
+                secondary_y=True,
+                showgrid=False,
+                zeroline=False
             )
 
             # -------------------------------
@@ -815,7 +821,7 @@ if st.session_state.run_model:
                     x=df.index,
                     y=df["TOS_RSI"],
                     mode="lines",
-                    name="TOS_RSI",
+                    name="RSI",
                     line=dict(width=2, color="lightgreen")
                 ),
                 row=3, col=1
@@ -921,18 +927,35 @@ if st.session_state.run_model:
             # Add Selected Indicators to the Chart
             # ---------------------------------------
             for ind in selected_indicators:
-                df[ind] = df[ind].replace(0, np.nan)
-                fig.add_trace(
-                    go.Scatter(
-                        x=df.index,
-                        y=df[ind],
-                        mode="lines",
-                        name=ind,
-                        line=dict(width=2)
-                    ),
-                    row=1, col=1#, 
-                    # secondary_y=True
-                )
+                if ind == 'VIX':
+                    tick = 'VIX_Close' if 'VIX_Close' in df else 'VIX'
+                    df[tick] = df[tick].replace(0, np.nan)
+                    print(df[tick])
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df.index,
+                            y=df[tick],
+                            mode="lines",
+                            name='VIX',
+                            line=dict(width=2)
+                        ),
+                        row=1, col=1, 
+                        secondary_y=True
+                    )
+                else:
+                    print(ind)
+                    df[ind] = df[ind].replace(0, np.nan)
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df.index,
+                            y=df[ind],
+                            mode="lines",
+                            name=ind,
+                            line=dict(width=2)
+                        ),
+                        row=1, col=1#, 
+                        # secondary_y=True
+                    )   
 
             # -------------------------------
             # 4) VOLUME BARS
