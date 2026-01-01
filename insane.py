@@ -754,6 +754,7 @@ if st.session_state.run_model:
 
             fig.update_yaxes(
                 title_text="VIX",
+                fixedrange=True,
                 secondary_y=True,
                 showgrid=False,
                 zeroline=False

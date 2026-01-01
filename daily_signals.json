@@ -1,42 +1,94 @@
 {
-    "date": "2025-12-26",
+    "date": "2025-12-31",
     "long": [
-        "AMCR",
-        "FCX",
-        "ICE",
-        "IP",
-        "JCI",
-        "NEM",
-        "PKG",
-        "SPGI",
-        "TMUS"
+        "NKE",
+        "TGRP"
     ],
     "short": [
-        "MCD",
-        "MO",
-        "PLTR",
+        "ADI",
+        "AMCR",
+        "AME",
+        "AMEN",
+        "AMP",
+        "BKNG",
+        "BLK",
+        "CAH",
+        "CAT",
+        "CBRE",
+        "CEG",
+        "CFG",
+        "CINF",
+        "CME",
+        "COF",
+        "COR",
+        "CRWD",
+        "CSCO",
+        "CTAS",
+        "CTSH",
+        "DGX",
+        "EMR",
+        "ES=F",
+        "FFIV",
+        "GDDY",
+        "GEN",
+        "GL",
+        "GM",
+        "HCA",
+        "HIG",
+        "HPQ",
+        "HRL",
+        "IR",
+        "ISRG",
+        "J",
+        "JCI",
+        "JKHY",
+        "KKR",
+        "LII",
+        "MAR",
+        "MCK",
+        "MDLZ",
+        "MS",
+        "MTB",
+        "NDAQ",
+        "NEM",
+        "PANW",
+        "PCAR",
+        "PH",
+        "PNC",
+        "PNR",
+        "QQQ",
+        "QTUM",
         "RCL",
-        "TPL"
+        "RSG",
+        "SPY",
+        "STT",
+        "TER",
+        "TPR",
+        "WFC",
+        "WMT",
+        "WTW",
+        "^GSPC",
+        "^IXIC"
     ],
     "nasdaq": {
-        "signal": "LONG",
-        "date": "2025-12-19"
+        "signal": "SHORT",
+        "date": "2025-12-31"
     },
     "qqq": {
-        "signal": "LONG",
-        "date": "2025-12-19"
+        "signal": "SHORT",
+        "date": "2025-12-31"
     },
     "spx": {
-        "signal": "LONG",
-        "date": "2025-12-19"
+        "signal": "SHORT",
+        "date": "2025-12-31"
     },
     "spy": {
-        "signal": "LONG",
-        "date": "2025-12-22"
+        "signal": "SHORT",
+        "date": "2025-12-31"
     },
     "russell": {
         "signal": "SHORT",
-        "date": "2025-12-16"
+        "date": "2025-12-30"
     },
     "vix": {
         "signal": "SHORT",
