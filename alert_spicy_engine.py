@@ -4,8 +4,13 @@ from build_dataset import build_feature_dataset
 from model import spicy_sauce
 from twilio.rest import Client
 import datetime as dt
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
+end_date = dt.date.today() + dt.timedelta(days=1)
+start_date = end_date - dt.timedelta(days=31)
 
 # ==============================
 # CONFIG
@@ -56,6 +61,8 @@ while True:
         for ticker in TICKERS:
             df = build_feature_dataset(
                 ticker,
+                start_date=start_date.strftime("%Y-%m-%d"),
+                end_date=end_date.strftime("%Y-%m-%d"), 
                 timeframe=TIMEFRAME
             )
 
