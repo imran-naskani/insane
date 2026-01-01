@@ -14,7 +14,7 @@ from backtest_same_day_close import generate_trade_log, compute_trade_stats
 from backtest_next_day_open import generate_trade_log_next_open
 from backtest_intraday_same_bar_close import backtest_intraday_close
 from backtest_intraday_next_bar_open import backtest_intraday_next_open
-from model import secret_sauce
+from model import secret_sauce, spicy_sauce
 from openai import OpenAI
 import json
 import glob
@@ -422,14 +422,14 @@ with filters_col:
     #         st_autorefresh(interval=1000, key="refresh_after_bar_close")
 
     if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-        default_start = dt.date.today() - dt.timedelta(days=5)
+        default_start = dt.date.today() - dt.timedelta(days=7)
     else:
         default_start = dt.date.today() - dt.timedelta(days=365*5)    
     start_date = st.date_input("Start Date", value=default_start)
     start_date_user = start_date
 
     if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-        extended_start = start_date_user - dt.timedelta(days=49)
+        extended_start = start_date_user - dt.timedelta(days=30)
     elif timeframe == '1d': 
         extended_start = start_date_user - dt.timedelta(days=290)
     
@@ -498,73 +498,83 @@ if st.session_state.run_model:
             # ------------------------------------------------------------
             # 2) COMPUTE KALMAN SIGNALS
             # ------------------------------------------------------------
+            price = df['Close']
+            
             if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
                 # price = (df['High'] + df['Low']) / 2
-                price = df['Close']
-            else:
-                price = df['Close']
-                
-            df["Smooth"], df["Slope"] = secret_sauce(price)
-            df["price_delta"] = df["Close"] - df["Smooth"]
-
-            slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()
-            slope_vals = [round(x / 0.25) * 0.25 for x in slope_q]
-            print(slope_vals)
-
-            df["Slope_Neg"] = (
-                (df["Slope"] < (slope_vals[0] + slope_vals[1])/2) & # ) / 2
-                (df["Close"] < df["Smooth"]) &
-                (df["Slope"] < df["Slope"].shift(1))
-            )
-
-            df["Slope_Pos"] = (
-                (df["Slope"] > (slope_vals[3] + slope_vals[4]) / 2) &
-                (df["Close"] > df["Smooth"]) &
-                (df["Slope"] > df["Slope"].shift(1))
-            )
-            
-            # if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-            #     q_roll = 120
-            # else: 
-            #     q_roll = 252
-
-            # df["q05"] = df["Slope"].expanding().quantile(0.05)
-            # df["q35"] = df["Slope"].expanding().quantile(0.35)
-            # df["q50"] = df["Slope"].expanding().quantile(0.50)
-            # df["q65"] = df["Slope"].expanding().quantile(0.65)
-            # df["q95"] = df["Slope"].expanding().quantile(0.95)
-            
-            # df["Slope_Neg"] = (
-            #     (df["Slope"] < (df["q05"] + df["q35"]) / 2) &
-            #     (df["Close"] < df["Smooth"]) &
-            #     (df["Slope"] < df["Slope"].shift(1))
-            # )
-
-            # df["Slope_Pos"] = (
-            #     (df["Slope"] > (df["q65"] + df["q95"]) / 2) &
-            #     (df["Close"] > df["Smooth"]) &
-            #     (df["Slope"] > df["Slope"].shift(1))
-            # )
-
-            # df["Slope_Neg"] = (
-            #     ((df["Slope"] < (df["q95"]) ) &
-            #     (df["Slope"].shift(1) > (df["q95"].shift(1)))) | 
-            #     ((df["Slope"].shift(1) < (df["Slope"])))
-
-            # )
-
-            # df["Slope_Pos"] = (
-            #     ((df["Slope"] > (df["q05"])) &
-            #     (df["Slope"].shift(1) < (df["q05"].shift(1)))) |
-            #     ((df["Slope"].shift(1) > (df["Slope"])))
-            # )
-            
-            # df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
-            # df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                df["Smooth"], df["Slope"] = spicy_sauce(df["Close"])
+                df['price_delta'] = df["Close"] - df["Smooth"]
+                price_delta = df['price_delta']
+                df["q05"] = df["price_delta"].rolling(84).quantile(0.05) # 0.05 quantile
+                df["q35"] = df["price_delta"].rolling(84).quantile(0.25)
+                df["q50"] = df["price_delta"].rolling(84).quantile(0.50)
+                df["q65"] = df["price_delta"].rolling(84).quantile(0.75)
+                df["q95"] = df["price_delta"].rolling(84).quantile(0.95) # 0.95 quantile
+                df["Slope_Neg"] = (df["price_delta"] < df["q05"])
+                df["Slope_Pos"] = (df["price_delta"] > df["q95"])
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
-            else:
+                            
+            
+            else:                                    
+                df["Smooth"], df["Slope"] = secret_sauce(price)
+                df["price_delta"] = df["Close"] - df["Smooth"]
+
+                # slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()
+                # slope_vals = [round(x / 0.25) * 0.25 for x in slope_q]
+                # print(slope_vals)
+
+                # df["Slope_Neg"] = (
+                #     (df["Slope"] < (slope_vals[0] + slope_vals[1])/2) & # ) / 2
+                #     (df["Close"] < df["Smooth"]) &
+                #     (df["Slope"] < df["Slope"].shift(1))
+                # )
+
+                # df["Slope_Pos"] = (
+                #     (df["Slope"] > (slope_vals[3] + slope_vals[4]) / 2) &
+                #     (df["Close"] > df["Smooth"]) &
+                #     (df["Slope"] > df["Slope"].shift(1))
+                # )
+            
+            # # if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            # #     q_roll = 120
+            # # else: 
+            # #     q_roll = 252
+
+            # # df["q05"] = df["Slope"].expanding().quantile(0.05)
+            # # df["q35"] = df["Slope"].expanding().quantile(0.35)
+            # # df["q50"] = df["Slope"].expanding().quantile(0.50)
+            # # df["q65"] = df["Slope"].expanding().quantile(0.65)
+            # # df["q95"] = df["Slope"].expanding().quantile(0.95)
+            
+            # # df["Slope_Neg"] = (
+            # #     (df["Slope"] < (df["q05"] + df["q35"]) / 2) &
+            # #     (df["Close"] < df["Smooth"]) &
+            # #     (df["Slope"] < df["Slope"].shift(1))
+            # # )
+
+            # # df["Slope_Pos"] = (
+            # #     (df["Slope"] > (df["q65"] + df["q95"]) / 2) &
+            # #     (df["Close"] > df["Smooth"]) &
+            # #     (df["Slope"] > df["Slope"].shift(1))
+            # # )
+
+            # # df["Slope_Neg"] = (
+            # #     ((df["Slope"] < (df["q95"]) ) &
+            # #     (df["Slope"].shift(1) > (df["q95"].shift(1)))) | 
+            # #     ((df["Slope"].shift(1) < (df["Slope"])))
+
+            # # )
+
+            # # df["Slope_Pos"] = (
+            # #     ((df["Slope"] > (df["q05"])) &
+            # #     (df["Slope"].shift(1) < (df["q05"].shift(1)))) |
+            # #     ((df["Slope"].shift(1) > (df["Slope"])))
+            # # )
+            
+            # # df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
+            # # df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+            if timeframe == "1d":
                 frozen = load_ticker_history(ticker)
                 if len(frozen) == 0:
                     df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))

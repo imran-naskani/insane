@@ -93,3 +93,36 @@ def secret_sauce(close):
     slope  = np.gradient(smooth)
 
     return smooth, slope
+
+
+def spicy_sauce(close):
+    """
+    2-D Kalman filter (price + slope)
+    Aligned with your 1-D Kalman:
+      R = 5
+      Q_price = 1
+      Q_slope = 0.01
+    """
+    dt = 0.7
+    kf = KalmanFilter(
+           # slows slope contribution - default 1.0
+        transition_matrices=np.array([
+            [1.0, dt],   # price = price + slope
+            [0.0, 1.0]    # slope = slope
+        ]),
+        observation_matrices=np.array([[1.0, 0.0]]),
+        initial_state_mean=[close.iloc[0], 0.0],
+        initial_state_covariance=np.eye(2),
+        observation_covariance=8,          # SAME as your 1-D
+        transition_covariance=np.array([
+            [1,  0.0],   # SAME as your 1-D Q
+            [0.0,  0.01]   # Q / 100 → stable slope
+        ])
+    )
+
+    state_means, state_covs = kf.filter(close.values)
+
+    smooth = state_means[:, 0]   # Kalman-smoothed price
+    slope  = state_means[:, 1]   # Kalman-estimated slope
+
+    return smooth, slope
