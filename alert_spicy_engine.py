@@ -17,7 +17,6 @@ start_date = end_date - dt.timedelta(days=31)
 # ==============================
 TICKERS = ["^GSPC", "TSLA"]
 TIMEFRAME = "5m"
-SLEEP_SECONDS = 330  # 5.5 minutes
 
 TWILIO_SID = os.environ["TWILIO_SID"]
 TWILIO_TOKEN = os.environ["TWILIO_TOKEN"]
@@ -50,6 +49,18 @@ def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.iloc[:-1]
 
+def sleep_until_next_5m(offset_seconds=10):
+    """
+    Sleeps until the next 5-minute boundary + offset.
+    Offset ensures bar is fully closed and data is available.
+    """
+    now = time.time()
+
+    interval = 300  # 5 minutes in seconds
+    next_run = ((now // interval) + 1) * interval + offset_seconds
+
+    sleep_for = max(0, next_run - now)
+    time.sleep(sleep_for)
 
 # ==============================
 # MAIN LOOP
@@ -58,6 +69,7 @@ print("🚨 INSANE Spicy Alert Engine started (5m)")
 
 while True:
     try:
+        sleep_until_next_5m(offset_seconds=10)
         for ticker in TICKERS:
             df = build_feature_dataset(
                 ticker,
@@ -101,9 +113,9 @@ while True:
 
             signal = None
             if last["Turn_Up"]:
-                signal = "TURN UP"
+                signal = "Momentum Rising - Potential Long"
             elif last["Turn_Down"]:
-                signal = "TURN DOWN"
+                signal = "Momentum Declining - Potential Short"
 
             # ------------------------------
             # Alert (deduplicated)
@@ -111,7 +123,7 @@ while True:
             if signal:
                 if last_alert.get(ticker) != bar_time:
                     msg = (
-                        f"INSANE ALERT 🚨\n"
+                        f"INSANE 5 min ALERT 🚨\n"
                         f"{ticker}\n"
                         f"{signal}\n"
                         f"Time: {bar_time}\n"
@@ -120,8 +132,8 @@ while True:
                     send_sms(msg)
                     last_alert[ticker] = bar_time
                     print(f"[{dt.datetime.now()}] Alert sent → {ticker} {signal}")
-
-        time.sleep(SLEEP_SECONDS)
+            else:
+                print("No signal detected!")
 
     except Exception as e:
         print("❌ Alert engine error:", e)
