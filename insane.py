@@ -510,8 +510,8 @@ if st.session_state.run_model:
                 df["q50"] = df["price_delta"].rolling(84).quantile(0.50)
                 df["q65"] = df["price_delta"].rolling(84).quantile(0.75)
                 df["q95"] = df["price_delta"].rolling(84).quantile(0.95) # 0.95 quantile
-                df["Slope_Neg"] = (df["price_delta"] < df["q05"])
-                df["Slope_Pos"] = (df["price_delta"] > df["q95"])
+                df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+                df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
                             
@@ -627,25 +627,28 @@ if st.session_state.run_model:
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
                     (
-                        ((df["High"] >= df["VWAP_Upper"]) &
+                        ((df["High"].shift(1) >= df["VWAP_Upper"].shift(1)) &
                         (df["Close"] < df["VWAP_Upper"])) | 
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"])) |
                         ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Low"] < df["TOS_Trail"]))
+                        (df["Low"] < df["TOS_Trail"])) 
                     )
                 )
 
                 df["Sell_Short"] = (
                     (df["Position"] == -1) &
-                    (((df["Low"] <= df["VWAP_Lower"]) &
-                    (df["Close"] > df["VWAP_Lower"])) |
-                    ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                    (df["Close"] > df["VWAP"]))) | 
-                    ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                    (df["High"] > df["TOS_Trail"]))
+                    (
+                        ((df["Low"].shift(1) <= df["VWAP_Lower"].shift(1)) &
+                        (df["Close"] > df["VWAP_Lower"])) |
+                        ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                        (df["Close"] > df["VWAP"])) | 
+                        ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                        (df["High"] > df["TOS_Trail"]))
+                    )
                 )
 
+                # df[['Close', 'Low', 'VWAP_Lower', 'VWAP', 'Position', 'Sell_Short', 'Sell_Long']].to_csv('test.csv')
             else:
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
@@ -689,38 +692,84 @@ if st.session_state.run_model:
                     df.at[df.index[i], "Position"] = df["Position"].iloc[i]
 
 
+            # # ------------------------------------------------------------
+            # # 7) FIRST EXIT ONLY (NO DUPLICATE EXIT MARKERS)
+            # # ------------------------------------------------------------
+            # df["Sell_Long_Plot"] = False
+            # df["Sell_Short_Plot"] = False
+
+            # in_long_trade = False
+            # in_short_trade = False
+
+            # for i in range(1, len(df)):
+            #     # New long entry resets long exit plot control
+            #     if df["Turn_Up"].iloc[i]:
+            #         in_long_trade = True
+            #         in_short_trade = False
+
+            #     # New short entry resets short exit plot control
+            #     if df["Turn_Down"].iloc[i]:
+            #         in_short_trade = True
+            #         in_long_trade = False
+
+            #     # First long exit after entry
+            #     if in_long_trade and df["Sell_Long"].iloc[i]:
+            #         df.at[df.index[i], "Sell_Long_Plot"] = True
+            #         in_long_trade = False
+
+            #     # First short exit after entry
+            #     if in_short_trade and df["Sell_Short"].iloc[i]:
+            #         df.at[df.index[i], "Sell_Short_Plot"] = True
+            #         in_short_trade = False
+
+            # df.loc[df["Turn_Up"], "Sell_Long_Plot"] = False
+            # df.loc[df["Turn_Down"], "Sell_Short_Plot"] = False
+
             # ------------------------------------------------------------
-            # 7) FIRST EXIT ONLY (NO DUPLICATE EXIT MARKERS)
+            # 7) ONE EXIT PER TURN SIGNAL (NO SAME-BAR EXIT)
             # ------------------------------------------------------------
             df["Sell_Long_Plot"] = False
             df["Sell_Short_Plot"] = False
 
-            in_long_trade = False
-            in_short_trade = False
+            exit_armed_long = False
+            exit_armed_short = False
+
+            last_turn_long_idx = None
+            last_turn_short_idx = None
 
             for i in range(1, len(df)):
-                # New long entry resets long exit plot control
+
+                # Arm LONG exit on Turn Up
                 if df["Turn_Up"].iloc[i]:
-                    in_long_trade = True
-                    in_short_trade = False
+                    exit_armed_long = True
+                    last_turn_long_idx = i
 
-                # New short entry resets short exit plot control
+                # Arm SHORT exit on Turn Down
                 if df["Turn_Down"].iloc[i]:
-                    in_short_trade = True
-                    in_long_trade = False
+                    exit_armed_short = True
+                    last_turn_short_idx = i
 
-                # First long exit after entry
-                if in_long_trade and df["Sell_Long"].iloc[i]:
+                # First LONG exit AFTER Turn Up (not same bar)
+                if (
+                    exit_armed_long and
+                    df["Sell_Long"].iloc[i] and
+                    last_turn_long_idx is not None and
+                    i > last_turn_long_idx
+                ):
                     df.at[df.index[i], "Sell_Long_Plot"] = True
-                    in_long_trade = False
+                    exit_armed_long = False
 
-                # First short exit after entry
-                if in_short_trade and df["Sell_Short"].iloc[i]:
+                # First SHORT exit AFTER Turn Down (not same bar)
+                if (
+                    exit_armed_short and
+                    df["Sell_Short"].iloc[i] and
+                    last_turn_short_idx is not None and
+                    i > last_turn_short_idx
+                ):
                     df.at[df.index[i], "Sell_Short_Plot"] = True
-                    in_short_trade = False
+                    exit_armed_short = False
 
-            df.loc[df["Turn_Up"], "Sell_Long_Plot"] = False
-            df.loc[df["Turn_Down"], "Sell_Short_Plot"] = False
+
             
             print(df[['Close','Turn_Up','Turn_Down','Sell_Long','Sell_Short','Sell_Long_Plot','Sell_Short_Plot','Position']].head(10))
             # print(default_start, start_date_user, extended_start)

@@ -2,10 +2,10 @@ import time
 import pandas as pd
 from build_dataset import build_feature_dataset
 from model import spicy_sauce
-from twilio.rest import Client
 import datetime as dt
 from dotenv import load_dotenv
 import os
+import requests
 
 load_dotenv()
 
@@ -18,29 +18,27 @@ start_date = end_date - dt.timedelta(days=31)
 TICKERS = ["^GSPC", "TSLA"]
 TIMEFRAME = "5m"
 
-TWILIO_SID = os.environ["TWILIO_SID"]
-TWILIO_TOKEN = os.environ["TWILIO_TOKEN"]
-TWILIO_FROM = os.environ["TWILIO_FROM"]
-ALERT_TO = os.environ["ALERT_TO"].split(",")
-
+BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
+CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 # ==============================
 # INIT
 # ==============================
-twilio = Client(TWILIO_SID, TWILIO_TOKEN)
+# twilio = Client(TWILIO_SID, TWILIO_TOKEN)
 last_alert = {}   # { ticker: bar_timestamp }
 
 
 # ==============================
 # HELPERS
 # ==============================
-def send_sms(message: str):
-    for number in ALERT_TO:
-        twilio.messages.create(
-            body=message,
-            from_=TWILIO_FROM,
-            to=number
-        )
-
+def send_telegram(msg: str):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": msg,
+        "parse_mode": "Markdown"
+    }
+    r = requests.post(url, json=payload, timeout=10)
+    r.raise_for_status()
 
 def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -69,7 +67,10 @@ print("🚨 INSANE Spicy Alert Engine started (5m)")
 
 while True:
     try:
-        sleep_until_next_5m(offset_seconds=10)
+        sleep_until_next_5m(offset_seconds=10)  
+        combined_msgs = []
+        current_bar_time = None
+
         for ticker in TICKERS:
             df = build_feature_dataset(
                 ticker,
@@ -99,11 +100,49 @@ while True:
             df["q05"] = df["price_delta"].rolling(84).quantile(0.05)
             df["q95"] = df["price_delta"].rolling(84).quantile(0.95)
 
-            df["Slope_Neg"] = df["price_delta"] < df["q05"]
-            df["Slope_Pos"] = df["price_delta"] > df["q95"]
+            df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+            df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
 
             df["Turn_Up"] = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
             df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+
+            # ------------------------------
+            # Exit Logic
+            # ------------------------------
+            
+            df["Position"] = 0
+            for i in range(1, len(df)):
+                if df["Turn_Up"].iloc[i]:
+                    df.at[df.index[i], "Position"] = 1
+
+                elif df["Turn_Down"].iloc[i]:
+                    df.at[df.index[i], "Position"] = -1
+
+                else:
+                    df.at[df.index[i], "Position"] = df["Position"].iloc[i-1]
+            df["Sell_Long"] = (
+                (df["Position"] == 1) &
+                (
+                    ((df["High"].shift(1) >= df["VWAP_Upper"].shift(1)) &
+                    (df["Close"] < df["VWAP_Upper"])) | 
+                    ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
+                    (df["Close"] < df["VWAP"])) |
+                    ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
+                    (df["Low"] < df["TOS_Trail"])) 
+                )
+                )
+
+            df["Sell_Short"] = (
+                (df["Position"] == -1) &
+                (
+                    ((df["Low"].shift(1) <= df["VWAP_Lower"].shift(1)) &
+                    (df["Close"] > df["VWAP_Lower"])) |
+                    ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                    (df["Close"] > df["VWAP"])) | 
+                    ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                    (df["High"] > df["TOS_Trail"]))
+                )
+            )
 
             # ------------------------------
             # Check LAST CLOSED BAR ONLY
@@ -116,24 +155,37 @@ while True:
                 signal = "Momentum Rising - Potential Long"
             elif last["Turn_Down"]:
                 signal = "Momentum Declining - Potential Short"
+            elif last["Sell_Long"] or last["Sell_Short"]:
+                signal = "Exit Warning - Close Position"
+                
+            # ------------------------------
+            # Collect alerts (do NOT send yet)
+            # ------------------------------
+            if current_bar_time is None:
+                current_bar_time = bar_time
 
-            # ------------------------------
-            # Alert (deduplicated)
-            # ------------------------------
-            if signal:
-                if last_alert.get(ticker) != bar_time:
-                    msg = (
-                        f"INSANE 5 min ALERT 🚨\n"
-                        f"{ticker}\n"
-                        f"{signal}\n"
-                        f"Time: {bar_time}\n"
-                        f"Price: {last['Close']:.2f}"
-                    )
-                    send_sms(msg)
-                    last_alert[ticker] = bar_time
-                    print(f"[{dt.datetime.now()}] Alert sent → {ticker} {signal}")
+
+            if signal and last_alert.get(ticker) != bar_time:
+                combined_msgs.append(
+                    f"{ticker}\n"
+                    f"{signal}\n"
+                    f"Price: {last['Close']:.2f}"
+                )
+                last_alert[ticker] = bar_time
             else:
                 print("No signal detected!")
+        
+        # ------------------------------
+        # Send ONE combined Telegram message
+        # ------------------------------
+        if combined_msgs:
+            final_msg = (
+                "🚨 INSANE 5 min ALERT 🚨\n\n"
+                f"Time: {current_bar_time}\n\n"
+                + "\n\n".join(combined_msgs)
+            )
+            send_telegram(final_msg)
+            print(f"[{dt.datetime.now()}] Combined alert sent")
 
     except Exception as e:
         print("❌ Alert engine error:", e)
