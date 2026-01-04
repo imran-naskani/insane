@@ -627,7 +627,7 @@ if st.session_state.run_model:
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
                     (
-                        ((df["High"].shift(1) >= df["VWAP_Upper"].shift(1)) &
+                        ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) &
                         (df["Close"] < df["VWAP_Upper"])) | 
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"])) |
@@ -639,7 +639,7 @@ if st.session_state.run_model:
                 df["Sell_Short"] = (
                     (df["Position"] == -1) &
                     (
-                        ((df["Low"].shift(1) <= df["VWAP_Lower"].shift(1)) &
+                        ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
                         (df["Close"] > df["VWAP_Lower"])) |
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"])) | 

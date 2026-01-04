@@ -167,7 +167,7 @@ while True:
 
             if signal and last_alert.get(ticker) != bar_time:
                 combined_msgs.append(
-                    f"{ticker}\n"
+                    f"{'SPX' if ticker == '^GSPC' else ticker}\n"
                     f"{signal}\n"
                     f"Price: {last['Close']:.2f}"
                 )
