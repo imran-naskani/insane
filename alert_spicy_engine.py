@@ -93,7 +93,7 @@ while True:
             if df.index.tz is None:
                 df.index = df.index.tz_localize("UTC")
 
-            df.index = df.index.tz_convert("US/Eastern")
+            df.index = df.index.tz_convert("US/Central")
 
             # ------------------------------
             # Run spicy_sauce
@@ -157,6 +157,7 @@ while True:
             # ------------------------------
             last = df.iloc[-1]
             bar_time = df.index[-1]
+            display_time = bar_time.strftime("%H:%M CT")
 
             signal = None
             signal_type = None
@@ -201,7 +202,7 @@ while True:
 
                 if allow:
                     combined_msgs.append(
-                        f"{'SPX' if ticker == '^GSPC' else ticker}\n"
+                        f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
                         f"{signal}\n"
                         f"Price: {last['Close']:.2f}"
                     )
@@ -213,8 +214,8 @@ while True:
         # ------------------------------
         if combined_msgs:
             final_msg = (
-                "🚨 INSANE 5 min ALERT 🚨\n\n"
-                f"Time: {current_bar_time}\n\n"
+                "🚨 INSANE ALERT 🚨\n\n"
+                f"*Time:* {display_time}\n\n"
                 + "\n\n".join(combined_msgs)
             )
             send_telegram(final_msg)
