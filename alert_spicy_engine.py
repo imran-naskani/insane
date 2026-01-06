@@ -24,7 +24,7 @@ CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 # INIT
 # ==============================
 # twilio = Client(TWILIO_SID, TWILIO_TOKEN)
-last_alert = {}   # { ticker: bar_timestamp }
+last_alert = {}   # { ticker: (bar_timestamp, signal_type) }
 
 
 # ==============================
@@ -86,6 +86,14 @@ while True:
             # Remove partial candle
             # ------------------------------
             df = get_last_closed_bar(df)
+
+            # ------------------------------
+            # Timezone fix: UTC → US/Eastern
+            # ------------------------------
+            if df.index.tz is None:
+                df.index = df.index.tz_localize("UTC")
+
+            df.index = df.index.tz_convert("US/Eastern")
 
             # ------------------------------
             # Run spicy_sauce
@@ -151,29 +159,54 @@ while True:
             bar_time = df.index[-1]
 
             signal = None
+            signal_type = None
+
             if last["Turn_Up"]:
                 signal = "Momentum Rising - Potential Long"
+                signal_type = "TURN_UP"
             elif last["Turn_Down"]:
                 signal = "Momentum Declining - Potential Short"
-            elif last["Sell_Long"] or last["Sell_Short"]:
-                signal = "Exit Warning - Close Position"
-                
+                signal_type = "TURN_DOWN"
+            elif last["Sell_Long"]:
+                signal = "Exit Warning - Close Long"
+                signal_type = "EXIT"
+            elif last["Sell_Short"]:
+                signal = "Exit Warning - Close Short"
+                signal_type = "EXIT"
+
             # ------------------------------
             # Collect alerts (do NOT send yet)
             # ------------------------------
-            if current_bar_time is None:
-                current_bar_time = bar_time
+            # if current_bar_time is None:
+            current_bar_time = bar_time
 
 
-            if signal and last_alert.get(ticker) != bar_time:
-                combined_msgs.append(
-                    f"{'SPX' if ticker == '^GSPC' else ticker}\n"
-                    f"{signal}\n"
-                    f"Price: {last['Close']:.2f}"
-                )
-                last_alert[ticker] = bar_time
-            else:
-                print("No signal detected!")
+            # if signal and last_alert.get(ticker) != bar_time:
+            #     combined_msgs.append(
+            #         f"{'SPX' if ticker == '^GSPC' else ticker}\n"
+            #         f"{signal}\n"
+            #         f"Price: {last['Close']:.2f}"
+            #     )
+            #     last_alert[ticker] = bar_time
+            # else:
+            #     print("No signal detected!")
+            prev = last_alert.get(ticker)
+            if signal:
+                if prev is None:
+                    allow = True
+                else:
+                    prev_time, prev_type = prev
+                    # Block repeated EXITs
+                    allow = not (signal_type == "EXIT" and prev_type == "EXIT")
+
+                if allow:
+                    combined_msgs.append(
+                        f"{'SPX' if ticker == '^GSPC' else ticker}\n"
+                        f"{signal}\n"
+                        f"Price: {last['Close']:.2f}"
+                    )
+                    last_alert[ticker] = (bar_time, signal_type)
+
         
         # ------------------------------
         # Send ONE combined Telegram message
