@@ -20,10 +20,13 @@ TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+
+RETRY_WINDOW_SECONDS = 45   # how long to retry within same bar
+RETRY_SLEEP_SECONDS = 3     # wait between retries
+
 # ==============================
-# INIT
+# STATE
 # ==============================
-# twilio = Client(TWILIO_SID, TWILIO_TOKEN)
 last_alert = {}   # { ticker: (bar_timestamp, signal_type) }
 
 
@@ -37,7 +40,7 @@ def send_telegram(msg: str):
         "text": msg,
         "parse_mode": "Markdown"
     }
-    r = requests.post(url, json=payload, timeout=10)
+    r = requests.post(url, json=payload, timeout=30)
     r.raise_for_status()
 
 def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
@@ -47,7 +50,7 @@ def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.iloc[:-1]
 
-def sleep_until_next_5m(offset_seconds=10):
+def sleep_until_next_5m(offset_seconds=3):
     """
     Sleeps until the next 5-minute boundary + offset.
     Offset ensures bar is fully closed and data is available.
@@ -67,25 +70,60 @@ print("🚨 INSANE Spicy Alert Engine started (5m)")
 
 while True:
     try:
-        sleep_until_next_5m(offset_seconds=10)  
+
+        sleep_until_next_5m(offset_seconds=3)
+
+        bar_start_time = time.time()
+        bar_deadline = bar_start_time + RETRY_WINDOW_SECONDS
+
         combined_msgs = []
         current_bar_time = None
 
         for ticker in TICKERS:
-            df = build_feature_dataset(
-                ticker,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"), 
-                timeframe=TIMEFRAME
-            )
+            df = None
+            last_exception = None
+            while time.time() < bar_deadline:
+                try:
+                    df = build_feature_dataset(
+                        ticker,
+                        start_date=start_date.strftime("%Y-%m-%d"),
+                        end_date=end_date.strftime("%Y-%m-%d"), 
+                        timeframe=TIMEFRAME
+                    )
 
-            if len(df) < 10:
+                    # Require at least one closed candle
+                    if df is not None and len(df) >= 10:
+                        temp = get_last_closed_bar(df)
+                        if temp is not None and len(temp) >= 10:
+                            last_bar = temp.index[-1]
+                            prev = last_alert.get(ticker)
+                            if prev is None or last_bar > prev[0]:
+                                df = temp
+                                break
+
+
+                except Exception as e:
+                    last_exception = e
+
+                time.sleep(RETRY_SLEEP_SECONDS)
+
+            if df is None or len(df) < 10:
+                print(f"[WARN] {ticker}: Yahoo retry failed for this bar")
                 continue
-
+        
             # ------------------------------
             # Remove partial candle
             # ------------------------------
-            df = get_last_closed_bar(df)
+            # df = get_last_closed_bar(df)
+            # if df is None or len(df) < 10:
+            #     continue
+
+            last_bar_time = df.index[-1]
+
+            # If bar is not new, skip this ticker (do NOT break loop)
+            prev = last_alert.get(ticker)
+            if prev is not None and last_bar_time <= prev[0]:
+                continue
 
             # ------------------------------
             # Timezone fix: UTC → US/Eastern
@@ -175,23 +213,8 @@ while True:
                 signal = "Exit Warning - Close Short"
                 signal_type = "EXIT"
 
-            # ------------------------------
-            # Collect alerts (do NOT send yet)
-            # ------------------------------
-            # if current_bar_time is None:
-            current_bar_time = bar_time
 
-
-            # if signal and last_alert.get(ticker) != bar_time:
-            #     combined_msgs.append(
-            #         f"{'SPX' if ticker == '^GSPC' else ticker}\n"
-            #         f"{signal}\n"
-            #         f"Price: {last['Close']:.2f}"
-            #     )
-            #     last_alert[ticker] = bar_time
-            # else:
-            #     print("No signal detected!")
-            prev = last_alert.get(ticker)
+            # prev = last_alert.get(ticker)
             if signal:
                 if prev is None:
                     allow = True

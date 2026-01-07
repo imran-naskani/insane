@@ -429,7 +429,7 @@ with filters_col:
     start_date_user = start_date
 
     if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-        extended_start = start_date_user - dt.timedelta(days=30)
+        extended_start = start_date_user - dt.timedelta(days=23)
     elif timeframe == '1d': 
         extended_start = start_date_user - dt.timedelta(days=290)
     
