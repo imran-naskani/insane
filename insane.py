@@ -632,7 +632,12 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"])) |
                         ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Low"] < df["TOS_Trail"])) 
+                        (df["Low"] < df["TOS_Trail"])) |
+                        ((df["Low"].shift(1) >= df["Low"]) &
+                        (df["Close"].shift(1) >= df["Close"])) |
+                        ((df["High"].shift(1) >= df["High"]) &
+                        (df["Close"].shift(1) >= df["Close"])) 
+
                     )
                 )
 
@@ -644,7 +649,11 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"])) | 
                         ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["High"] > df["TOS_Trail"]))
+                        (df["High"] > df["TOS_Trail"])) |
+                        ((df["Low"].shift(1) <= df["Low"]) &
+                        (df["Close"].shift(1) <= df["Close"])) |
+                        ((df["High"].shift(1) <= df["High"]) &
+                        (df["Close"].shift(1) <= df["Close"])) 
                     )
                 )
 

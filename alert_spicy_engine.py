@@ -169,24 +169,32 @@ while True:
             df["Sell_Long"] = (
                 (df["Position"] == 1) &
                 (
-                    ((df["High"].shift(1) >= df["VWAP_Upper"].shift(1)) &
-                    (df["Close"] < df["VWAP_Upper"])) | 
-                    ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                    (df["Close"] < df["VWAP"])) |
-                    ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                    (df["Low"] < df["TOS_Trail"])) 
+                    ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) &
+                        (df["Close"] < df["VWAP_Upper"])) | 
+                        ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
+                        (df["Close"] < df["VWAP"])) |
+                        ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
+                        (df["Low"] < df["TOS_Trail"])) |
+                        ((df["Low"].shift(1) >= df["Low"]) &
+                        (df["Close"].shift(1) >= df["Close"])) |
+                        ((df["High"].shift(1) >= df["High"]) &
+                        (df["Close"].shift(1) >= df["Close"])) 
                 )
                 )
 
             df["Sell_Short"] = (
                 (df["Position"] == -1) &
                 (
-                    ((df["Low"].shift(1) <= df["VWAP_Lower"].shift(1)) &
-                    (df["Close"] > df["VWAP_Lower"])) |
-                    ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                    (df["Close"] > df["VWAP"])) | 
-                    ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                    (df["High"] > df["TOS_Trail"]))
+                    ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
+                        (df["Close"] > df["VWAP_Lower"])) |
+                        ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                        (df["Close"] > df["VWAP"])) | 
+                        ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                        (df["High"] > df["TOS_Trail"])) |
+                        ((df["Low"].shift(1) <= df["Low"]) &
+                        (df["Close"].shift(1) <= df["Close"])) |
+                        ((df["High"].shift(1) <= df["High"]) &
+                        (df["Close"].shift(1) <= df["Close"])) 
                 )
             )
 
