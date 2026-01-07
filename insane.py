@@ -520,21 +520,21 @@ if st.session_state.run_model:
                 df["Smooth"], df["Slope"] = secret_sauce(price)
                 df["price_delta"] = df["Close"] - df["Smooth"]
 
-                # slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()
-                # slope_vals = [round(x / 0.25) * 0.25 for x in slope_q]
-                # print(slope_vals)
+                slope_q = df["Slope"].quantile([0.05, 0.35, 0.5, 0.65, 0.95]).tolist()
+                slope_vals = [round(x / 0.25) * 0.25 for x in slope_q]
+                print(slope_vals)
 
-                # df["Slope_Neg"] = (
-                #     (df["Slope"] < (slope_vals[0] + slope_vals[1])/2) & # ) / 2
-                #     (df["Close"] < df["Smooth"]) &
-                #     (df["Slope"] < df["Slope"].shift(1))
-                # )
+                df["Slope_Neg"] = (
+                    (df["Slope"] < (slope_vals[0] + slope_vals[1])/2) & # ) / 2
+                    (df["Close"] < df["Smooth"]) &
+                    (df["Slope"] < df["Slope"].shift(1))
+                )
 
-                # df["Slope_Pos"] = (
-                #     (df["Slope"] > (slope_vals[3] + slope_vals[4]) / 2) &
-                #     (df["Close"] > df["Smooth"]) &
-                #     (df["Slope"] > df["Slope"].shift(1))
-                # )
+                df["Slope_Pos"] = (
+                    (df["Slope"] > (slope_vals[3] + slope_vals[4]) / 2) &
+                    (df["Close"] > df["Smooth"]) &
+                    (df["Slope"] > df["Slope"].shift(1))
+                )
             
             # # if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
             # #     q_roll = 120
@@ -632,11 +632,11 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"])) |
                         ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Low"] < df["TOS_Trail"])) |
-                        ((df["Low"].shift(1) >= df["Low"]) &
-                        (df["Close"].shift(1) >= df["Close"])) |
-                        ((df["High"].shift(1) >= df["High"]) &
-                        (df["Close"].shift(1) >= df["Close"])) 
+                        (df["Low"] < df["TOS_Trail"])) #|
+                        # ((df["Low"].shift(1) >= df["Low"]) &
+                        # (df["Close"].shift(1) >= df["Close"])) |
+                        # ((df["High"].shift(1) >= df["High"]) &
+                        # (df["Close"].shift(1) >= df["Close"])) 
 
                     )
                 )
@@ -649,11 +649,11 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"])) | 
                         ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["High"] > df["TOS_Trail"])) |
-                        ((df["Low"].shift(1) <= df["Low"]) &
-                        (df["Close"].shift(1) <= df["Close"])) |
-                        ((df["High"].shift(1) <= df["High"]) &
-                        (df["Close"].shift(1) <= df["Close"])) 
+                        (df["High"] > df["TOS_Trail"])) #|
+                        # ((df["Low"].shift(1) <= df["Low"]) &
+                        # (df["Close"].shift(1) <= df["Close"])) |
+                        # ((df["High"].shift(1) <= df["High"]) &
+                        # (df["Close"].shift(1) <= df["Close"])) 
                     )
                 )
 
