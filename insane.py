@@ -510,8 +510,12 @@ if st.session_state.run_model:
                 df["q50"] = df["price_delta"].rolling(84).quantile(0.50)
                 df["q65"] = df["price_delta"].rolling(84).quantile(0.75)
                 df["q95"] = df["price_delta"].rolling(84).quantile(0.95) # 0.95 quantile
-                df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
-                df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+                if ticker == "^GSPC":
+                    df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"]) & (round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25)
+                    df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"]) & (round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25)
+                else:
+                    df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+                    df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
                             
@@ -636,7 +640,9 @@ if st.session_state.run_model:
                         # ((df["Low"].shift(1) >= df["Low"]) &
                         # (df["Close"].shift(1) >= df["Close"])) |
                         # ((df["High"].shift(1) >= df["High"]) &
-                        # (df["Close"].shift(1) >= df["Close"])) 
+                        # (df["Close"].shift(1) >= df["Close"])) #|
+                        # ((df["High"].shift(1) >= df["High"]) &
+                        # (df["Low"].shift(1) >= df["Low"])) 
 
                     )
                 )
@@ -649,11 +655,13 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"])) | 
                         ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["High"] > df["TOS_Trail"])) #|
+                        (df["High"] > df["TOS_Trail"])) # |
                         # ((df["Low"].shift(1) <= df["Low"]) &
                         # (df["Close"].shift(1) <= df["Close"])) |
                         # ((df["High"].shift(1) <= df["High"]) &
-                        # (df["Close"].shift(1) <= df["Close"])) 
+                        # (df["Close"].shift(1) <= df["Close"])) #|
+                        # ((df["High"].shift(1) <= df["High"]) &
+                        # (df["Low"].shift(1) <= df["Low"])) 
                     )
                 )
 
