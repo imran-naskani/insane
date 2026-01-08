@@ -47,7 +47,7 @@ def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.iloc[:-1]
 
-def sleep_until_next_5m(offset_seconds=5):
+def sleep_until_next_5m(offset_seconds=2):
     """
     Sleeps until the next 5-minute boundary + offset.
     Offset ensures bar is fully closed and data is available.
@@ -67,7 +67,7 @@ print("🚨 INSANE Spicy Alert Engine started (5m)")
 
 while True:
     try:
-        sleep_until_next_5m(offset_seconds=5)  
+        sleep_until_next_5m(offset_seconds=2)  
         combined_msgs = []
         current_bar_time = None
 
@@ -139,11 +139,11 @@ while True:
                     ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                     (df["Close"] < df["VWAP"])) |
                     ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                    (df["Low"] < df["TOS_Trail"])) |
-                    ((df["Low"].shift(1) >= df["Low"]) &
-                    (df["Close"].shift(1) >= df["Close"])) |
-                    ((df["High"].shift(1) >= df["High"]) &
-                    (df["Close"].shift(1) >= df["Close"])) #|
+                    (df["Low"] < df["TOS_Trail"])) #|
+                    # ((df["Low"].shift(1) >= df["Low"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) |
+                    # ((df["High"].shift(1) >= df["High"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) #|
                     # ((df["High"].shift(1) >= df["High"]) &
                     # (df["Low"].shift(1) >= df["Low"])) 
                 )
@@ -157,11 +157,11 @@ while True:
                     ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                     (df["Close"] > df["VWAP"])) | 
                     ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                    (df["High"] > df["TOS_Trail"])) |
-                    ((df["Low"].shift(1) <= df["Low"]) &
-                    (df["Close"].shift(1) <= df["Close"])) |
-                    ((df["High"].shift(1) <= df["High"]) &
-                    (df["Close"].shift(1) <= df["Close"])) #|
+                    (df["High"] > df["TOS_Trail"])) #|
+                    # ((df["Low"].shift(1) <= df["Low"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) |
+                    # ((df["High"].shift(1) <= df["High"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) #|
                     # ((df["High"].shift(1) <= df["High"]) &
                     # (df["Low"].shift(1) <= df["Low"])) 
                 )
@@ -214,7 +214,10 @@ while True:
                 else:
                     prev_time, prev_type = prev
                     # Block repeated EXITs
-                    allow = not (signal_type == "EXIT" and prev_type == "EXIT")
+                    allow = not (
+                        (signal_type == "EXIT" and prev_type == "EXIT") or
+                        (signal_type == prev_type and signal_type in ("TURN_UP", "TURN_DOWN"))
+                    )
 
                 if allow:
                     combined_msgs.append(
