@@ -510,9 +510,17 @@ if st.session_state.run_model:
                 df["q50"] = df["price_delta"].rolling(84).quantile(0.50)
                 df["q65"] = df["price_delta"].rolling(84).quantile(0.75)
                 df["q95"] = df["price_delta"].rolling(84).quantile(0.95) # 0.95 quantile
+                df["date"] = df.index.date
+                day_high = df.groupby("date")["High"].cummax()
+                day_low  = df.groupby("date")["Low"].cummin()
+                df["today_range"] = day_high - day_low
+                df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
+                df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
+
+
                 if ticker == "^GSPC":
-                    df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"]) & (round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25)
-                    df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"]) & (round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25)
+                    df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q05"] )) & (df["Close"] < df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 )  ) #
+                    df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q95"] )) & (df["Close"] > df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 ) ) #
                 else:
                     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
                     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
@@ -636,13 +644,13 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"])) |
                         ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Low"] < df["TOS_Trail"])) #|
-                        # ((df["Low"].shift(1) >= df["Low"]) &
-                        # (df["Close"].shift(1) >= df["Close"])) |
-                        # ((df["High"].shift(1) >= df["High"]) &
-                        # (df["Close"].shift(1) >= df["Close"])) #|
-                        # ((df["High"].shift(1) >= df["High"]) &
-                        # (df["Low"].shift(1) >= df["Low"])) 
+                        (df["Low"] < df["TOS_Trail"])) |
+                        ((df["Low"].shift(1) >= df["Low"]) &
+                        (df["Close"].shift(1) >= df["Close"])) |
+                        ((df["High"].shift(1) >= df["High"]) &
+                        (df["Close"].shift(1) >= df["Close"])) |
+                        ((df["High"].shift(1) >= df["High"]) &
+                        (df["Low"].shift(1) >= df["Low"])) 
 
                     )
                 )
@@ -655,13 +663,13 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"])) | 
                         ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["High"] > df["TOS_Trail"])) # |
-                        # ((df["Low"].shift(1) <= df["Low"]) &
-                        # (df["Close"].shift(1) <= df["Close"])) |
-                        # ((df["High"].shift(1) <= df["High"]) &
-                        # (df["Close"].shift(1) <= df["Close"])) #|
-                        # ((df["High"].shift(1) <= df["High"]) &
-                        # (df["Low"].shift(1) <= df["Low"])) 
+                        (df["High"] > df["TOS_Trail"]))  |
+                        ((df["Low"].shift(1) <= df["Low"]) &
+                        (df["Close"].shift(1) <= df["Close"])) |
+                        ((df["High"].shift(1) <= df["High"]) &
+                        (df["Close"].shift(1) <= df["Close"])) |
+                        ((df["High"].shift(1) <= df["High"]) &
+                        (df["Low"].shift(1) <= df["Low"])) 
                     )
                 )
 
