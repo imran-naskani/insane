@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore")
 import streamlit.components.v1 as components
 import numpy as np
 import datetime
-from build_dataset import build_feature_dataset
+from build_dataset import build_feature_dataset, floor_5_or_int
 from technical_features import add_all_labels
 from backtest_same_day_close import generate_trade_log, compute_trade_stats
 from backtest_next_day_open import generate_trade_log_next_open
@@ -430,6 +430,7 @@ with filters_col:
 
     if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
         extended_start = start_date_user - dt.timedelta(days=23)
+        print("Extended Start for Intraday:", extended_start)
     elif timeframe == '1d': 
         extended_start = start_date_user - dt.timedelta(days=290)
     
@@ -493,37 +494,47 @@ if st.session_state.run_model:
 
             # Add Labels
             df = add_all_labels(data)
-            df = df[df.index >= pd.to_datetime(start_date_user).tz_localize(df.index.tz)]
+            # df = df[df.index >= pd.to_datetime(start_date_user).tz_localize(df.index.tz)]
 
             # ------------------------------------------------------------
             # 2) COMPUTE KALMAN SIGNALS
             # ------------------------------------------------------------
             price = df['Close']
-            
+            if ticker == "^GSPC":
+                p_win = 252
+            else:
+                p_win = 125  
             if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
                 # price = (df['High'] + df['Low']) / 2
                 df["Smooth"], df["Slope"] = spicy_sauce(df["Close"])
                 df['price_delta'] = df["Close"] - df["Smooth"]
                 price_delta = df['price_delta']
-                df["q05"] = df["price_delta"].rolling(84).quantile(0.05) # 0.05 quantile
-                df["q35"] = df["price_delta"].rolling(84).quantile(0.25)
-                df["q50"] = df["price_delta"].rolling(84).quantile(0.50)
-                df["q65"] = df["price_delta"].rolling(84).quantile(0.75)
-                df["q95"] = df["price_delta"].rolling(84).quantile(0.95) # 0.95 quantile
+                df["q05"] = df["price_delta"].rolling(p_win).quantile(0.05) # 0.05 quantile
+                df["q35"] = df["price_delta"].rolling(p_win).quantile(0.25)
+                df["q50"] = df["price_delta"].rolling(p_win).quantile(0.50)
+                df["q65"] = df["price_delta"].rolling(p_win).quantile(0.75)
+                df["q95"] = df["price_delta"].rolling(p_win).quantile(0.95) # 0.95 quantile
                 df["date"] = df.index.date
                 day_high = df.groupby("date")["High"].cummax()
                 day_low  = df.groupby("date")["Low"].cummin()
                 df["today_range"] = day_high - day_low
                 df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
                 df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
+                df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.025)
+                df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.975)
+                df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
+                daily_thr = floor_5_or_int(df['today_range'].median())
+                vwap_thr  = floor_5_or_int(df['vwap_range'].median())
+                
+                # if ticker == "^GSPC":
+                df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] ))  & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr )  ) # 
+                df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr ) ) 
 
-
-                if ticker == "^GSPC":
-                    df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q05"] )) & (df["Close"] < df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 )  ) #
-                    df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q95"] )) & (df["Close"] > df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 ) ) #
-                else:
-                    df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
-                    df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+                # else:
+                #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+                #     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+                
+                
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
                             
@@ -795,7 +806,7 @@ if st.session_state.run_model:
                     exit_armed_short = False
 
 
-            
+            df = df[df.index >= pd.to_datetime(start_date_user).tz_localize(df.index.tz)]
             print(df[['Close','Turn_Up','Turn_Down','Sell_Long','Sell_Short','Sell_Long_Plot','Sell_Short_Plot','Position']].head(10))
             # print(default_start, start_date_user, extended_start)
             # ------------------------------------------------------------
@@ -1267,5 +1278,5 @@ if st.session_state.run_model:
             with stats_right:
                 st.subheader("📊 Trade Statistics — Next-Bar Open")
                 st.table(pd.DataFrame(open_stats, index=[0]).T)
-                
+            
             

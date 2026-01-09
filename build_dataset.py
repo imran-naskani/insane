@@ -5,6 +5,9 @@ from datetime import datetime
 import ta
 
 
+def floor_5_or_int(x):
+    return int((x // 5) * 5) if x >= 5 else int(x // 1)
+
 # ----------------------------------------------------
 #  COMPUTE FRAMA
 # ----------------------------------------------------

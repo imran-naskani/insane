@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-from build_dataset import build_feature_dataset
+from build_dataset import build_feature_dataset, floor_5_or_int
 from model import spicy_sauce
 import datetime as dt
 from dotenv import load_dotenv
@@ -72,6 +72,11 @@ while True:
         current_bar_time = None
 
         for ticker in TICKERS:
+            if ticker == "^GSPC":
+                p_win = 252
+            else:
+                p_win = 125  
+
             df = build_feature_dataset(
                 ticker,
                 start_date=start_date.strftime("%Y-%m-%d"),
@@ -104,9 +109,9 @@ while True:
             # Recreate your intraday signal logic
             # ------------------------------
             df["price_delta"] = df["Close"] - df["Smooth"]
-
-            df["q05"] = df["price_delta"].rolling(84).quantile(0.05)
-            df["q95"] = df["price_delta"].rolling(84).quantile(0.95)
+            
+            df["q05"] = df["price_delta"].rolling(p_win).quantile(0.05)
+            df["q95"] = df["price_delta"].rolling(p_win).quantile(0.95)
 
             df["date"] = df.index.date
             day_high = df.groupby("date")["High"].cummax()
@@ -114,13 +119,18 @@ while True:
             df["today_range"] = day_high - day_low
             df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
             df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
+            df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.025)
+            df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.975)
+            df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
+            daily_thr = floor_5_or_int(df['today_range'].median())
+            vwap_thr  = floor_5_or_int(df['vwap_range'].median())
 
-            if ticker == "^GSPC":
-                df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q05"] )) & (df["Close"] < df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 )  ) #
-                df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q95"] )) & (df["Close"] > df["TOS_Trail"]) & ((round(df["VWAP_Upper"] - df["VWAP_Lower"]) >= 25) | (df["today_range"].shift(1)  >= 30 ) ) #
-            else:
-                df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
-                df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+            # if ticker == "^GSPC":
+            df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr )  ) #
+            df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr ) ) #
+            # else:
+            #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+            #     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
 
             df["Turn_Up"] = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
             df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
