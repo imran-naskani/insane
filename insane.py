@@ -527,8 +527,8 @@ if st.session_state.run_model:
                 vwap_thr  = floor_5_or_int(df['vwap_range'].median())
                 
                 # if ticker == "^GSPC":
-                df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] ))  & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr )  ) # 
-                df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr ) ) 
+                df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr )) #  
+                df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr ))  # 
 
                 # else:
                 #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
@@ -650,10 +650,10 @@ if st.session_state.run_model:
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
                     (
-                        ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) &
-                        (df["Close"] < df["VWAP_Upper"])) | 
+                        ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) & 
+                        (df["Close"] < df["VWAP_Upper"]) & (df['vwap_range'] >= vwap_thr)) | 
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                        (df["Close"] < df["VWAP"])) |
+                        (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
                         ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
                         (df["Low"] < df["TOS_Trail"])) |
                         ((df["Low"].shift(1) >= df["Low"]) &
@@ -670,9 +670,9 @@ if st.session_state.run_model:
                     (df["Position"] == -1) &
                     (
                         ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
-                        (df["Close"] > df["VWAP_Lower"])) |
+                        (df["Close"] > df["VWAP_Lower"]) & (df['vwap_range'] >= vwap_thr)) |
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                        (df["Close"] > df["VWAP"])) | 
+                        (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
                         ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
                         (df["High"] > df["TOS_Trail"]))  |
                         ((df["Low"].shift(1) <= df["Low"]) &
