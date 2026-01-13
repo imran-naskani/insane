@@ -75,7 +75,7 @@ while True:
             if ticker == "^GSPC":
                 p_win = 252
             else:
-                p_win = 125  
+                p_win = 84  
 
             df = build_feature_dataset(
                 ticker,
@@ -126,8 +126,8 @@ while True:
             vwap_thr  = floor_5_or_int(df['vwap_range'].median())
 
             # if ticker == "^GSPC":
-            df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr )  ) #
-            df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"].shift(1)  >= daily_thr ) ) #
+            df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"] >= daily_thr ) ) #.shift(1)
+            df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"] >= daily_thr ) ) #.shift(1)
             # else:
             #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
             #     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
@@ -157,13 +157,13 @@ while True:
                     ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                     (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
                     ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                    (df["Low"] < df["TOS_Trail"])) |
-                    ((df["Low"].shift(1) >= df["Low"]) &
-                    (df["Close"].shift(1) >= df["Close"])) |
-                    ((df["High"].shift(1) >= df["High"]) &
-                    (df["Close"].shift(1) >= df["Close"])) |
-                    ((df["High"].shift(1) >= df["High"]) &
-                    (df["Low"].shift(1) >= df["Low"])) 
+                    (df["Low"] < df["TOS_Trail"])) #|
+                    # ((df["Low"].shift(1) >= df["Low"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) |
+                    # ((df["High"].shift(1) >= df["High"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) |
+                    # ((df["High"].shift(1) >= df["High"]) &
+                    # (df["Low"].shift(1) >= df["Low"])) 
 
                 )
             )
@@ -176,13 +176,13 @@ while True:
                     ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                     (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
                     ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                    (df["High"] > df["TOS_Trail"]))  |
-                    ((df["Low"].shift(1) <= df["Low"]) &
-                    (df["Close"].shift(1) <= df["Close"])) |
-                    ((df["High"].shift(1) <= df["High"]) &
-                    (df["Close"].shift(1) <= df["Close"])) |
-                    ((df["High"].shift(1) <= df["High"]) &
-                    (df["Low"].shift(1) <= df["Low"])) 
+                    (df["High"] > df["TOS_Trail"])) # |
+                    # ((df["Low"].shift(1) <= df["Low"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) |
+                    # ((df["High"].shift(1) <= df["High"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) |
+                    # ((df["High"].shift(1) <= df["High"]) &
+                    # (df["Low"].shift(1) <= df["Low"])) 
                 )
             )
             print(df.tail())
