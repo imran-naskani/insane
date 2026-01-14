@@ -15,7 +15,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ==============================
 # CONFIG
 # ==============================
-TICKERS = ["^GSPC", "TSLA"]
+TICKERS = ["^GSPC", "TSLA", "TMUS"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -64,6 +64,8 @@ def sleep_until_next_5m(offset_seconds=2):
 # MAIN LOOP
 # ==============================
 print("🚨 INSANE Spicy Alert Engine started (5m)")
+MAX_RETRIES = 10
+RETRY_SLEEP = 2
 
 while True:
     try:
@@ -77,14 +79,25 @@ while True:
             else:
                 p_win = 84  
 
-            df = build_feature_dataset(
-                ticker,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"), 
-                timeframe=TIMEFRAME
-            )
+            df = None
+            for attempt in range(1, MAX_RETRIES + 1):
+                try:
+                    df = build_feature_dataset(
+                        ticker,
+                        start_date=start_date.strftime("%Y-%m-%d"),
+                        end_date=end_date.strftime("%Y-%m-%d"),
+                        timeframe=TIMEFRAME
+                    )
+                    break  # Success → exit retry loop
 
-            if len(df) < 10:
+                except Exception as e:
+                    print(f"{ticker} attempt {attempt}/{MAX_RETRIES} failed: {e}")
+                    if attempt < MAX_RETRIES:
+                        time.sleep(RETRY_SLEEP)
+
+            # If still failed after retries → skip ticker
+            if df is None:
+                print(f"{ticker} skipped after {MAX_RETRIES} failures")
                 continue
 
             # ------------------------------
@@ -157,7 +170,8 @@ while True:
                     ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                     (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
                     ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                    (df["Low"] < df["TOS_Trail"])) #|
+                    (df["Low"] < df["TOS_Trail"])) # | 
+                    # ((df['Close'] < df['Open'].shift(1))) #|
                     # ((df["Low"].shift(1) >= df["Low"]) &
                     # (df["Close"].shift(1) >= df["Close"])) |
                     # ((df["High"].shift(1) >= df["High"]) &
@@ -176,7 +190,8 @@ while True:
                     ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                     (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
                     ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                    (df["High"] > df["TOS_Trail"])) # |
+                    (df["High"] > df["TOS_Trail"])) # | 
+                    # ((df['Close'] > df['Open'].shift(1))) # |
                     # ((df["Low"].shift(1) <= df["Low"]) &
                     # (df["Close"].shift(1) <= df["Close"])) |
                     # ((df["High"].shift(1) <= df["High"]) &

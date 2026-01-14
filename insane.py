@@ -655,7 +655,8 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
                         (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
                         ((df["Close"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] < df["TOS_Trail"])) #|
+                        (df["Close"] < df["TOS_Trail"])) # | 
+                        # ((df['Close'] < df['Open'].shift(1))) #|
                         # ((df["Low"].shift(1) >= df["Low"]) &
                         # (df["Close"].shift(1) >= df["Close"])) |
                         # ((df["High"].shift(1) >= df["High"]) &
@@ -674,7 +675,8 @@ if st.session_state.run_model:
                         ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
                         (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
                         ((df["Close"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] > df["TOS_Trail"]))  #|
+                        (df["Close"] > df["TOS_Trail"])) # | 
+                        # ((df['Close'] > df['Open'].shift(1))) #|
                         # ((df["Low"].shift(1) <= df["Low"]) &
                         # (df["Close"].shift(1) <= df["Close"])) |
                         # ((df["High"].shift(1) <= df["High"]) &
