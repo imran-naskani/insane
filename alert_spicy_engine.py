@@ -75,7 +75,7 @@ while True:
 
         for ticker in TICKERS:
             if ticker == "^GSPC":
-                p_win = 252
+                p_win = 84
             else:
                 p_win = 84  
 
@@ -132,8 +132,8 @@ while True:
             df["today_range"] = day_high - day_low
             df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
             df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
-            df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.025)
-            df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.975)
+            df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.05)
+            df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.95)
             df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
             daily_thr = floor_5_or_int(df['today_range'].median())
             vwap_thr  = floor_5_or_int(df['vwap_range'].median())
@@ -257,6 +257,7 @@ while True:
                     combined_msgs.append(
                         f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
                         f"{signal}\n"
+                        f"Time: {display_time}\n"
                         f"Price: {last['Close']:.2f}"
                     )
                     last_alert[ticker] = (bar_time, signal_type)
@@ -268,7 +269,6 @@ while True:
         if combined_msgs:
             final_msg = (
                 "🚨 INSANE ALERT 🚨\n\n"
-                f"*Time:* {display_time}\n\n"
                 + "\n\n".join(combined_msgs)
             )
             send_telegram(final_msg)
