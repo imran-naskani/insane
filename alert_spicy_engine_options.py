@@ -16,8 +16,8 @@ ACCOUNT_CAPITAL = 100_000      # paper capital
 RISK_PCT = 0.01                # risk 1% per trade
 MAX_CONTRACTS = 1             # hard cap
 
-BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+BOT_TOKEN = os.environ["TELEGRAM_OPTION_BOT_TOKEN"]
+CHAT_ID = os.environ["TELEGRAM_OPTION_CHAT_ID"]
 
 STRIKE_LADDERS = {
     "MES": 5,
