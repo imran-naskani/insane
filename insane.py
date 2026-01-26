@@ -12,8 +12,8 @@ from build_dataset import build_feature_dataset, floor_5_or_int
 from technical_features import add_all_labels
 from backtest_same_day_close import generate_trade_log, compute_trade_stats
 from backtest_next_day_open import generate_trade_log_next_open
-from backtest_intraday_same_bar_close import backtest_intraday_close
-from backtest_intraday_next_bar_open import backtest_intraday_next_open
+from backtest_intraday_same_bar_close import backtest_intraday_close, backtest_intraday_close_sell_only
+from backtest_intraday_next_bar_open import backtest_intraday_next_open, backtest_intraday_next_open_sell_only
 from model import secret_sauce, spicy_sauce
 from openai import OpenAI
 import json
@@ -520,19 +520,17 @@ if st.session_state.run_model:
                 df["today_range"] = day_high - day_low
                 df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
                 df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
-                df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.05)
-                df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.95)
+                df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.25) #0.05
+                df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.75) #0.95
                 df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
                 daily_thr = floor_5_or_int(df['today_range'].median())
                 vwap_thr  = floor_5_or_int(df['vwap_range'].median())
                 
-                # if ticker == "^GSPC":
-                df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) #  .shift(1)
-                df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr ))  # .shift(1)
+                # df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) #  .shift(1)
+                # df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr ))  # .shift(1)
 
-                # else:
-                #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
-                #     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+                df["Slope_Neg"] = ((df['price_delta_shift'] <  df["q01"] ) ) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] < 50)
+                df["Slope_Pos"] = ((df['price_delta_shift'] >  df["q99"] ) ) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] > 50)
                 
                 
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
@@ -652,10 +650,12 @@ if st.session_state.run_model:
                     (
                         ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) & 
                         (df["Close"] < df["VWAP_Upper"]) & (df['vwap_range'] >= vwap_thr)) | 
-                        ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                        (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
+                        # ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
+                        # (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
                         ((df["Close"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] < df["TOS_Trail"])) # | 
+                        (df["Close"] < df["TOS_Trail"])) |
+                        ((df["TOS_RSI"].shift(1) > 70) &
+                        (df["TOS_RSI"] < 70)) #| 
                         # ((df['Close'] < df['Open'].shift(1))) #|
                         # ((df["Low"].shift(1) >= df["Low"]) &
                         # (df["Close"].shift(1) >= df["Close"])) |
@@ -672,10 +672,12 @@ if st.session_state.run_model:
                     (
                         ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
                         (df["Close"] > df["VWAP_Lower"]) & (df['vwap_range'] >= vwap_thr)) |
-                        ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                        (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
+                        # ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                        # (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
                         ((df["Close"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] > df["TOS_Trail"])) # | 
+                        (df["Close"] > df["TOS_Trail"])) |
+                        ((df["TOS_RSI"].shift(1) < 30) &
+                        (df["TOS_RSI"] > 30)) #|
                         # ((df['Close'] > df['Open'].shift(1))) #|
                         # ((df["Low"].shift(1) <= df["Low"]) &
                         # (df["Close"].shift(1) <= df["Close"])) |
@@ -1177,7 +1179,8 @@ if st.session_state.run_model:
             with bt_left:
                 # ---- Net Profit for Same-Day Close ----
                 if is_intraday:
-                    close_df, close_equity_end = backtest_intraday_close(df, capital)
+                    # close_df, close_equity_end = backtest_intraday_close(df, capital)
+                    close_df, close_equity_end = backtest_intraday_close_sell_only(df, capital)
                 else:
                     close_df, close_equity_end = generate_trade_log(df, capital)
                     # close_df, close_equity_end = backtest_intraday_close(df, capital)
@@ -1215,7 +1218,8 @@ if st.session_state.run_model:
             with bt_right:
                 # ---- Net Profit for Next-Day Open ----
                 if is_intraday:
-                    open_df, open_equity_end = backtest_intraday_next_open(df, capital)
+                    # open_df, open_equity_end = backtest_intraday_next_open(df, capital)
+                    open_df, open_equity_end = backtest_intraday_next_open_sell_only(df, capital)
                 else:
                     open_df, open_equity_end = generate_trade_log_next_open(df, capital)
                     # open_df, open_equity_end = backtest_intraday_next_open(df, capital)

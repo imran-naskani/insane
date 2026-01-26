@@ -24,15 +24,18 @@ STRIKE_LADDERS = {
     "SPX": 5,
     "TSLA": 2.5
 }
-
 INSTRUMENTS = {
-    # "MES": {
-    #     "contract": Future("MES", "202603", "CME", "USD"),
-    #     "option_symbol": "MES",
-    #     "multiplier": "5",
-    #     "p_win": 252
-    # },
-    # Uncomment when ready
+    "MES": {
+        "contract": Future(
+            symbol="MES",
+            lastTradeDateOrContractMonth="202603",
+            exchange="CME",
+            currency="USD"
+        ),
+        "option_symbol": "MES",
+        "multiplier": "5",
+        "p_win": 252
+    },
     "TSLA": {
         "contract": Stock("TSLA", "SMART", "USD"),
         "option_symbol": "TSLA",

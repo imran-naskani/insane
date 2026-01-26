@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-from build_dataset import build_feature_dataset
+from build_dataset import build_feature_dataset, floor_5_or_int
 from model import spicy_sauce
 import datetime as dt
 from dotenv import load_dotenv
@@ -15,18 +15,15 @@ start_date = end_date - dt.timedelta(days=31)
 # ==============================
 # CONFIG
 # ==============================
-TICKERS = ["^GSPC", "TSLA"]
+TICKERS = ["^GSPC", "TSLA", "TMUS"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
-
-RETRY_WINDOW_SECONDS = 45   # how long to retry within same bar
-RETRY_SLEEP_SECONDS = 3     # wait between retries
-
 # ==============================
-# STATE
+# INIT
 # ==============================
+# twilio = Client(TWILIO_SID, TWILIO_TOKEN)
 last_alert = {}   # { ticker: (bar_timestamp, signal_type) }
 
 
@@ -40,7 +37,7 @@ def send_telegram(msg: str):
         "text": msg,
         "parse_mode": "Markdown"
     }
-    r = requests.post(url, json=payload, timeout=30)
+    r = requests.post(url, json=payload, timeout=10)
     r.raise_for_status()
 
 def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
@@ -50,7 +47,7 @@ def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.iloc[:-1]
 
-def sleep_until_next_5m(offset_seconds=3):
+def sleep_until_next_5m(offset_seconds=2):
     """
     Sleeps until the next 5-minute boundary + offset.
     Offset ensures bar is fully closed and data is available.
@@ -67,63 +64,46 @@ def sleep_until_next_5m(offset_seconds=3):
 # MAIN LOOP
 # ==============================
 print("🚨 INSANE Spicy Alert Engine started (5m)")
+MAX_RETRIES = 10
+RETRY_SLEEP = 2
 
 while True:
     try:
-
-        sleep_until_next_5m(offset_seconds=3)
-
-        bar_start_time = time.time()
-        bar_deadline = bar_start_time + RETRY_WINDOW_SECONDS
-
+        sleep_until_next_5m(offset_seconds=2)  
         combined_msgs = []
         current_bar_time = None
 
         for ticker in TICKERS:
+            if ticker == "^GSPC":
+                p_win = 84
+            else:
+                p_win = 84  
+
             df = None
-            last_exception = None
-            while time.time() < bar_deadline:
+            for attempt in range(1, MAX_RETRIES + 1):
                 try:
                     df = build_feature_dataset(
                         ticker,
                         start_date=start_date.strftime("%Y-%m-%d"),
-                        end_date=end_date.strftime("%Y-%m-%d"), 
+                        end_date=end_date.strftime("%Y-%m-%d"),
                         timeframe=TIMEFRAME
                     )
-
-                    # Require at least one closed candle
-                    if df is not None and len(df) >= 10:
-                        temp = get_last_closed_bar(df)
-                        if temp is not None and len(temp) >= 10:
-                            last_bar = temp.index[-1]
-                            prev = last_alert.get(ticker)
-                            if prev is None or last_bar > prev[0]:
-                                df = temp
-                                break
-
+                    break  # Success → exit retry loop
 
                 except Exception as e:
-                    last_exception = e
+                    print(f"{ticker} attempt {attempt}/{MAX_RETRIES} failed: {e}")
+                    if attempt < MAX_RETRIES:
+                        time.sleep(RETRY_SLEEP)
 
-                time.sleep(RETRY_SLEEP_SECONDS)
-
-            if df is None or len(df) < 10:
-                print(f"[WARN] {ticker}: Yahoo retry failed for this bar")
+            # If still failed after retries → skip ticker
+            if df is None:
+                print(f"{ticker} skipped after {MAX_RETRIES} failures")
                 continue
-        
+
             # ------------------------------
             # Remove partial candle
             # ------------------------------
-            # df = get_last_closed_bar(df)
-            # if df is None or len(df) < 10:
-            #     continue
-
-            last_bar_time = df.index[-1]
-
-            # If bar is not new, skip this ticker (do NOT break loop)
-            prev = last_alert.get(ticker)
-            if prev is not None and last_bar_time <= prev[0]:
-                continue
+            df = get_last_closed_bar(df)
 
             # ------------------------------
             # Timezone fix: UTC → US/Eastern
@@ -142,12 +122,28 @@ while True:
             # Recreate your intraday signal logic
             # ------------------------------
             df["price_delta"] = df["Close"] - df["Smooth"]
+            
+            df["q05"] = df["price_delta"].rolling(p_win).quantile(0.05)
+            df["q95"] = df["price_delta"].rolling(p_win).quantile(0.95)
 
-            df["q05"] = df["price_delta"].rolling(84).quantile(0.05)
-            df["q95"] = df["price_delta"].rolling(84).quantile(0.95)
+            df["date"] = df.index.date
+            day_high = df.groupby("date")["High"].cummax()
+            day_low  = df.groupby("date")["Low"].cummin()
+            df["today_range"] = day_high - day_low
+            df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
+            df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
+            df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.05)
+            df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.95)
+            df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
+            daily_thr = floor_5_or_int(df['today_range'].median())
+            vwap_thr  = floor_5_or_int(df['vwap_range'].median())
 
-            df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
-            df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
+            # if ticker == "^GSPC":
+            df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"] >= daily_thr ) ) #.shift(1)
+            df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"] >= daily_thr ) ) #.shift(1)
+            # else:
+            #     df["Slope_Neg"] = (df["price_delta"] < df["q05"]) & (df["Close"] < df["TOS_Trail"])
+            #     df["Slope_Pos"] = (df["price_delta"] > df["q95"]) & (df["Close"] > df["TOS_Trail"])
 
             df["Turn_Up"] = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
             df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
@@ -169,35 +165,43 @@ while True:
             df["Sell_Long"] = (
                 (df["Position"] == 1) &
                 (
-                    ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) &
-                        (df["Close"] < df["VWAP_Upper"])) | 
-                        ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                        (df["Close"] < df["VWAP"])) |
-                        ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Low"] < df["TOS_Trail"])) |
-                        ((df["Low"].shift(1) >= df["Low"]) &
-                        (df["Close"].shift(1) >= df["Close"])) |
-                        ((df["High"].shift(1) >= df["High"]) &
-                        (df["Close"].shift(1) >= df["Close"])) 
+                    ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) & 
+                    (df["Close"] < df["VWAP_Upper"]) & (df['vwap_range'] >= vwap_thr)) | 
+                    ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
+                    (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
+                    ((df["Low"].shift(1) >= df["TOS_Trail"].shift(1)) &
+                    (df["Low"] < df["TOS_Trail"])) # | 
+                    # ((df['Close'] < df['Open'].shift(1))) #|
+                    # ((df["Low"].shift(1) >= df["Low"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) |
+                    # ((df["High"].shift(1) >= df["High"]) &
+                    # (df["Close"].shift(1) >= df["Close"])) |
+                    # ((df["High"].shift(1) >= df["High"]) &
+                    # (df["Low"].shift(1) >= df["Low"])) 
+
                 )
-                )
+            )
 
             df["Sell_Short"] = (
                 (df["Position"] == -1) &
                 (
                     ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
-                        (df["Close"] > df["VWAP_Lower"])) |
-                        ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                        (df["Close"] > df["VWAP"])) | 
-                        ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["High"] > df["TOS_Trail"])) |
-                        ((df["Low"].shift(1) <= df["Low"]) &
-                        (df["Close"].shift(1) <= df["Close"])) |
-                        ((df["High"].shift(1) <= df["High"]) &
-                        (df["Close"].shift(1) <= df["Close"])) 
+                    (df["Close"] > df["VWAP_Lower"]) & (df['vwap_range'] >= vwap_thr)) |
+                    ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                    (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
+                    ((df["High"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                    (df["High"] > df["TOS_Trail"])) # | 
+                    # ((df['Close'] > df['Open'].shift(1))) # |
+                    # ((df["Low"].shift(1) <= df["Low"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) |
+                    # ((df["High"].shift(1) <= df["High"]) &
+                    # (df["Close"].shift(1) <= df["Close"])) |
+                    # ((df["High"].shift(1) <= df["High"]) &
+                    # (df["Low"].shift(1) <= df["Low"])) 
                 )
             )
-
+            print(df.tail())
+            
             # ------------------------------
             # Check LAST CLOSED BAR ONLY
             # ------------------------------
@@ -221,20 +225,39 @@ while True:
                 signal = "Exit Warning - Close Short"
                 signal_type = "EXIT"
 
+            # ------------------------------
+            # Collect alerts (do NOT send yet)
+            # ------------------------------
+            # if current_bar_time is None:
+            current_bar_time = bar_time
 
-            # prev = last_alert.get(ticker)
+
+            # if signal and last_alert.get(ticker) != bar_time:
+            #     combined_msgs.append(
+            #         f"{'SPX' if ticker == '^GSPC' else ticker}\n"
+            #         f"{signal}\n"
+            #         f"Price: {last['Close']:.2f}"
+            #     )
+            #     last_alert[ticker] = bar_time
+            # else:
+            #     print("No signal detected!")
+            prev = last_alert.get(ticker)
             if signal:
                 if prev is None:
                     allow = True
                 else:
                     prev_time, prev_type = prev
                     # Block repeated EXITs
-                    allow = not (signal_type == "EXIT" and prev_type == "EXIT")
+                    allow = not (
+                        (signal_type == "EXIT" and prev_type == "EXIT") or
+                        (signal_type == prev_type and signal_type in ("TURN_UP", "TURN_DOWN"))
+                    )
 
                 if allow:
                     combined_msgs.append(
                         f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
                         f"{signal}\n"
+                        f"Time: {display_time}\n"
                         f"Price: {last['Close']:.2f}"
                     )
                     last_alert[ticker] = (bar_time, signal_type)
@@ -246,7 +269,6 @@ while True:
         if combined_msgs:
             final_msg = (
                 "🚨 INSANE ALERT 🚨\n\n"
-                f"*Time:* {display_time}\n\n"
                 + "\n\n".join(combined_msgs)
             )
             send_telegram(final_msg)

@@ -171,3 +171,99 @@ def backtest_intraday_next_open(df, trade_capital=10000):
         })
 
     return pd.DataFrame(trade_log), trade_capital + reserve_profit
+
+
+def backtest_intraday_next_open_sell_only(df, capital):
+    position = 0
+    entry_price = None
+    entry_time = None
+
+    equity = capital
+    trades = []
+
+    for i in range(len(df) - 1):
+        row = df.iloc[i]
+        next_row = df.iloc[i + 1]
+        bar_time = row.name.time()
+
+        # ----- SKIP EXTENDED HOURS -----
+        if bar_time < pd.Timestamp("09:30").time() or bar_time > pd.Timestamp("15:55").time():
+            continue
+
+        # ----- FORCED EOD EXIT (2:55 PM — SAME BAR CLOSE) -----
+        if position != 0 and bar_time >= pd.Timestamp("15:55").time():
+            exit_price = row["Close"]
+            pnl = (exit_price - entry_price) if position == 1 else (entry_price - exit_price)
+            equity += pnl
+
+            trades.append({
+                "Entry_Date": entry_time,
+                "Exit_Date": row.name,
+                "Direction": "LONG" if position == 1 else "SHORT",
+                "Entry_Price": entry_price,
+                "Exit_Price": exit_price,
+                "PnL_$": pnl,
+                "Return_%": (pnl / entry_price) * 100,
+                "Total_Equity": equity
+            })
+
+            position = 0
+            entry_price = None
+            entry_time = None
+            continue
+
+        # ----- ENTRY -----
+        if position == 0:
+            if row["Turn_Up"]:
+                position = 1
+                entry_price = next_row["Open"]
+                entry_time = next_row.name
+
+            elif row["Turn_Down"]:
+                position = -1
+                entry_price = next_row["Open"]
+                entry_time = next_row.name
+
+        # ----- EXIT (SELL SIGNALS ONLY) -----
+        elif position == 1 and row["Sell_Long"]:
+            exit_price = next_row["Open"]
+            pnl = exit_price - entry_price
+            equity += pnl
+
+            trades.append({
+                "Entry_Date": entry_time,
+                "Exit_Date": next_row.name,
+                "Direction": "LONG",
+                "Entry_Price": entry_price,
+                "Exit_Price": exit_price,
+                "PnL_$": pnl,
+                "Return_%": (pnl / entry_price) * 100,
+                "Total_Equity": equity
+            })
+
+            position = 0
+            entry_price = None
+            entry_time = None
+
+        elif position == -1 and row["Sell_Short"]:
+            exit_price = next_row["Open"]
+            pnl = entry_price - exit_price
+            equity += pnl
+
+            trades.append({
+                "Entry_Date": entry_time,
+                "Exit_Date": next_row.name,
+                "Direction": "SHORT",
+                "Entry_Price": entry_price,
+                "Exit_Price": exit_price,
+                "PnL_$": pnl,
+                "Return_%": (pnl / entry_price) * 100,
+                "Total_Equity": equity
+            })
+
+            position = 0
+            entry_price = None
+            entry_time = None
+
+    trade_df = pd.DataFrame(trades)
+    return trade_df, equity
