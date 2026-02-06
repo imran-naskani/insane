@@ -15,7 +15,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ==============================
 # CONFIG
 # ==============================
-TICKERS = ["^GSPC", "TSLA", "TMUS"]
+TICKERS = ["^GSPC", "TSLA", "AAPL"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
