@@ -81,7 +81,12 @@ def train_gan(X_train: np.ndarray, epochs: int = 40, batch_size: int = 128) -> S
             noise = np.random.normal(0, 1, (batch_size, n_timesteps, n_features))
             g_loss = gan.train_on_batch(noise, np.ones((batch_size, 1)))
 
-        logging.info(f"GAN Epoch {epoch+1}/{epochs} - D Loss: {d_loss:.4f}, G Loss: {g_loss:.4f}")
+        # logging.info(f"GAN Epoch {epoch+1}/{epochs} - D Loss: {d_loss:.4f}, G Loss: {g_loss:.4f}")
+        # logging.info(
+        #                 f"GAN Epoch {epoch+1}/{epochs} - "
+        #                 f"D Loss: {d_loss[0]:.4f}, D Acc: {d_loss[1]:.4f}, "
+        #                 f"G Loss: {g_loss:.4f}"
+        #             )
 
     return generator
 
