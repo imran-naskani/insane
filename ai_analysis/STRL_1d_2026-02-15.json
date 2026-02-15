@@ -1,0 +1,12 @@
+{
+    "ticker": "STRL",
+    "timeframe": "1d",
+    "date": "2026-02-15",
+    "date_range": "2025-02-17 to 2026-02-16",
+    "last_signal": "Turn_Up (LONG)",
+    "last_signal_date": "2026-02-06",
+    "current_close": 437.7699890136719,
+    "model": "gpt-4o",
+    "prompt": "Ticker: STRL\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 437.77\nMomentum Trend: 426.12 (Close is above trend line)\nLast Signal: Turn_Up (LONG) on 2026-02-06\nTOS RSI(9): 78.9\nRSI(14): 70.5\nBacktest Win Rate (Same-Bar): 37.9%\nBacktest Profit Factor (Same-Bar): 2.19\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.",
+    "response": "1. **Pattern Recognition**:\n   - **Cup and Handle**: A potential cup and handle pattern is forming. The cup started around July 2025 and completed by January 2026. The handle is forming currently, indicating a potential breakout stage.\n\n2. **Signal Confidence**: \n   - **Confidence Level: 8/10**: The recent Turn_Up signal is supported by the price being above the momentum trend line and strong RSI levels. However, the RSI is in overbought territory, which could limit upside potential.\n\n3. **Key Price Levels**:\n   - **Support**: Approximately 400\n   - **Resistance**: Approximately 450\n\n4. **Expected Move**:\n   - **Probable Next Move**: Continuation of the upward trend. Target price around 460, with an invalidation level at 410.\n\n5. **Risk Assessment**:\n   - **Warning Signs**: High RSI levels suggest overbought conditions. Watch for any bearish divergence or a drop below the momentum trend line as potential reversal signals."
+}

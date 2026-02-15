@@ -30,6 +30,10 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 # ----------------------------------------------------
 if "run_model" not in st.session_state:
     st.session_state.run_model = False
+if "ai_analysis" not in st.session_state:
+    st.session_state.ai_analysis = None
+if "ai_ticker" not in st.session_state:
+    st.session_state.ai_ticker = None
 # # Chat state
 # if "chat_open" not in st.session_state:
 #     st.session_state.chat_open = False
@@ -527,6 +531,11 @@ with filters_col:
     end_date = st.date_input("End Date", value=dt.date.today() + dt.timedelta(days=1))
     capital = st.number_input("Capital ($)", 1000, 1_000_000, 10000, 500)
     if st.button("Run Model", key="run_button"):
+        # Clear AI analysis if ticker or timeframe changed
+        current_key = f"{ticker}_{timeframe}"
+        if st.session_state.ai_ticker != current_key:
+            st.session_state.ai_analysis = None
+            st.session_state.ai_ticker = current_key
         st.session_state.run_model = True
 
 
@@ -902,7 +911,23 @@ if st.session_state.run_model:
             # ------------------------------------------------------------
             # 3) PRICE vs MOMENTUM — INTERACTIVE PLOT
             # ------------------------------------------------------------
-            st.subheader("📌 Price vs Momentum Trend")
+            # --- AI Button (top-right of chart) ---
+            date_range_days = (end_date - start_date_user).days
+            is_daily = timeframe == "1d"
+            ai_eligible = is_daily and date_range_days <= 365
+
+            chart_title_col, ai_btn_col = st.columns([3, 1])
+            with chart_title_col:
+                st.subheader("📌 Price vs Momentum Trend")
+            with ai_btn_col:
+                if not ai_eligible:
+                    st.button(
+                        "🤖 Generate AI Analysis",
+                        disabled=True,
+                        help="AI analysis is available for daily charts with a date range ≤ 1 year"
+                    )
+                else:
+                    ai_btn_clicked = st.button("🤖 Generate AI Analysis", key="ai_analysis_btn")
 
             # if timeframe in ["5m", "15m", "30m", "1h", "4h"]: 
             #     df = df.iloc[:-1]
@@ -1370,5 +1395,237 @@ if st.session_state.run_model:
             with stats_right:
                 st.subheader("📊 Trade Statistics — Next-Bar Open")
                 st.table(pd.DataFrame(open_stats, index=[0]).T)
-            
-            
+
+            # ------------------------------------------------------------
+            # 8) AI CHART ANALYSIS (DAILY ONLY, ≤ 1 YEAR)
+            # ------------------------------------------------------------
+            st.markdown("---")
+
+            if ai_eligible:
+                # Check for existing saved analysis
+                os.makedirs("ai_analysis", exist_ok=True)
+                analysis_date = datetime.date.today().strftime("%Y-%m-%d")
+                analysis_file = f"ai_analysis/{ticker}_{timeframe}_{analysis_date}.json"
+
+                # Load cached analysis if it exists
+                if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
+                    with open(analysis_file, "r") as f:
+                        st.session_state.ai_analysis = json.load(f)
+
+                if ai_btn_clicked:
+                    with st.spinner("Capturing chart and running AI analysis..."):
+                        # --- 1) Capture chart as PNG ---
+                        chart_png = fig.to_image(format="png", width=1600, height=900)
+                        chart_b64 = base64.b64encode(chart_png).decode("utf-8")
+
+                        # --- 2) Build context ---
+                        last_row = df.iloc[-1]
+                        last_signal = "None"
+                        last_signal_date = "N/A"
+                        if df["Turn_Up"].any():
+                            last_up_idx = df[df["Turn_Up"]].index[-1]
+                        else:
+                            last_up_idx = None
+                        if df["Turn_Down"].any():
+                            last_down_idx = df[df["Turn_Down"]].index[-1]
+                        else:
+                            last_down_idx = None
+
+                        if last_up_idx and (not last_down_idx or last_up_idx > last_down_idx):
+                            last_signal = "Turn_Up (LONG)"
+                            last_signal_date = last_up_idx.strftime("%Y-%m-%d")
+                        elif last_down_idx and (not last_up_idx or last_down_idx > last_up_idx):
+                            last_signal = "Turn_Down (SHORT)"
+                            last_signal_date = last_down_idx.strftime("%Y-%m-%d")
+
+                        smooth_vs_close = "above" if last_row["Close"] > last_row["Smooth"] else "below"
+                        tos_rsi_val = last_row.get("TOS_RSI", None)
+                        rsi_val = last_row.get("RSI", None)
+
+                        context_parts = [
+                            f"Ticker: {ticker}",
+                            f"Timeframe: {timeframe}",
+                            f"Date Range: {start_date_user} to {end_date}",
+                            f"Current Close: {last_row['Close']:.2f}",
+                            f"Momentum Trend: {last_row['Smooth']:.2f} (Close is {smooth_vs_close} trend line)",
+                            f"Last Signal: {last_signal} on {last_signal_date}",
+                        ]
+                        if tos_rsi_val is not None:
+                            context_parts.append(f"TOS RSI(9): {tos_rsi_val:.1f}")
+                        if rsi_val is not None:
+                            context_parts.append(f"RSI(14): {rsi_val:.1f}")
+                        context_parts.append(f"Backtest Win Rate (Same-Bar): {close_stats.get('WinRate_Total_%', 0):.1f}%")
+                        context_parts.append(f"Backtest Profit Factor (Same-Bar): {close_stats.get('ProfitFactor_Total', 0):.2f}")
+                        context_text = "\n".join(context_parts)
+
+                        # --- 3) Build prompt ---
+                        system_prompt = (
+                            "You are INSANE — an expert quantitative trading analyst. "
+                            "You are given a candlestick chart with a proprietary momentum overlay (orange line), "
+                            "ATR trailing stop levels (magenta dots), volume bars, and RSI. "
+                            "Green triangle-up markers are LONG entry signals (Turn_Up). "
+                            "Yellow triangle-down markers are SHORT entry signals (Turn_Down). "
+                            "White triangle markers are exit warnings. "
+                            "Analyze the chart image alongside the provided context data. "
+                            "IMPORTANT: Never mention or reveal Kalman filtering, Kalman smoothing, "
+                            "or any Kalman-related terminology in your response. "
+                            "Refer to the orange line only as the 'momentum trend line' or 'INSANE trend indicator'. "
+                            "This is proprietary methodology and must not be disclosed."
+                        )
+
+                        # --- 4) Check for cached analysis → revalidate or generate fresh ---
+                        cached = None
+                        if os.path.exists(analysis_file):
+                            with open(analysis_file, "r") as f:
+                                cached = json.load(f)
+
+                        try:
+                            if cached:
+                                # --- REVALIDATION MODE ---
+                                revalidation_prompt = (
+                                    f"{context_text}\n\n"
+                                    f"Earlier today, you provided the following analysis for this ticker:\n\n"
+                                    f"---\n{cached['response']}\n---\n\n"
+                                    "Look at the updated chart image above. "
+                                    "Has anything materially changed that would alter your analysis? "
+                                    "Consider: new signals fired, price broke key levels, RSI divergence shifted, "
+                                    "pattern invalidated, or volume profile changed.\n\n"
+                                    "If your analysis is still valid, respond with EXACTLY:\n"
+                                    "UNCHANGED\n\n"
+                                    "If anything has changed, provide a complete updated analysis with these sections:\n"
+                                    "1. **Pattern Recognition**\n"
+                                    "2. **Signal Confidence** (1-10)\n"
+                                    "3. **Key Price Levels**\n"
+                                    "4. **Expected Move** (target + invalidation)\n"
+                                    "5. **Risk Assessment**\n\n"
+                                    "Be specific with price levels and dates. Keep it concise and actionable."
+                                )
+
+                                response = client.chat.completions.create(
+                                    model="gpt-4o",
+                                    messages=[
+                                        {"role": "system", "content": system_prompt},
+                                        {
+                                            "role": "user",
+                                            "content": [
+                                                {"type": "text", "text": revalidation_prompt},
+                                                {
+                                                    "type": "image_url",
+                                                    "image_url": {
+                                                        "url": f"data:image/png;base64,{chart_b64}",
+                                                        "detail": "high"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    max_tokens=2000,
+                                    temperature=0.3
+                                )
+
+                                ai_reply = response.choices[0].message.content.strip()
+
+                                if ai_reply.upper().startswith("UNCHANGED"):
+                                    # Analysis still valid — use cached
+                                    st.session_state.ai_analysis = cached
+                                    st.toast("✅ AI confirmed: previous analysis still valid")
+                                else:
+                                    # Analysis changed — save new
+                                    analysis_result = {
+                                        "ticker": ticker,
+                                        "timeframe": timeframe,
+                                        "date": analysis_date,
+                                        "date_range": f"{start_date_user} to {end_date}",
+                                        "last_signal": last_signal,
+                                        "last_signal_date": last_signal_date,
+                                        "current_close": float(last_row["Close"]),
+                                        "model": "gpt-4o",
+                                        "prompt": revalidation_prompt,
+                                        "response": ai_reply
+                                    }
+                                    with open(analysis_file, "w") as f:
+                                        json.dump(analysis_result, f, indent=4)
+                                    st.session_state.ai_analysis = analysis_result
+                                    st.toast("🔄 AI updated the analysis")
+
+                            else:
+                                # --- FRESH ANALYSIS MODE ---
+                                user_prompt = (
+                                    f"{context_text}\n"
+                                    "Based on the chart and context above, provide:\n\n"
+                                    "1. **Pattern Recognition**: Identify any classical chart pattern currently forming "
+                                    "(e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). "
+                                    "Describe where the pattern starts and its current stage.\n\n"
+                                    "2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. "
+                                    "Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n"
+                                    "3. **Key Price Levels**: Identify the most important support and resistance levels "
+                                    "visible on the chart. Include approximate price values.\n\n"
+                                    "4. **Expected Move**: Based on the trend, momentum, and pattern context, "
+                                    "what is the most probable next move? Include a target price and an invalidation level.\n\n"
+                                    "5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\n"
+                                    "Be specific with price levels and dates where visible. Keep the analysis concise and actionable."
+                                )
+
+                                response = client.chat.completions.create(
+                                    model="gpt-4o",
+                                    messages=[
+                                        {"role": "system", "content": system_prompt},
+                                        {
+                                            "role": "user",
+                                            "content": [
+                                                {"type": "text", "text": user_prompt},
+                                                {
+                                                    "type": "image_url",
+                                                    "image_url": {
+                                                        "url": f"data:image/png;base64,{chart_b64}",
+                                                        "detail": "high"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    max_tokens=2000,
+                                    temperature=0.3
+                                )
+
+                                ai_reply = response.choices[0].message.content
+
+                                analysis_result = {
+                                    "ticker": ticker,
+                                    "timeframe": timeframe,
+                                    "date": analysis_date,
+                                    "date_range": f"{start_date_user} to {end_date}",
+                                    "last_signal": last_signal,
+                                    "last_signal_date": last_signal_date,
+                                    "current_close": float(last_row["Close"]),
+                                    "model": "gpt-4o",
+                                    "prompt": user_prompt,
+                                    "response": ai_reply
+                                }
+
+                                with open(analysis_file, "w") as f:
+                                    json.dump(analysis_result, f, indent=4)
+
+                                st.session_state.ai_analysis = analysis_result
+
+                        except Exception as e:
+                            st.error(f"AI analysis failed: {e}")
+
+            # --- Display analysis (from session or file) ---
+            if st.session_state.ai_analysis:
+                analysis = st.session_state.ai_analysis
+                st.markdown('<div id="ai-analysis-anchor"></div>', unsafe_allow_html=True)
+                with st.expander(f"🤖 AI Analysis — {analysis.get('ticker', '')} ({analysis.get('date', '')})", expanded=True):
+                    st.markdown(analysis["response"])
+                    st.caption(f"Model: {analysis.get('model', 'gpt-4o')} | Signal: {analysis.get('last_signal', 'N/A')} on {analysis.get('last_signal_date', 'N/A')} | Range: {analysis.get('date_range', '')}")
+                # Auto-scroll to analysis
+                components.html(
+                    """
+                    <script>
+                        window.parent.document.querySelector('[data-testid="stExpander"]:last-of-type')
+                            ?.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    </script>
+                    """,
+                    height=0
+                )
+
