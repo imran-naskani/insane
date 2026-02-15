@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^python -c \"import json; d=json\\.load\\(open\\('earnings_watchlist\\.json'\\)\\); print\\(json\\.dumps\\(d\\['watchlist'\\]\\[:3\\], indent=2\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
