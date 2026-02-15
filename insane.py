@@ -76,7 +76,157 @@ st.markdown("""
 # ----------------------------------------------------
 # TITLE
 # ----------------------------------------------------
-st.markdown("<h1 id='MainTitle'>📈 INSANE — Intelligent Statistical Algorithm for Navigating Equities</h1>", unsafe_allow_html=True)
+import base64
+
+with open("assets/INSANE_Logo.png", "rb") as _logo_file:
+    _logo_b64 = base64.b64encode(_logo_file.read()).decode()
+
+st.markdown(
+    f"""
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:8px;">
+        <img src="data:image/png;base64,{_logo_b64}" style="height:60px;" />
+        <h1 id='MainTitle' style="margin:0;">Intelligent Statistical Algorithm for Navigating Equities</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ----------------------------------------------------
+# PRELOAD SIGNAL DATA (used by index bar + right column)
+# ----------------------------------------------------
+INDEX_TICKERS = {
+    "SPY": "SPY",
+    "QQQ": "QQQ",
+    "^GSPC": "S&P 500 (SPX)",
+    "^IXIC": "NASDAQ Composite",
+    "^RUT": "Russell 2000",
+    "^VIX": "VIX"
+}
+
+_long_rows = []
+_short_rows = []
+_index_signals = {}
+_today_date = None
+
+try:
+    with open("daily_closes.json", "r") as f:
+        _daily_data = json.load(f)
+    _today_date = _daily_data["date"]
+    _today_closes = _daily_data["closes"]
+
+    _signal_files = glob.glob("signal_history/*.json")
+
+    for _file in _signal_files:
+        _ticker = os.path.basename(_file).replace(".json", "")
+
+        with open(_file, "r") as f:
+            _history = json.load(f)
+
+        if not isinstance(_history, list) or len(_history) == 0:
+            continue
+
+        _last = _history[-1]
+        _signal = _last["signal"]
+        _signal_date = _last["date"]
+        _signal_close = _last["close"]
+        _today_close = _today_closes.get(_ticker)
+
+        # INDEX HANDLING
+        if _ticker in INDEX_TICKERS:
+            _index_signals[_ticker] = {
+                "signal": "LONG" if _signal == "UP" else "SHORT",
+                "date": _signal_date
+            }
+            continue
+
+        # STOCK SIGNALS
+        _delta = None
+        _delta_pct = None
+
+        if _today_close is not None and _signal_close != 0:
+            if _signal == "UP":
+                _delta = _today_close - _signal_close
+            elif _signal == "DOWN":
+                _delta = _signal_close - _today_close
+
+            _delta = round(_delta, 2)
+            _delta_pct = round((_delta / _signal_close) * 100, 2)
+
+        _row = {
+            "Ticker": _ticker,
+            "Signal Date": _signal_date,
+            "Signal Close": round(_signal_close, 2),
+            "Today Close": round(_today_close, 2) if _today_close else None,
+            "Delta": _delta,
+            "Delta %": _delta_pct
+        }
+
+        if _signal == "UP":
+            _long_rows.append(_row)
+        elif _signal == "DOWN":
+            _short_rows.append(_row)
+
+    _data_loaded = True
+except Exception:
+    _data_loaded = False
+
+# ----------------------------------------------------
+# INDEX TREND SIGNALS — HORIZONTAL BAR (FULL WIDTH)
+# ----------------------------------------------------
+if _data_loaded and _index_signals:
+    st.markdown(
+        f"<div style='display:flex; align-items:baseline; gap:12px; margin-bottom:8px;'>"
+        f"<span style='font-size:18px; font-weight:700;'>📅 Daily Market Signals (@ 3PM CST)</span>"
+        f"<span style='font-size:13px; color:#9e9e9e;'>Last Update: {_today_date}</span>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
+    st.markdown("""
+    <style>
+    .index-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .index-pill {
+        background: #1e1e1e;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 8px 14px;
+        min-width: 120px;
+        text-align: center;
+    }
+    .index-pill-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #e0e0e0;
+    }
+    .index-pill-signal {
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    .index-pill-date {
+        font-size: 10px;
+        color: #9e9e9e;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    pills_html = '<div class="index-bar">'
+    for tkr, name in INDEX_TICKERS.items():
+        if tkr in _index_signals:
+            sig = _index_signals[tkr]
+            color = "#4CAF50" if sig["signal"] == "LONG" else "#F44336" if sig["signal"] == "SHORT" else "#B0BEC5"
+            pills_html += f'''
+            <div class="index-pill">
+                <div class="index-pill-name">{name}</div>
+                <div class="index-pill-signal" style="color:{color};">{sig["signal"]}</div>
+                <div class="index-pill-date">{sig["date"]}</div>
+            </div>'''
+    pills_html += '</div>'
+    st.markdown(pills_html, unsafe_allow_html=True)
 
 # ----------------------------------------------------
 # LAYOUT COLUMNS
@@ -88,6 +238,40 @@ filters_col, main_col, chat_col = st.columns([1, 4, 1])
 # ----------------------------------------------------
 with chat_col:
 
+    # -----------------------------------------------------------
+    # EARNINGS WATCHLIST
+    # -----------------------------------------------------------
+    try:
+        with open("earnings_watchlist.json", "r") as f:
+            _earnings = json.load(f)
+
+        _wl = _earnings.get("watchlist", [])
+        if _wl:
+            with st.expander(f"📅 Earnings This Week ({len(_wl)})", expanded=True):
+                st.caption(f"Scanned: {_earnings.get('scan_from', '')} → {_earnings.get('scan_to', '')}  |  Generated: {_earnings.get('generated', '')}")
+                _edf = pd.DataFrame(_wl)
+                _edf = _edf.rename(columns={
+                    "symbol": "Ticker",
+                    "earnings_date": "Date",
+                    "hour": "Hour",
+                    "eps_estimate": "EPS Est",
+                    "revenue_estimate": "Rev Est",
+                    "last_signal": "Signal",
+                    "signal_date": "Sig Date",
+                    "last_price": "Sig Price",
+                })
+                _display_cols = ["Ticker", "Date", "Hour", "EPS Est", "Signal", "Sig Date", "Sig Price"]
+                _edf = _edf[[c for c in _display_cols if c in _edf.columns]]
+                _edf = _edf.sort_values("Date")
+                if "Sig Price" in _edf.columns:
+                    _edf["Sig Price"] = _edf["Sig Price"].round(2)
+                if "EPS Est" in _edf.columns:
+                    _edf["EPS Est"] = _edf["EPS Est"].round(2)
+                st.dataframe(_edf, use_container_width=True, height=400, hide_index=True)
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        st.warning(f"Earnings data error: {e}")
 
     # -----------------------------------------------------------
     # DAILY SIGNALS DISPLAY (COMPACT VERSION)
@@ -120,155 +304,38 @@ with chat_col:
     </style>
     """, unsafe_allow_html=True)
 
-
-    st.markdown("<div class='signal-header'>📅 Daily Market Signals (@ 3PM CST)</div>", unsafe_allow_html=True)
-
-    try:
-        # with open("daily_signals.json", "r") as f:
-        #     signals = json.load(f)
-        
-        # --------------------------------------------------
-        # LOAD DAILY CLOSES (LATEST DAY)
-        # --------------------------------------------------
-        with open("daily_closes.json", "r") as f:
-            daily_data = json.load(f)
-        today_date = daily_data["date"]
-        today_closes = daily_data["closes"]
-        st.write(f"**Last Update:** {today_date}")
-
-        # --------------------------------------------------
-        # LOAD SIGNAL HISTORY FILES
-        # --------------------------------------------------
-        signal_files = glob.glob("signal_history/*.json")
-
-        long_rows = []
-        short_rows = []
-
-        index_signals = {}
-
-        INDEX_TICKERS = {
-            "SPY": "SPY",
-            "QQQ": "QQQ",
-            "^GSPC": "S&P 500 (SPX)",
-            "^IXIC": "NASDAQ Composite",
-            "^RUT": "Russell 2000",
-            "^VIX": "VIX"
-        }
-
-        for file in signal_files:
-            ticker = os.path.basename(file).replace(".json", "")
-
-            with open(file, "r") as f:
-                history = json.load(f)
-
-            # Ensure history is a non-empty list
-            if not isinstance(history, list) or len(history) == 0:
-                continue
-
-            last = history[-1]   # last flip only
-
-            signal = last["signal"]
-            signal_date = last["date"]
-            signal_close = last["close"]
-            today_close = today_closes.get(ticker)
-
-            # INDEX HANDLING
-            if ticker in INDEX_TICKERS:
-                index_signals[ticker] = {
-                    "signal": "LONG" if signal == "UP" else "SHORT",
-                    "date": signal_date
-                }
-                continue
-
-            # STOCK SIGNALS
-            delta = None
-            delta_pct = None
-
-            if today_close is not None and signal_close != 0:
-                if signal == "UP":        # LONG
-                    delta = today_close - signal_close
-                elif signal == "DOWN":    # SHORT
-                    delta = signal_close - today_close
-
-                delta = round(delta, 2)
-                delta_pct = round((delta / signal_close) * 100, 2)
-
-            row = {
-                "Ticker": ticker,
-                "Signal Date": signal_date,
-                "Signal Close": round(signal_close, 2),
-                "Today Close": round(today_close, 2) if today_close else None,
-                "Delta": delta,
-                "Delta %": delta_pct
-            }
-
-            if signal == "UP":
-                long_rows.append(row)
-            elif signal == "DOWN":
-                short_rows.append(row)
+    if _data_loaded:
 
         # --------------------------------------------------
         # DISPLAY LONG SIGNALS
         # --------------------------------------------------
-        st.markdown("#### 🟢 Long Signals")
-
-        if long_rows:
-            st.dataframe(
-                pd.DataFrame(long_rows).sort_values("Signal Date", ascending=False),
-                use_container_width=True,
-                height=300,
-                hide_index=True
-            )
-        else:
-            st.write("No Long signals.")
+        with st.expander(f"🟢 Long Signals ({len(_long_rows)})", expanded=True):
+            if _long_rows:
+                st.dataframe(
+                    pd.DataFrame(_long_rows).sort_values("Signal Date", ascending=False),
+                    use_container_width=True,
+                    height=300,
+                    hide_index=True
+                )
+            else:
+                st.write("No Long signals.")
 
         # --------------------------------------------------
         # DISPLAY SHORT SIGNALS
         # --------------------------------------------------
-        st.markdown("#### 🔴 Short Signals")
+        with st.expander(f"🔴 Short Signals ({len(_short_rows)})", expanded=True):
+            if _short_rows:
+                st.dataframe(
+                    pd.DataFrame(_short_rows).sort_values("Signal Date", ascending=False),
+                    use_container_width=True,
+                    height=300,
+                    hide_index=True
+                )
+            else:
+                st.write("No Short signals.")
 
-        if short_rows:
-            st.dataframe(
-                pd.DataFrame(short_rows).sort_values("Signal Date", ascending=False),
-                use_container_width=True,
-                height=300,
-                hide_index=True
-            )
-        else:
-            st.write("No Short signals.")
-
-        # --------------------------------------------------
-        # INDEX SIGNALS
-        # --------------------------------------------------
-        st.markdown("### 📈 Index Trend Signals")
-
-        def show_index(name, obj):
-            signal = obj["signal"]
-            date = obj["date"]
-
-            color = (
-                "#4CAF50" if signal == "LONG"
-                else "#F44336" if signal == "SHORT"
-                else "#B0BEC5"
-            )
-
-            st.markdown(
-                f"""
-                <div class="index-card">
-                    <div class="index-title">{name}</div>
-                    <div class="index-signal" style="color:{color};">{signal}</div>
-                    <div class="index-date">Last signal: {date}</div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        for tkr, name in INDEX_TICKERS.items():
-            if tkr in index_signals:
-                show_index(name, index_signals[tkr])
-
-    except Exception as e:
-        st.warning(f"Signal data not available: {e}")
+    else:
+        st.warning("Signal data not available. Run daily_engine.py first.")
 
     #     # Today's Stock Signals
     #     st.markdown("#### 🟢 Long Signals")
