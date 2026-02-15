@@ -239,7 +239,7 @@ filters_col, main_col, chat_col = st.columns([1, 4, 1])
 with chat_col:
 
     # -----------------------------------------------------------
-    # EARNINGS WATCHLIST
+    # EARNINGS WATCHLIST (enriched live from signal_strength_history)
     # -----------------------------------------------------------
     try:
         with open("earnings_watchlist.json", "r") as f:
@@ -247,24 +247,43 @@ with chat_col:
 
         _wl = _earnings.get("watchlist", [])
         if _wl:
+            # Enrich each row with live signal + current price
+            _enriched = []
+            for _e in _wl:
+                _sym = _e["symbol"]
+                _sig_file = os.path.join("signal_history", f"{_sym}.json")
+                _signal = "N/A"
+                _strength = "N/A"
+                _sig_date = ""
+                if os.path.exists(_sig_file):
+                    try:
+                        with open(_sig_file, "r") as _sf:
+                            _sig_hist = json.load(_sf)
+                        if _sig_hist:
+                            _last = _sig_hist[-1]
+                            _signal = "Long" if _last["signal"] == "UP" else ("Short" if _last["signal"] == "DOWN" else "N/A")
+                            _strength = _last.get("strength", "Strong")
+                            _sig_date = _last.get("date", "")
+                    except Exception:
+                        pass
+                # Current close from daily_closes.json (already loaded as _today_closes)
+                _cur_price = _today_closes.get(_sym) if _data_loaded else None
+                _enriched.append({
+                    "Ticker": _sym,
+                    "Earnings": _e.get("earnings_date", ""),
+                    "Hour": _e.get("hour", ""),
+                    "EPS Est": _e.get("eps_estimate"),
+                    "Rev Est": _e.get("revenue_estimate"),
+                    "Signal": _signal,
+                    "Strength": _strength,
+                    "Sig Date": _sig_date,
+                    "Price": round(_cur_price, 2) if _cur_price is not None else None,
+                })
+
             with st.expander(f"📅 Earnings This Week ({len(_wl)})", expanded=True):
                 st.caption(f"Scanned: {_earnings.get('scan_from', '')} → {_earnings.get('scan_to', '')}  |  Generated: {_earnings.get('generated', '')}")
-                _edf = pd.DataFrame(_wl)
-                _edf = _edf.rename(columns={
-                    "symbol": "Ticker",
-                    "earnings_date": "Date",
-                    "hour": "Hour",
-                    "eps_estimate": "EPS Est",
-                    "revenue_estimate": "Rev Est",
-                    "last_signal": "Signal",
-                    "signal_date": "Sig Date",
-                    "last_price": "Sig Price",
-                })
-                _display_cols = ["Ticker", "Date", "Hour", "EPS Est", "Signal", "Sig Date", "Sig Price"]
-                _edf = _edf[[c for c in _display_cols if c in _edf.columns]]
-                _edf = _edf.sort_values("Date")
-                if "Sig Price" in _edf.columns:
-                    _edf["Sig Price"] = _edf["Sig Price"].round(2)
+                _edf = pd.DataFrame(_enriched)
+                _edf = _edf.sort_values("Earnings")
                 if "EPS Est" in _edf.columns:
                     _edf["EPS Est"] = _edf["EPS Est"].round(2)
                 st.dataframe(_edf, use_container_width=True, height=400, hide_index=True)

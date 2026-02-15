@@ -65,6 +65,7 @@ def snapshot_all_signals_first_time(ticker, df):
         record = {
             "date": idx.strftime("%Y-%m-%d"),
             "signal": signal_type,
+            "strength": "Strong",
             "turn_up": bool(row["Turn_Up"]),
             "turn_down": bool(row["Turn_Down"]),
             "close": float(row["Close"]),
@@ -73,7 +74,10 @@ def snapshot_all_signals_first_time(ticker, df):
         }
 
         history.append(record)
-    
+
+    # Last flip is edge-of-data (backward difference only) → Weak
+    if history:
+        history[-1]["strength"] = "Weak"
     
     cst = pytz.timezone('America/Chicago')
     now_cst = datetime.now(cst)
@@ -88,10 +92,40 @@ def snapshot_new_signals_only(ticker, df):
         snapshot_all_signals_first_time(ticker, df)
         return
 
-    last_saved_signal = history[-1]["signal"]
-    last_saved_date = history[-1]["date"]
+    last_entry = history[-1]
+    last_saved_signal = last_entry["signal"]
+    last_saved_date = last_entry["date"]
+    last_saved_strength = last_entry.get("strength", "Strong")
 
-    # Append only REAL flips after last saved date
+    # ----------------------------------------------------------
+    # WEAK → STRONG PROMOTION
+    # If the last saved signal is Weak, check if today's
+    # recalculation (with central difference) still shows a flip
+    # at the same date and same direction.
+    # ----------------------------------------------------------
+    if last_saved_strength == "Weak":
+        # Check if the signal at that date still exists in today's data
+        signal_confirmed = False
+        signal_vanished = True
+
+        for idx, row in df.iterrows():
+            date_str = idx.strftime("%Y-%m-%d")
+            if date_str == last_saved_date:
+                if (last_saved_signal == "UP" and row["Turn_Up"]) or \
+                   (last_saved_signal == "DOWN" and row["Turn_Down"]):
+                    signal_confirmed = True
+                    signal_vanished = False
+                break  # only check the specific date
+
+        if signal_confirmed:
+            # Signal survived recalculation → promote to Strong
+            history[-1]["strength"] = "Strong"
+        # If signal_vanished, the Weak entry stays Weak forever
+        # (immutable audit trail — never delete)
+
+    # ----------------------------------------------------------
+    # APPEND NEW FLIPS (after last saved date) as Weak
+    # ----------------------------------------------------------
     for idx, row in df.iterrows():
         date_str = idx.strftime("%Y-%m-%d")
         if date_str <= last_saved_date:
@@ -111,10 +145,11 @@ def snapshot_new_signals_only(ticker, df):
         else:
             continue  # no flip
 
-        # Build detail record
+        # Build detail record — new flips always start as Weak
         record = {
             "date": date_str,
             "signal": signal_type,
+            "strength": "Weak",
             "turn_up": bool(row["Turn_Up"]),
             "turn_down": bool(row["Turn_Down"]),
             "close": float(row["Close"]),
@@ -143,8 +178,15 @@ sp500 = pd.read_csv(sp500_url)
 base_tickers = set(sp500['Symbol'].unique())
 extra_tickers = {"SPY", "QQQ", "^GSPC", "^IXIC", "^RUT", "^VIX"}
 history_tickers = set(get_existing_history_tickers())
+earnings_tickers = set()
+if os.path.exists("earnings_watchlist.json"):
+    try:
+        with open("earnings_watchlist.json", "r") as f:
+            earnings_tickers = {e["symbol"] for e in json.load(f).get("watchlist", [])}
+    except Exception:
+        pass
 
-TICKERS = sorted(base_tickers | extra_tickers | history_tickers)
+TICKERS = sorted(base_tickers | extra_tickers | history_tickers | earnings_tickers)
 
 
 # ----------------------------------------------------
