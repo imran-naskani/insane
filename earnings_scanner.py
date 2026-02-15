@@ -208,7 +208,7 @@ def run_earnings_scanner():
             "hour": event.get("hour", ""),           # bmo / amc / dmh
             "eps_estimate": event.get("epsEstimate"),
             "revenue_estimate": event.get("revenueEstimate"),
-            "last_signal": sig["signal"],
+            "last_signal": "Long" if sig["signal"] == "UP" else ("Short" if sig["signal"] == "DOWN" else "None"),
             "signal_date": sig["date"],
             "last_price": sig["close"],
         })
