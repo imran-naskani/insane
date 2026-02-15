@@ -7,6 +7,44 @@
     "last_signal_date": "2026-02-12",
     "current_close": 255.77999877929688,
     "model": "gpt-4o",
-    "prompt": "Ticker: AAPL\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 255.78\nMomentum Trend: 264.86 (Close is below trend line)\nLast Signal: Turn_Down (SHORT) on 2026-02-12\nTOS RSI(9): 22.3\nRSI(14): 39.4\nBacktest Win Rate (Same-Bar): 61.9%\nBacktest Profit Factor (Same-Bar): 2.15\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.",
-    "response": "1. **Pattern Recognition**:\n   - **Pattern**: Potential Double Top\n   - **Start**: The first peak around December 2025 and the second peak in February 2026.\n   - **Current Stage**: The price is declining after the second peak, indicating a possible confirmation of the pattern.\n\n2. **Signal Confidence**: \n   - **Confidence Level**: 7/10\n   - **Supporting Factors**: The recent Turn_Down signal aligns with the price being below the momentum trend line and a low RSI(9) of 22.3, indicating bearish momentum.\n   - **Undermining Factors**: The RSI(14) is not yet in oversold territory, which could limit downside potential.\n\n3. **Key Price Levels**:\n   - **Support**: Around 240, where the price previously found support in January 2026.\n   - **Resistance**: Near 270, which aligns with the recent peaks forming the potential double top.\n\n4. **Expected Move**:\n   - **Probable Move**: Further downside is likely given the bearish signal and pattern.\n   - **Target Price**: 240, aligning with the support level.\n   - **Invalidation Level**: A close above 270 would invalidate the bearish outlook.\n\n5. **Risk Assessment**:\n   - **Warning Signs**: Watch for any bullish divergence in RSI or a strong reversal candle, which could indicate a potential reversal.\n   - **Volume**: A spike in volume could signal increased selling pressure or a potential reversal if it occurs on a bullish candle.\n\nStay alert for any changes in momentum or unexpected market news that could impact the current trend."
+    "prompt": "Ticker: AAPL\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 255.78\nMomentum Trend: 264.86 (Close is below trend line)\nLast Signal: Turn_Down (SHORT) on 2026-02-12\nTOS RSI(9): 22.3\nRSI(14): 39.4\nBacktest Win Rate (Same-Bar): 61.9%\nBacktest Profit Factor (Same-Bar): 2.15\nSwing Highs: 2025-09-05 at 241.32, 2025-10-03 at 259.24, 2025-10-31 at 277.32, 2025-11-13 at 276.7, 2025-12-03 at 288.62, 2025-12-15 at 280.15, 2026-01-02 at 277.84, 2026-02-06 at 280.91\nSwing Lows: 2025-08-01 at 201.5, 2025-08-21 at 223.78, 2025-09-10 at 225.95, 2025-10-10 at 244.0, 2025-11-18 at 265.32, 2025-12-18 at 266.95, 2026-01-08 at 255.7, 2026-01-20 at 243.42\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.\n\nAdditionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:\n```json\n{\n  \"support_levels\": [price1, price2],\n  \"resistance_levels\": [price1, price2],\n  \"direction\": \"BULLISH\",\n  \"pattern\": {\n    \"name\": \"Pattern Name\",\n    \"points\": [\n      {\"date\": \"YYYY-MM-DD\", \"price\": 123.45, \"role\": \"upper\"},\n      {\"date\": \"YYYY-MM-DD\", \"price\": 100.00, \"role\": \"lower\"}\n    ]\n  },\n  \"target_price\": 123.45,\n  \"invalidation_price\": 100.00\n}\n```\nJSON rules:\n- support_levels: 1-3 most important support prices visible on the chart\n- resistance_levels: 1-3 most important resistance prices visible on the chart\n- direction: \"BULLISH\" or \"BEARISH\" \u2014 your directional bias based on the analysis\n- pattern.name: The chart pattern identified (e.g., \"Head & Shoulders\", \"Ascending Triangle\", \"Channel\")\n- pattern.points: 3-6 key boundary vertices that outline the pattern shape (NOT individual price swings). Each point has:\n  - \"date\": YYYY-MM-DD format\n  - \"price\": numeric price at that vertex\n  - \"role\": either \"upper\" (upper trendline/boundary) or \"lower\" (lower trendline/boundary)\n  For channels/triangles/wedges: alternate between upper and lower boundary points to trace the pattern edges.\n  For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).\n  Points should be in chronological order.\n- target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.\n- invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.\n- All prices MUST be numeric (no strings). All dates MUST be YYYY-MM-DD format.\n- CRITICAL: For pattern points, you MUST use dates and prices ONLY from the \"Swing Highs\" and \"Swing Lows\" lists provided in the context data. Use swing highs for \"upper\" role points and swing lows for \"lower\" role points. Do NOT estimate prices from the chart image.\n- For support_levels, use prices from the Swing Lows list. For resistance_levels, use prices from the Swing Highs list.\n- If no clear pattern exists, set pattern to null.",
+    "response": "1. **Pattern Recognition**: The chart is forming a **Descending Triangle** pattern. The pattern starts from the swing high on 2025-12-03 at 288.62 and is currently in the consolidation phase, approaching the lower boundary.\n\n2. **Signal Confidence**: Confidence level: 7. The recent Turn_Down signal is supported by the RSI(9) at 22.3, indicating oversold conditions, which could lead to a short-term bounce. However, the close is below the momentum trend line, supporting the bearish signal.\n\n3. **Key Price Levels**:\n   - **Support Levels**: 243.42, 225.95\n   - **Resistance Levels**: 280.91, 288.62\n\n4. **Expected Move**: The most probable next move is a bearish continuation due to the descending triangle pattern. The target price is 243.42, with an invalidation level at 280.91.\n\n5. **Risk Assessment**: Watch for potential bullish divergence on RSI, which could indicate a reversal. The oversold RSI(9) suggests caution for short positions.",
+    "overlay": {
+        "support_levels": [
+            243.42,
+            225.95
+        ],
+        "resistance_levels": [
+            280.91,
+            288.62
+        ],
+        "direction": "BEARISH",
+        "pattern": {
+            "name": "Descending Triangle",
+            "points": [
+                {
+                    "date": "2025-12-03",
+                    "price": 288.62,
+                    "role": "upper"
+                },
+                {
+                    "date": "2025-12-18",
+                    "price": 266.95,
+                    "role": "lower"
+                },
+                {
+                    "date": "2026-02-06",
+                    "price": 280.91,
+                    "role": "upper"
+                },
+                {
+                    "date": "2026-01-20",
+                    "price": 243.42,
+                    "role": "lower"
+                }
+            ]
+        },
+        "target_price": 243.42,
+        "invalidation_price": 280.91
+    }
 }

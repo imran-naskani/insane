@@ -7,6 +7,54 @@
     "last_signal_date": "2026-02-11",
     "current_close": 281.5799865722656,
     "model": "gpt-4o",
-    "prompt": "Ticker: WDC\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 281.58\nMomentum Trend: 278.52 (Close is above trend line)\nLast Signal: Turn_Up (LONG) on 2026-02-11\nTOS RSI(9): 57.6\nRSI(14): 60.5\nBacktest Win Rate (Same-Bar): 53.6%\nBacktest Profit Factor (Same-Bar): 4.27\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.",
-    "response": "**1. Pattern Recognition:**\nThe chart appears to be forming an ascending channel starting from around November 2025. The price is currently near the upper boundary of this channel, indicating a potential continuation or a pullback.\n\n**2. Signal Confidence:**\nConfidence Level: 8/10\n- The current close is above the momentum trend line, supporting the recent LONG signal.\n- RSI levels (9 and 14) are moderately high but not overbought, suggesting room for further upward movement.\n- Volume is steady, supporting the upward trend.\n\n**3. Key Price Levels:**\n- **Support:** Around 260, where the ATR trailing stop levels are visible.\n- **Resistance:** Approximately 290, near the recent highs.\n\n**4. Expected Move:**\nThe most probable next move is a continuation of the upward trend towards the resistance level of 290. If the price breaks above this level, the next target could be around 310. An invalidation level would be a close below the support at 260.\n\n**5. Risk Assessment:**\n- Watch for any bearish divergence in RSI, which could indicate weakening momentum.\n- A significant increase in volume on a down day could signal a potential reversal.\n- Keep an eye on the price action near the resistance level for any signs of rejection."
+    "prompt": "Ticker: WDC\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 281.58\nMomentum Trend: 278.52 (Close is above trend line)\nLast Signal: Turn_Up (LONG) on 2026-02-11\nTOS RSI(9): 57.6\nRSI(14): 60.5\nBacktest Win Rate (Same-Bar): 53.6%\nBacktest Profit Factor (Same-Bar): 4.27\nSwing Highs: 2025-07-31 at 78.8, 2025-08-13 at 77.18, 2025-10-02 at 137.4, 2025-11-11 at 178.45, 2025-12-11 at 188.77, 2025-12-22 at 187.18, 2026-01-06 at 221.23, 2026-02-03 at 296.5\nSwing Lows: 2025-04-07 at 28.83, 2025-05-23 at 49.0, 2025-06-13 at 54.6, 2025-08-20 at 73.14, 2025-10-14 at 112.52, 2025-11-21 at 132.43, 2025-12-17 at 165.47, 2025-12-31 at 171.26\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.\n\nAdditionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:\n```json\n{\n  \"support_levels\": [price1, price2],\n  \"resistance_levels\": [price1, price2],\n  \"direction\": \"BULLISH\",\n  \"pattern\": {\n    \"name\": \"Pattern Name\",\n    \"points\": [\n      {\"date\": \"YYYY-MM-DD\", \"price\": 123.45, \"role\": \"upper\"},\n      {\"date\": \"YYYY-MM-DD\", \"price\": 100.00, \"role\": \"lower\"}\n    ]\n  },\n  \"target_price\": 123.45,\n  \"invalidation_price\": 100.00\n}\n```\nJSON rules:\n- support_levels: 1-3 most important support prices visible on the chart\n- resistance_levels: 1-3 most important resistance prices visible on the chart\n- direction: \"BULLISH\" or \"BEARISH\" \u2014 your directional bias based on the analysis\n- pattern.name: The chart pattern identified (e.g., \"Head & Shoulders\", \"Ascending Triangle\", \"Channel\")\n- pattern.points: 3-6 key boundary vertices that outline the pattern shape (NOT individual price swings). Each point has:\n  - \"date\": YYYY-MM-DD format\n  - \"price\": numeric price at that vertex\n  - \"role\": either \"upper\" (upper trendline/boundary) or \"lower\" (lower trendline/boundary)\n  For channels/triangles/wedges: alternate between upper and lower boundary points to trace the pattern edges.\n  For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).\n  Points should be in chronological order.\n- target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.\n- invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.\n- All prices MUST be numeric (no strings). All dates MUST be YYYY-MM-DD format.\n- CRITICAL: For pattern points, you MUST use dates and prices ONLY from the \"Swing Highs\" and \"Swing Lows\" lists provided in the context data. Use swing highs for \"upper\" role points and swing lows for \"lower\" role points. Do NOT estimate prices from the chart image.\n- For support_levels, use prices from the Swing Lows list. For resistance_levels, use prices from the Swing Highs list.\n- If no clear pattern exists, set pattern to null.",
+    "response": "1. **Pattern Recognition**: The chart is forming an \"Ascending Channel.\" The pattern starts around 2025-08-20 and is currently in an upward phase.\n\n2. **Signal Confidence**: Confidence level is 8. The recent LONG signal is supported by the close being above the momentum trend line and RSI levels indicating bullish momentum without being overbought.\n\n3. **Key Price Levels**:\n   - **Support**: 221.23, 171.26\n   - **Resistance**: 296.5, 221.23\n\n4. **Expected Move**: The most probable next move is upward, targeting a price of 320.00. Invalidation occurs if the price falls below 221.23.\n\n5. **Risk Assessment**: Watch for any RSI divergence or a break below the momentum trend line, which could signal weakening momentum.",
+    "overlay": {
+        "support_levels": [
+            221.23,
+            171.26
+        ],
+        "resistance_levels": [
+            296.5,
+            221.23
+        ],
+        "direction": "BULLISH",
+        "pattern": {
+            "name": "Ascending Channel",
+            "points": [
+                {
+                    "date": "2025-08-20",
+                    "price": 73.14,
+                    "role": "lower"
+                },
+                {
+                    "date": "2025-10-02",
+                    "price": 137.4,
+                    "role": "upper"
+                },
+                {
+                    "date": "2025-10-14",
+                    "price": 112.52,
+                    "role": "lower"
+                },
+                {
+                    "date": "2025-11-11",
+                    "price": 178.45,
+                    "role": "upper"
+                },
+                {
+                    "date": "2025-12-17",
+                    "price": 165.47,
+                    "role": "lower"
+                },
+                {
+                    "date": "2026-02-03",
+                    "price": 296.5,
+                    "role": "upper"
+                }
+            ]
+        },
+        "target_price": 320.0,
+        "invalidation_price": 221.23
+    }
 }

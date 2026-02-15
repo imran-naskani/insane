@@ -7,6 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import streamlit.components.v1 as components
 import numpy as np
+import re
 import datetime
 from build_dataset import build_feature_dataset, floor_5_or_int
 from technical_features import add_all_labels
@@ -25,6 +26,151 @@ import os
 
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# ----------------------------------------------------
+# HELPER FUNCTIONS — AI Overlay
+# ----------------------------------------------------
+def snap_to_price(target_price, df, tolerance_pct=0.03, role=None):
+    """Snap an AI-estimated price to the nearest actual High/Low within tolerance.
+    If role='upper', only snap to Highs. If role='lower', only snap to Lows.
+    """
+    if role == "upper":
+        candidates = df["High"].reset_index(drop=True)
+    elif role == "lower":
+        candidates = df["Low"].reset_index(drop=True)
+    else:
+        candidates = pd.concat([df["High"], df["Low"]]).reset_index(drop=True)
+    diffs = (candidates - target_price).abs()
+    nearest_price = float(candidates.iloc[diffs.argmin()])
+    if abs(nearest_price - target_price) / target_price <= tolerance_pct:
+        return nearest_price
+    return target_price
+
+def detect_swing_points(df, window=5, max_points=8):
+    """Detect swing highs and swing lows from OHLC data.
+    A swing high is a bar whose High is the highest in a 2*window+1 neighborhood.
+    Returns (swing_highs, swing_lows) as lists of {'date': str, 'price': float}.
+    """
+    highs = df["High"]
+    lows = df["Low"]
+    swing_highs = []
+    swing_lows = []
+    for i in range(window, len(df) - window):
+        local_high = highs.iloc[i - window:i + window + 1]
+        if highs.iloc[i] == local_high.max():
+            swing_highs.append({
+                "date": df.index[i].strftime("%Y-%m-%d"),
+                "price": round(float(highs.iloc[i]), 2)
+            })
+        local_low = lows.iloc[i - window:i + window + 1]
+        if lows.iloc[i] == local_low.min():
+            swing_lows.append({
+                "date": df.index[i].strftime("%Y-%m-%d"),
+                "price": round(float(lows.iloc[i]), 2)
+            })
+    # Deduplicate consecutive same-price swings, keep most recent
+    def dedup(pts):
+        if not pts:
+            return pts
+        result = [pts[0]]
+        for p in pts[1:]:
+            if p["price"] != result[-1]["price"]:
+                result.append(p)
+        return result
+    swing_highs = dedup(swing_highs)[-max_points:]
+    swing_lows = dedup(swing_lows)[-max_points:]
+    return swing_highs, swing_lows
+
+def parse_overlay_from_response(response_text):
+    """Extract overlay JSON block and clean markdown from AI response.
+    Returns (clean_markdown, overlay_dict) tuple.
+    """
+    pattern = r'```json\s*(\{.*?\})\s*```'
+    match = re.search(pattern, response_text, re.DOTALL)
+    if match:
+        json_str = match.group(1)
+        clean_markdown = response_text[:match.start()].rstrip()
+        try:
+            overlay = json.loads(json_str)
+            return clean_markdown, overlay
+        except json.JSONDecodeError:
+            return response_text, None
+    return response_text, None
+
+def validate_overlay(overlay, current_close):
+    """Validate and fix directional consistency of overlay data.
+    For BULLISH: target > current_close, invalidation < current_close.
+    For BEARISH: target < current_close, invalidation > current_close.
+    Returns corrected overlay dict.
+    """
+    if not overlay:
+        return overlay
+    direction = overlay.get("direction", "BULLISH").upper()
+    tp = overlay.get("target_price")
+    inv = overlay.get("invalidation_price")
+    if tp and inv:
+        if direction == "BULLISH":
+            # Target should be above close, invalidation below
+            if tp < current_close and inv > current_close:
+                # Swapped — fix
+                overlay["target_price"], overlay["invalidation_price"] = inv, tp
+            elif tp < current_close:
+                overlay["target_price"] = None  # nonsensical, remove
+        elif direction == "BEARISH":
+            # Target should be below close, invalidation above
+            if tp > current_close and inv < current_close:
+                # Swapped — fix
+                overlay["target_price"], overlay["invalidation_price"] = inv, tp
+            elif tp > current_close:
+                overlay["target_price"] = None  # nonsensical, remove
+    # Cap pattern points to 6
+    pat = overlay.get("pattern")
+    if pat and pat.get("points") and len(pat["points"]) > 6:
+        overlay["pattern"]["points"] = pat["points"][:6]
+    return overlay
+
+OVERLAY_JSON_INSTRUCTION = """
+
+Additionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:
+```json
+{
+  "support_levels": [price1, price2],
+  "resistance_levels": [price1, price2],
+  "direction": "BULLISH",
+  "pattern": {
+    "name": "Pattern Name",
+    "points": [
+      {"date": "YYYY-MM-DD", "price": 123.45, "role": "upper"},
+      {"date": "YYYY-MM-DD", "price": 100.00, "role": "lower"}
+    ]
+  },
+  "target_price": 123.45,
+  "invalidation_price": 100.00
+}
+```
+JSON rules:
+- support_levels: 1-3 most important support prices visible on the chart
+- resistance_levels: 1-3 most important resistance prices visible on the chart
+- direction: "BULLISH" or "BEARISH" — your directional bias based on the analysis
+- pattern.name: The chart pattern identified — ONLY linear-boundary patterns that can be drawn with straight trendlines:
+  ALLOWED: Ascending Triangle, Descending Triangle, Symmetrical Triangle, Rising Wedge, Falling Wedge, Bull Flag, Bear Flag, Channel Up, Channel Down, Head & Shoulders, Inverse Head & Shoulders, Double Top, Double Bottom
+  NOT ALLOWED (set pattern to null instead): Cup & Handle, Rounding Bottom, Rounding Top, Saucer, or any pattern requiring curved lines. Describe these in the text analysis but mention the pattern overlay cannot be drawn for this pattern type due to its curved nature.
+- pattern.points: 3-6 key boundary vertices that outline the pattern shape (NOT individual price swings). Each point has:
+  - "date": YYYY-MM-DD format
+  - "price": numeric price at that vertex
+  - "role": either "upper" (upper trendline/boundary) or "lower" (lower trendline/boundary)
+  For channels/triangles/wedges: place 2-3 points on the upper trendline and 2-3 on the lower trendline. Upper points should form one straight line, lower points another.
+  For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).
+  For double top/bottom: mark the two peaks (upper) and the valley/neckline (lower), or vice versa.
+  Points should be in chronological order.
+- target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.
+- invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.
+- All prices MUST be numeric (no strings). All dates MUST be YYYY-MM-DD format.
+- CRITICAL: For pattern points, you MUST use dates and prices ONLY from the "Swing Highs" and "Swing Lows" lists provided in the context data. Use swing highs for "upper" role points and swing lows for "lower" role points. Do NOT estimate prices from the chart image.
+- For support_levels, use prices from the Swing Lows list. For resistance_levels, use prices from the Swing Highs list.
+- If no clear pattern exists, or the pattern requires curved lines (cup & handle, rounding bottom, etc.), set pattern to null.
+- IMPORTANT: In your text response, NEVER mention "JSON", "null", "set to null", or any implementation details. If a pattern cannot be overlaid, simply say the pattern overlay cannot be drawn for this pattern type due to its curved nature."""
+
 # ----------------------------------------------------
 # Application state
 # ----------------------------------------------------
@@ -34,6 +180,10 @@ if "ai_analysis" not in st.session_state:
     st.session_state.ai_analysis = None
 if "ai_ticker" not in st.session_state:
     st.session_state.ai_ticker = None
+if "ai_overlay_visible" not in st.session_state:
+    st.session_state.ai_overlay_visible = True
+if "ai_toast" not in st.session_state:
+    st.session_state.ai_toast = None
 # # Chat state
 # if "chat_open" not in st.session_state:
 #     st.session_state.chat_open = False
@@ -43,6 +193,11 @@ if "ai_ticker" not in st.session_state:
 
 
 st.set_page_config(page_title="INSANE Trading Model", layout="wide")
+
+# --- Show deferred toast from AI analysis (after st.rerun) ---
+if st.session_state.ai_toast:
+    st.toast(st.session_state.ai_toast)
+    st.session_state.ai_toast = None
 
 # ----------------------------------------------------
 # GLOBAL CSS (DARK THEME SAFE)
@@ -530,12 +685,14 @@ with filters_col:
     #     end_date = st.date_input("End Date", value=dt.date.today() + dt.timedelta(days=1))
     end_date = st.date_input("End Date", value=dt.date.today() + dt.timedelta(days=1))
     capital = st.number_input("Capital ($)", 1000, 1_000_000, 10000, 500)
+    # Clear AI analysis if ticker or timeframe changed (runs on every rerun, not just button click)
+    current_key = f"{ticker}_{timeframe}"
+    if st.session_state.ai_ticker != current_key:
+        st.session_state.ai_analysis = None
+        st.session_state.ai_overlay_visible = False
+        st.session_state.ai_ticker = current_key
+
     if st.button("Run Model", key="run_button"):
-        # Clear AI analysis if ticker or timeframe changed
-        current_key = f"{ticker}_{timeframe}"
-        if st.session_state.ai_ticker != current_key:
-            st.session_state.ai_analysis = None
-            st.session_state.ai_ticker = current_key
         st.session_state.run_model = True
 
 
@@ -916,9 +1073,27 @@ if st.session_state.run_model:
             is_daily = timeframe == "1d"
             ai_eligible = is_daily and date_range_days <= 365
 
-            chart_title_col, ai_btn_col = st.columns([3, 1])
+            # --- Pre-load AI analysis cache (needed for overlay before chart renders) ---
+            if ai_eligible:
+                os.makedirs("ai_analysis", exist_ok=True)
+                analysis_date = datetime.date.today().strftime("%Y-%m-%d")
+                analysis_file = f"ai_analysis/{ticker}_{timeframe}_{analysis_date}.json"
+                if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
+                    with open(analysis_file, "r") as f:
+                        st.session_state.ai_analysis = json.load(f)
+                    # Auto-enable overlay if cached analysis has overlay data
+                    if st.session_state.ai_analysis.get("overlay"):
+                        st.session_state.ai_overlay_visible = True
+
+            has_overlay = (st.session_state.ai_analysis is not None and
+                           st.session_state.ai_analysis.get("overlay") is not None)
+
+            chart_title_col, overlay_col, ai_btn_col = st.columns([5, 1, 2])
             with chart_title_col:
                 st.subheader("📌 Price vs Momentum Trend")
+            with overlay_col:
+                if has_overlay:
+                    st.checkbox("Overlay Pattern", key="ai_overlay_visible")
             with ai_btn_col:
                 if not ai_eligible:
                     st.button(
@@ -1279,6 +1454,138 @@ if st.session_state.run_model:
 
             fig.update_xaxes(rangeslider_visible=False)
 
+            # -----------------------------------------------
+            # AI PATTERN OVERLAY (drawn before chart render)
+            # -----------------------------------------------
+            if (ai_eligible and
+                st.session_state.get("ai_overlay_visible", True) and
+                st.session_state.ai_analysis and
+                st.session_state.ai_analysis.get("overlay")):
+
+                _overlay = st.session_state.ai_analysis["overlay"]
+
+                # Support levels (green dashed lines)
+                for _lvl in _overlay.get("support_levels", []):
+                    _snapped = snap_to_price(_lvl, df, role="lower")
+                    fig.add_hline(
+                        y=_snapped, line_dash="dash", line_color="#00ff88", line_width=1,
+                        annotation_text=f"S: {_snapped:.2f}",
+                        annotation_position="bottom right",
+                        annotation_font=dict(color="#00ff88", size=10),
+                        row=1, col=1
+                    )
+
+                # Resistance levels (red dashed lines)
+                for _lvl in _overlay.get("resistance_levels", []):
+                    _snapped = snap_to_price(_lvl, df, role="upper")
+                    fig.add_hline(
+                        y=_snapped, line_dash="dash", line_color="#ff4444", line_width=1,
+                        annotation_text=f"R: {_snapped:.2f}",
+                        annotation_position="top right",
+                        annotation_font=dict(color="#ff4444", size=10),
+                        row=1, col=1
+                    )
+
+                # Target price (dotted green)
+                if _overlay.get("target_price"):
+                    _tp = _overlay["target_price"]
+                    fig.add_hline(
+                        y=_tp, line_dash="dot", line_color="#00ff88", line_width=1.5,
+                        annotation_text=f"\U0001f3af Target: {_tp:.2f}",
+                        annotation_position="top left",
+                        annotation_font=dict(color="#00ff88", size=11),
+                        row=1, col=1
+                    )
+
+                # Invalidation price (dotted red)
+                if _overlay.get("invalidation_price"):
+                    _inv = _overlay["invalidation_price"]
+                    fig.add_hline(
+                        y=_inv, line_dash="dot", line_color="#ff4444", line_width=1.5,
+                        annotation_text=f"\u26d4 Invalidation: {_inv:.2f}",
+                        annotation_position="bottom left",
+                        annotation_font=dict(color="#ff4444", size=11),
+                        row=1, col=1
+                    )
+
+                # Pattern outline — draw upper and lower boundaries separately
+                _pattern = _overlay.get("pattern")
+                if _pattern and _pattern.get("points") and len(_pattern.get("points", [])) >= 2:
+                    _pts = _pattern["points"]
+                    _upper = [p for p in _pts if p.get("role") == "upper"]
+                    _lower = [p for p in _pts if p.get("role") == "lower"]
+
+                    # If roles not specified, fall back to connecting all points
+                    if not _upper and not _lower:
+                        _upper = _pts
+
+                    # Find the full date range across all pattern points
+                    _all_dates = [pd.Timestamp(p["date"]) for p in _pts]
+                    _rightmost_date = max(_all_dates).strftime("%Y-%m-%d") if _all_dates else None
+
+                    def _extrapolate_line(points, target_date, role_snap):
+                        """Extend a trendline to target_date using linear extrapolation."""
+                        if len(points) < 2 or not target_date:
+                            return points
+                        last_date = pd.Timestamp(points[-1]["date"])
+                        if last_date >= pd.Timestamp(target_date):
+                            return points  # already extends far enough
+                        # Linear extrapolation from last two points
+                        d0 = pd.Timestamp(points[-2]["date"]).timestamp()
+                        d1 = pd.Timestamp(points[-1]["date"]).timestamp()
+                        dt = pd.Timestamp(target_date).timestamp()
+                        p0 = snap_to_price(points[-2]["price"], df, role=role_snap)
+                        p1 = snap_to_price(points[-1]["price"], df, role=role_snap)
+                        if d1 != d0:
+                            slope = (p1 - p0) / (d1 - d0)
+                            projected_price = p1 + slope * (dt - d1)
+                        else:
+                            projected_price = p1
+                        extended = list(points) + [{"date": target_date, "price": projected_price, "role": points[-1].get("role"), "_ext": True}]
+                        return extended
+
+                    # Extend shorter line to match the rightmost date
+                    if _upper and _lower and _rightmost_date:
+                        _upper = _extrapolate_line(_upper, _rightmost_date, "upper")
+                        _lower = _extrapolate_line(_lower, _rightmost_date, "lower")
+
+                    def _resolve_prices(pts, role_snap):
+                        """Snap original points to real prices; keep extrapolated prices as-is."""
+                        return [p["price"] if p.get("_ext") else snap_to_price(p["price"], df, role=role_snap) for p in pts]
+
+                    # Draw upper boundary
+                    if len(_upper) >= 2:
+                        fig.add_trace(
+                            go.Scatter(
+                                x=[p["date"] for p in _upper],
+                                y=_resolve_prices(_upper, "upper"),
+                                mode="lines+markers+text",
+                                name=f"\U0001f4d0 {_pattern.get('name', 'Pattern')} (upper)",
+                                line=dict(color="cyan", width=2, dash="dashdot"),
+                                marker=dict(size=8, color="cyan", symbol="diamond"),
+                                text=[_pattern.get("name", "")] + [""] * (len(_upper) - 1),
+                                textposition="top center",
+                                textfont=dict(color="cyan", size=11),
+                                showlegend=bool(not _lower or len(_lower) < 2),
+                            ),
+                            row=1, col=1, secondary_y=False
+                        )
+
+                    # Draw lower boundary
+                    if len(_lower) >= 2:
+                        fig.add_trace(
+                            go.Scatter(
+                                x=[p["date"] for p in _lower],
+                                y=_resolve_prices(_lower, "lower"),
+                                mode="lines+markers",
+                                name=f"\U0001f4d0 {_pattern.get('name', 'Pattern')} (lower)",
+                                line=dict(color="cyan", width=2, dash="dashdot"),
+                                marker=dict(size=8, color="cyan", symbol="diamond"),
+                                showlegend=True,
+                            ),
+                            row=1, col=1, secondary_y=False
+                        )
+
             st.plotly_chart(fig, use_container_width=True)
 
             # ------------------------------------------------------------
@@ -1402,15 +1709,7 @@ if st.session_state.run_model:
             st.markdown("---")
 
             if ai_eligible:
-                # Check for existing saved analysis
-                os.makedirs("ai_analysis", exist_ok=True)
-                analysis_date = datetime.date.today().strftime("%Y-%m-%d")
-                analysis_file = f"ai_analysis/{ticker}_{timeframe}_{analysis_date}.json"
-
-                # Load cached analysis if it exists
-                if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
-                    with open(analysis_file, "r") as f:
-                        st.session_state.ai_analysis = json.load(f)
+                # analysis_date and analysis_file already defined above (pre-load block)
 
                 if ai_btn_clicked:
                     with st.spinner("Capturing chart and running AI analysis..."):
@@ -1456,6 +1755,16 @@ if st.session_state.run_model:
                             context_parts.append(f"RSI(14): {rsi_val:.1f}")
                         context_parts.append(f"Backtest Win Rate (Same-Bar): {close_stats.get('WinRate_Total_%', 0):.1f}%")
                         context_parts.append(f"Backtest Profit Factor (Same-Bar): {close_stats.get('ProfitFactor_Total', 0):.2f}")
+
+                        # Detect and add swing points for precise pattern vertices
+                        _swing_highs, _swing_lows = detect_swing_points(df, window=5, max_points=8)
+                        if _swing_highs:
+                            sh_str = ", ".join([f"{p['date']} at {p['price']}" for p in _swing_highs])
+                            context_parts.append(f"Swing Highs: {sh_str}")
+                        if _swing_lows:
+                            sl_str = ", ".join([f"{p['date']} at {p['price']}" for p in _swing_lows])
+                            context_parts.append(f"Swing Lows: {sl_str}")
+
                         context_text = "\n".join(context_parts)
 
                         # --- 3) Build prompt ---
@@ -1499,6 +1808,9 @@ if st.session_state.run_model:
                                     "4. **Expected Move** (target + invalidation)\n"
                                     "5. **Risk Assessment**\n\n"
                                     "Be specific with price levels and dates. Keep it concise and actionable."
+                                    "\n\nIf providing an updated analysis, also include the JSON overlay block "
+                                    "at the end (same format as the original request).\n"
+                                    + OVERLAY_JSON_INSTRUCTION
                                 )
 
                                 response = client.chat.completions.create(
@@ -1519,18 +1831,20 @@ if st.session_state.run_model:
                                             ]
                                         }
                                     ],
-                                    max_tokens=2000,
+                                    max_tokens=2500,
                                     temperature=0.3
                                 )
 
                                 ai_reply = response.choices[0].message.content.strip()
 
                                 if ai_reply.upper().startswith("UNCHANGED"):
-                                    # Analysis still valid — use cached
+                                    # Analysis still valid — use cached (overlay already in cached data)
                                     st.session_state.ai_analysis = cached
-                                    st.toast("✅ AI confirmed: previous analysis still valid")
+                                    st.session_state.ai_toast = "✅ AI confirmed: previous analysis still valid"
                                 else:
-                                    # Analysis changed — save new
+                                    # Analysis changed — parse overlay and save
+                                    clean_text, overlay_data = parse_overlay_from_response(ai_reply)
+                                    overlay_data = validate_overlay(overlay_data, float(last_row["Close"]))
                                     analysis_result = {
                                         "ticker": ticker,
                                         "timeframe": timeframe,
@@ -1541,12 +1855,15 @@ if st.session_state.run_model:
                                         "current_close": float(last_row["Close"]),
                                         "model": "gpt-4o",
                                         "prompt": revalidation_prompt,
-                                        "response": ai_reply
+                                        "response": clean_text,
+                                        "overlay": overlay_data
                                     }
                                     with open(analysis_file, "w") as f:
                                         json.dump(analysis_result, f, indent=4)
                                     st.session_state.ai_analysis = analysis_result
-                                    st.toast("🔄 AI updated the analysis")
+                                    st.session_state.ai_overlay_visible = True
+                                    st.session_state.ai_toast = "🔄 AI updated the analysis"
+                                    st.rerun()
 
                             else:
                                 # --- FRESH ANALYSIS MODE ---
@@ -1554,7 +1871,9 @@ if st.session_state.run_model:
                                     f"{context_text}\n"
                                     "Based on the chart and context above, provide:\n\n"
                                     "1. **Pattern Recognition**: Identify any classical chart pattern currently forming "
-                                    "(e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). "
+                                    "(e.g., head & shoulders, double top/bottom, flag, wedge, triangle, channel). "
+                                    "ONLY identify patterns with straight-line boundaries that can be drawn with trendlines. "
+                                    "If you see curved patterns (cup & handle, rounding bottom), describe them in text but note the pattern overlay cannot be drawn due to its curved nature. "
                                     "Describe where the pattern starts and its current stage.\n\n"
                                     "2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. "
                                     "Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n"
@@ -1564,6 +1883,7 @@ if st.session_state.run_model:
                                     "what is the most probable next move? Include a target price and an invalidation level.\n\n"
                                     "5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\n"
                                     "Be specific with price levels and dates where visible. Keep the analysis concise and actionable."
+                                    + OVERLAY_JSON_INSTRUCTION
                                 )
 
                                 response = client.chat.completions.create(
@@ -1584,11 +1904,15 @@ if st.session_state.run_model:
                                             ]
                                         }
                                     ],
-                                    max_tokens=2000,
+                                    max_tokens=2500,
                                     temperature=0.3
                                 )
 
                                 ai_reply = response.choices[0].message.content
+
+                                # Parse overlay JSON from response
+                                clean_text, overlay_data = parse_overlay_from_response(ai_reply)
+                                overlay_data = validate_overlay(overlay_data, float(last_row["Close"]))
 
                                 analysis_result = {
                                     "ticker": ticker,
@@ -1600,13 +1924,17 @@ if st.session_state.run_model:
                                     "current_close": float(last_row["Close"]),
                                     "model": "gpt-4o",
                                     "prompt": user_prompt,
-                                    "response": ai_reply
+                                    "response": clean_text,
+                                    "overlay": overlay_data
                                 }
 
                                 with open(analysis_file, "w") as f:
                                     json.dump(analysis_result, f, indent=4)
 
                                 st.session_state.ai_analysis = analysis_result
+                                st.session_state.ai_overlay_visible = True
+                                st.session_state.ai_toast = "✅ AI analysis generated"
+                                st.rerun()
 
                         except Exception as e:
                             st.error(f"AI analysis failed: {e}")

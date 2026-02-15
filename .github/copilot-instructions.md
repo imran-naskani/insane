@@ -179,12 +179,12 @@ Same as `alert_spicy_engine.py` (spicy_sauce + price_delta_shift + TOS_Trail + T
 - Earnings watchlist reads from `earnings_watchlist.json`, enriched with signal history
 - `p_win = 84` for all tickers (quantile lookback window)
 - OpenAI client instantiated for AI chart analysis (chatbot UI is commented out)
-- Active `st.session_state` variables: `run_model` (boolean gate), `ai_analysis` (cached AI response dict), `ai_ticker` (tracks `{ticker}_{timeframe}` to clear stale analysis on change)
+- Active `st.session_state` variables: `run_model` (boolean gate), `ai_analysis` (cached AI response dict), `ai_ticker` (tracks `{ticker}_{timeframe}` to clear stale analysis on change), `ai_overlay_visible` (toggle for chart overlay), `ai_toast` (deferred toast message shown after `st.rerun()`)
 
 #### AI Chart Analysis (Section 8)
 GPT-4o vision-based chart analysis available for **daily charts with ≤ 1 year date range**.
 
-**UI Placement**: "🤖 Generate AI Analysis" button appears top-right of chart area via `st.columns([3, 1])`. Disabled with tooltip when not eligible (intraday or >365 day range).
+**UI Placement**: "🤖 Generate AI Analysis" button appears top-right of chart area via `st.columns([5, 1, 2])`. A "📊 Overlay" checkbox toggle appears in the middle column when overlay data exists. Disabled with tooltip when not eligible (intraday or >365 day range).
 
 **Eligibility**: `ai_eligible = is_daily and date_range_days <= 365`
 
@@ -194,19 +194,58 @@ GPT-4o vision-based chart analysis available for **daily charts with ≤ 1 year 
 
 **System Prompt**: Instructs AI to act as "INSANE — an expert quantitative trading analyst". **Critical**: AI is explicitly told to NEVER reveal Kalman filtering/smoothing terminology — must refer to the orange line only as "momentum trend line" or "INSANE trend indicator".
 
-**Analysis Output**: 5 sections — (1) Pattern Recognition (classical chart patterns), (2) Signal Confidence (1-10 with justification), (3) Key Price Levels (support/resistance), (4) Expected Move (target + invalidation), (5) Risk Assessment.
+**Analysis Output**: 5 sections — (1) Pattern Recognition (classical chart patterns), (2) Signal Confidence (1-10 with justification), (3) Key Price Levels (support/resistance), (4) Expected Move (target + invalidation), (5) Risk Assessment. Additionally, a structured JSON overlay block at the end of the response.
 
-**Caching & Revalidation Flow**:
-1. Analyses saved to `ai_analysis/{ticker}_{timeframe}_{YYYY-MM-DD}.json`
-2. On page load: if `st.session_state.ai_analysis` is None but a file exists for today → auto-loads from cache
-3. On button click with **no cached file**: Sends fresh analysis prompt → saves result
-4. On button click with **existing cached file**: Sends revalidation prompt that includes the previous analysis text + updated chart. AI responds with either `UNCHANGED` (keeps cached) or a full updated analysis (overwrites file)
-5. `st.toast()` confirms whether AI kept or updated the analysis
-6. On ticker/timeframe change ("Run Model" press): `ai_analysis` and `ai_ticker` session state are cleared to prevent stale display
+**Overlay JSON Schema** (appended to AI response in ```json fences):
+```json
+{
+  "support_levels": [price1, price2],
+  "resistance_levels": [price1, price2],
+  "direction": "BULLISH",
+  "pattern": {
+    "name": "Pattern Name",
+    "points": [
+      {"date": "YYYY-MM-DD", "price": 123.45, "role": "upper"},
+      {"date": "YYYY-MM-DD", "price": 100.00, "role": "lower"}
+    ]
+  },
+  "target_price": 123.45,
+  "invalidation_price": 100.00
+}
+```
+- `direction`: `"BULLISH"` or `"BEARISH"` — directional bias; enforces target/invalidation consistency
+- `pattern.points[].role`: `"upper"` or `"lower"` — determines which trendline boundary the vertex belongs to; upper and lower boundaries are drawn as separate lines
+- Points capped at 3-6 key boundary vertices (not individual price swings)
+- Parsed by `parse_overlay_from_response()` which splits markdown analysis from JSON block
+- Validated by `validate_overlay()` which fixes swapped target/invalidation, removes nonsensical prices, caps points to 6
+- Stored in the `"overlay"` key of the analysis JSON file
 
-**Display**: `st.expander()` with ticker + date title, analysis markdown body, caption with model/signal/date metadata. Auto-scrolls to analysis via `components.html()` injecting JavaScript that targets the last `[data-testid="stExpander"]` element.
+**Chart Overlay Drawing** (Phase 2):
+Overlays are drawn on the Plotly chart BEFORE `st.plotly_chart()` renders, reading from `st.session_state.ai_analysis["overlay"]`:
+- **Support levels**: Green dashed horizontal lines (`#00ff88`) with "S: {price}" labels
+- **Resistance levels**: Red dashed horizontal lines (`#ff4444`) with "R: {price}" labels
+- **Target price**: Dotted green line with 🎯 emoji label
+- **Invalidation price**: Dotted red line with ⛔ emoji label
+- **Pattern outline**: Upper and lower boundaries drawn as separate cyan dash-dot lines with diamond markers; pattern name annotated on upper boundary. Falls back to single line if `role` field is missing.
 
-**API Parameters**: `model="gpt-4o"`, `max_tokens=2000`, `temperature=0.3`, image detail `"high"`
+**Price Snapping**: `snap_to_price(target_price, df, tolerance_pct=0.03)` snaps AI-estimated prices to the nearest actual High/Low in the dataframe within 3% tolerance. Improves accuracy since AI reads a rasterized PNG.
+
+**Direction Validation**: `validate_overlay(overlay, current_close)` ensures directional consistency:
+- BULLISH: target must be above close, invalidation below (auto-swaps if inverted, nullifies if nonsensical)
+- BEARISH: target must be below close, invalidation above
+
+**Overlay Toggle**: "📊 Overlay" checkbox (bound to `st.session_state.ai_overlay_visible`) appears only when overlay data exists. Toggling re-renders the chart with/without overlays.
+
+**Helper Functions** (module-level):
+| Function | Description |
+|----------|-------------|
+| `snap_to_price(target_price, df, tolerance_pct, role)` | Snaps AI price to nearest actual High/Low within tolerance; role-aware (`"upper"` → snap to Highs only, `"lower"` → Lows only) |
+| `detect_swing_points(df, window=5, max_points=8)` | Detects swing highs/lows (local max/min in 2×window+1 neighborhood); returns deduplicated lists of `{date, price}` dicts |
+| `parse_overlay_from_response(response_text)` | Extracts JSON overlay block from AI response, returns `(clean_markdown, overlay_dict)` |
+| `validate_overlay(overlay, current_close)` | Fixes directional inconsistencies in target/invalidation, caps pattern points to 6 |
+| `OVERLAY_JSON_INSTRUCTION` | Constant string appended to both fresh and revalidation prompts requesting the structured JSON block |
+
+**Swing Point Context**: `detect_swing_points()` computes recent swing highs and swing lows from the OHLC data. These are appended to the AI context text as `"Swing Highs: date at price, ..."` and `"Swing Lows: date at price, ..."`. The AI prompt instructs: *"For pattern points, you MUST use dates and prices ONLY from the Swing Highs / Swing Lows lists."* This ensures pattern vertices land precisely on real chart points instead of AI pixel-reading approximations.
 
 ### Backtesting Modules
 

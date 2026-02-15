@@ -7,6 +7,44 @@
     "last_signal_date": "2026-01-30",
     "current_close": 601.9199829101562,
     "model": "gpt-4o",
-    "prompt": "Ticker: QQQ\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 601.92\nMomentum Trend: 605.77 (Close is below trend line)\nLast Signal: Turn_Down (SHORT) on 2026-01-30\nTOS RSI(9): 34.4\nRSI(14): 40.8\nBacktest Win Rate (Same-Bar): 47.6%\nBacktest Profit Factor (Same-Bar): 3.25\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.",
-    "response": "1. **Pattern Recognition**:\n   - **Pattern**: Potential Double Top\n   - **Start**: Peaks around November 2025 and January 2026.\n   - **Current Stage**: Testing the neckline around 590.\n\n2. **Signal Confidence**: \n   - **Confidence Level**: 7\n   - **Support**: The RSI is below 50, indicating bearish momentum. The current close is below the momentum trend line, aligning with the short signal.\n   - **Undermining Factors**: Volume is not significantly higher, which could undermine the strength of the move.\n\n3. **Key Price Levels**:\n   - **Support**: 590 (neckline of the double top)\n   - **Resistance**: 620 (recent highs)\n\n4. **Expected Move**:\n   - **Probable Move**: Further downside if the 590 support breaks.\n   - **Target Price**: 570\n   - **Invalidation Level**: Close above 620\n\n5. **Risk Assessment**:\n   - **Warning Signs**: Watch for any bullish divergence in RSI or a strong volume spike, which could indicate a reversal.\n   - **Divergences**: No clear divergences currently, but monitor RSI for changes.\n\nStay vigilant for any changes in volume or RSI that could signal a shift in momentum."
+    "prompt": "Ticker: QQQ\nTimeframe: 1d\nDate Range: 2025-02-17 to 2026-02-16\nCurrent Close: 601.92\nMomentum Trend: 605.77 (Close is below trend line)\nLast Signal: Turn_Down (SHORT) on 2026-01-30\nTOS RSI(9): 34.4\nRSI(14): 40.8\nBacktest Win Rate (Same-Bar): 47.6%\nBacktest Profit Factor (Same-Bar): 3.25\nSwing Highs: 2025-08-13 at 583.32, 2025-09-22 at 602.87, 2025-10-10 at 613.18, 2025-10-29 at 637.01, 2025-12-10 at 629.21, 2025-12-26 at 625.52, 2026-01-15 at 630.0, 2026-01-28 at 636.6\nSwing Lows: 2025-09-02 at 559.54, 2025-09-25 at 588.5, 2025-10-10 at 589.05, 2025-11-21 at 580.74, 2025-12-17 at 600.28, 2026-01-02 at 610.15, 2026-01-20 at 607.05, 2026-02-05 at 594.76\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming (e.g., head & shoulders, double top/bottom, flag, wedge, cup & handle, channel). Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.\n\nAdditionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:\n```json\n{\n  \"support_levels\": [price1, price2],\n  \"resistance_levels\": [price1, price2],\n  \"direction\": \"BULLISH\",\n  \"pattern\": {\n    \"name\": \"Pattern Name\",\n    \"points\": [\n      {\"date\": \"YYYY-MM-DD\", \"price\": 123.45, \"role\": \"upper\"},\n      {\"date\": \"YYYY-MM-DD\", \"price\": 100.00, \"role\": \"lower\"}\n    ]\n  },\n  \"target_price\": 123.45,\n  \"invalidation_price\": 100.00\n}\n```\nJSON rules:\n- support_levels: 1-3 most important support prices visible on the chart\n- resistance_levels: 1-3 most important resistance prices visible on the chart\n- direction: \"BULLISH\" or \"BEARISH\" \u2014 your directional bias based on the analysis\n- pattern.name: The chart pattern identified (e.g., \"Head & Shoulders\", \"Ascending Triangle\", \"Channel\")\n- pattern.points: 3-6 key boundary vertices that outline the pattern shape (NOT individual price swings). Each point has:\n  - \"date\": YYYY-MM-DD format\n  - \"price\": numeric price at that vertex\n  - \"role\": either \"upper\" (upper trendline/boundary) or \"lower\" (lower trendline/boundary)\n  For channels/triangles/wedges: alternate between upper and lower boundary points to trace the pattern edges.\n  For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).\n  Points should be in chronological order.\n- target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.\n- invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.\n- All prices MUST be numeric (no strings). All dates MUST be YYYY-MM-DD format.\n- CRITICAL: For pattern points, you MUST use dates and prices ONLY from the \"Swing Highs\" and \"Swing Lows\" lists provided in the context data. Use swing highs for \"upper\" role points and swing lows for \"lower\" role points. Do NOT estimate prices from the chart image.\n- For support_levels, use prices from the Swing Lows list. For resistance_levels, use prices from the Swing Highs list.\n- If no clear pattern exists, set pattern to null.",
+    "response": "1. **Pattern Recognition**:\n   - **Pattern**: Double Top\n   - **Start**: Begins around 2025-10-29 at 637.01 and 2026-01-28 at 636.6.\n   - **Current Stage**: Potential completion with a decline following the second peak.\n\n2. **Signal Confidence**: \n   - **Confidence Level**: 7\n   - **Support**: The current close is below the momentum trend line, and RSI levels are relatively low, indicating bearish momentum.\n   - **Undermine**: The RSI is not extremely oversold, which could limit further downside.\n\n3. **Key Price Levels**:\n   - **Support**: 594.76, 580.74\n   - **Resistance**: 636.6, 637.01\n\n4. **Expected Move**:\n   - **Direction**: BEARISH\n   - **Target Price**: 580.00\n   - **Invalidation Level**: 637.00\n\n5. **Risk Assessment**:\n   - **Warning Signs**: Watch for any bullish divergence in RSI or a break back above the momentum trend line, which could signal a reversal.",
+    "overlay": {
+        "support_levels": [
+            594.76,
+            580.74
+        ],
+        "resistance_levels": [
+            636.6,
+            637.01
+        ],
+        "direction": "BEARISH",
+        "pattern": {
+            "name": "Double Top",
+            "points": [
+                {
+                    "date": "2025-10-29",
+                    "price": 637.01,
+                    "role": "upper"
+                },
+                {
+                    "date": "2025-11-21",
+                    "price": 580.74,
+                    "role": "lower"
+                },
+                {
+                    "date": "2026-01-28",
+                    "price": 636.6,
+                    "role": "upper"
+                },
+                {
+                    "date": "2026-02-05",
+                    "price": 594.76,
+                    "role": "lower"
+                }
+            ]
+        },
+        "target_price": 580.0,
+        "invalidation_price": 637.0
+    }
 }
