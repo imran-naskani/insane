@@ -160,8 +160,10 @@ JSON rules:
   - "price": numeric price at that vertex
   - "role": either "upper" (upper trendline/boundary) or "lower" (lower trendline/boundary)
   For channels/triangles/wedges: place 2-3 points on the upper trendline and 2-3 on the lower trendline. Upper points should form one straight line, lower points another.
+  For bull flag / bear flag: The flag is the CONSOLIDATION zone only (NOT the flagpole). Place 2 upper points along the top edge of the consolidation (recent swing highs within the flag) and 2 lower points along the bottom edge (recent swing lows within the flag). These should form two roughly parallel, slightly sloping lines. Do NOT use the flagpole base or tip as flag boundary points.
   For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).
   For double top/bottom: mark the two peaks (upper) and the valley/neckline (lower), or vice versa.
+  IMPORTANT: Each boundary (upper and lower) needs at least 2 points to draw a trendline. Never leave a boundary with only 1 point.
   Points should be in chronological order.
 - target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.
 - invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.
@@ -850,22 +852,27 @@ if st.session_state.run_model:
             if timeframe == "1d":
                 frozen = load_ticker_history(ticker)
                 if len(frozen) == 0:
+                    # New ticker — compute signals from scratch
                     df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                     df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+                    # Attempt to persist (time-gated inside snapshot_all_signals_first_time)
                     snapshot_all_signals_first_time(ticker, df)
                     frozen = load_ticker_history(ticker)
                 
-                df["Turn_Up"] = False
-                df["Turn_Down"] = False
-                for record in frozen:
-                    date = record["date"]
-                    mask = df.index.strftime("%Y-%m-%d") == date
-                    if mask.any():
-                        idx = df.index[mask][0]
-                        if record["signal"] == "UP":
-                            df.at[idx, "Turn_Up"] = True
-                        if record["signal"] == "DOWN":
-                            df.at[idx, "Turn_Down"] = True
+                # Only overwrite from frozen history if it actually exists on disk;
+                # otherwise keep the computed signals for display
+                if len(frozen) > 0:
+                    df["Turn_Up"] = False
+                    df["Turn_Down"] = False
+                    for record in frozen:
+                        date = record["date"]
+                        mask = df.index.strftime("%Y-%m-%d") == date
+                        if mask.any():
+                            idx = df.index[mask][0]
+                            if record["signal"] == "UP":
+                                df.at[idx, "Turn_Up"] = True
+                            if record["signal"] == "DOWN":
+                                df.at[idx, "Turn_Down"] = True
 
             df["Turn_Up"] = df["Turn_Up"].fillna(False)
             df["Turn_Down"] = df["Turn_Down"].fillna(False)
@@ -1779,7 +1786,31 @@ if st.session_state.run_model:
                             "IMPORTANT: Never mention or reveal Kalman filtering, Kalman smoothing, "
                             "or any Kalman-related terminology in your response. "
                             "Refer to the orange line only as the 'momentum trend line' or 'INSANE trend indicator'. "
-                            "This is proprietary methodology and must not be disclosed."
+                            "This is proprietary methodology and must not be disclosed.\n\n"
+                            "PATTERN CLASSIFICATION RULES — apply these strictly:\n"
+                            "- ALWAYS consider the PRIOR TREND before classifying a pattern. "
+                            "A pattern after a strong uptrend has different meaning than after a downtrend.\n"
+                            "- Bull Flag / Bear Flag: A sharp move (flagpole) followed by a shallow, "
+                            "short-duration consolidation (the flag) that slopes AGAINST the prior trend. "
+                            "The flag retraces only 30-50%% of the flagpole. This is a CONTINUATION pattern.\n"
+                            "- Double Top: Two distinct peaks at approximately the SAME price level, "
+                            "separated by a meaningful trough (at least 8-10%% decline from peak to trough) "
+                            "AND the two peaks must be separated by at least 15-20 trading days. "
+                            "Two peaks close together with a shallow dip is NOT a double top — it is likely a consolidation or flag. "
+                            "This is a REVERSAL pattern — requires an uptrend showing exhaustion to reverse. "
+                            "Do NOT call double top if the prior trend is still strong and momentum is intact.\n"
+                            "- Double Bottom: Two distinct troughs at the same level, separated by a peak, "
+                            "with at least 8-10%% rally between them and at least 15-20 trading days apart. "
+                            "Also a reversal pattern — requires a downtrend showing exhaustion to reverse.\n"
+                            "- Channel Up / Channel Down: Price oscillating between two PARALLEL trendlines "
+                            "over an extended period (at least 3 touches on each boundary).\n"
+                            "- Wedge (Rising/Falling): Two CONVERGING trendlines. Rising wedge is bearish, "
+                            "falling wedge is bullish.\n"
+                            "- Triangle: Converging boundaries, but one is flat (ascending/descending) or both slope (symmetrical).\n"
+                            "- Head & Shoulders: Three peaks — middle peak (head) higher than the two side peaks (shoulders), "
+                            "with a neckline connecting the troughs.\n"
+                            "- If the price action does not clearly match any pattern, say 'No clear pattern' "
+                            "rather than forcing a classification.\n"
                         )
 
                         # --- 4) Check for cached analysis → revalidate or generate fresh ---
@@ -1870,8 +1901,10 @@ if st.session_state.run_model:
                                 user_prompt = (
                                     f"{context_text}\n"
                                     "Based on the chart and context above, provide:\n\n"
-                                    "1. **Pattern Recognition**: Identify any classical chart pattern currently forming "
-                                    "(e.g., head & shoulders, double top/bottom, flag, wedge, triangle, channel). "
+                                    "1. **Pattern Recognition**: Identify any classical chart pattern currently forming. "
+                                    "FIRST describe the prior trend (direction, strength, duration), THEN classify the pattern. "
+                                    "A consolidation after a strong move is likely a flag/pennant (continuation), NOT a double top/bottom (reversal). "
+                                    "Only call it a double top if two peaks are at nearly the same price with a meaningful trough between them AND the prior trend shows exhaustion. "
                                     "ONLY identify patterns with straight-line boundaries that can be drawn with trendlines. "
                                     "If you see curved patterns (cup & handle, rounding bottom), describe them in text but note the pattern overlay cannot be drawn due to its curved nature. "
                                     "Describe where the pattern starts and its current stage.\n\n"
