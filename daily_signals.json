@@ -1,5 +1,5 @@
 {
-    "date": "2026-02-13",
+    "date": "2026-02-16",
     "long": [
         "ADI",
         "AMAT",
@@ -34,6 +34,7 @@
         "GTX",
         "HLIT",
         "HUBB",
+        "HUBS",
         "IR",
         "KMB",
         "KNSA",
@@ -70,7 +71,8 @@
         "WAB",
         "WM",
         "WMB",
-        "ZBH"
+        "ZBH",
+        "^VIX"
     ],
     "short": [
         "APD",
@@ -117,6 +119,6 @@
     },
     "vix": {
         "signal": "LONG",
-        "date": "2026-02-12"
+        "date": "2026-02-16"
     }
 }
