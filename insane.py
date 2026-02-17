@@ -129,6 +129,63 @@ def validate_overlay(overlay, current_close):
         overlay["pattern"]["points"] = pat["points"][:6]
     return overlay
 
+
+def compute_overlay_status(overlay, current_close, df=None, tol_pct=0.005):
+    """Determine whether an overlay's target or invalidation has been hit relative to current_close.
+    Returns a dict: {status: 'open'|'hit'|'invalidated'|'near', status_date, status_price, extra...}
+    """
+    import datetime as _dt
+    result = {"status": "open"}
+    if not overlay:
+        return result
+    try:
+        direction = overlay.get("direction", "BULLISH").upper()
+        tp = overlay.get("target_price")
+        inv = overlay.get("invalidation_price")
+        # Snap if df provided
+        if df is not None and tp is not None:
+            tp_snapped = snap_to_price(tp, df, role="upper" if direction == "BULLISH" else "lower")
+        else:
+            tp_snapped = tp
+        if df is not None and inv is not None:
+            inv_snapped = snap_to_price(inv, df, role="lower" if direction == "BULLISH" else "upper")
+        else:
+            inv_snapped = inv
+
+        tol = abs(tol_pct * float(current_close)) if current_close is not None else 0
+
+        # Check hit first
+        if tp_snapped is not None:
+            tp_val = float(tp_snapped)
+            if direction == "BULLISH":
+                if float(current_close) >= tp_val - tol:
+                    return {"status": "hit", "status_date": _dt.date.today().isoformat(), "status_price": float(current_close), "snapped_target": tp_val}
+            else:
+                if float(current_close) <= tp_val + tol:
+                    return {"status": "hit", "status_date": _dt.date.today().isoformat(), "status_price": float(current_close), "snapped_target": tp_val}
+
+        # Check invalidation
+        if inv_snapped is not None:
+            inv_val = float(inv_snapped)
+            if direction == "BULLISH":
+                # invalidation is below; hit invalidation if price moves below it
+                if float(current_close) <= inv_val + tol:
+                    return {"status": "invalidated", "status_date": _dt.date.today().isoformat(), "status_price": float(current_close), "snapped_invalidation": inv_val}
+            else:
+                # invalidation is above; hit invalidation if price moves above it
+                if float(current_close) >= inv_val - tol:
+                    return {"status": "invalidated", "status_date": _dt.date.today().isoformat(), "status_price": float(current_close), "snapped_invalidation": inv_val}
+
+        # Near-target
+        if tp_snapped is not None:
+            if abs(float(current_close) - float(tp_snapped)) <= tol:
+                return {"status": "near", "distance": abs(float(current_close) - float(tp_snapped)), "snapped_target": float(tp_snapped)}
+
+    except Exception:
+        return result
+
+    return result
+
 OVERLAY_JSON_INSTRUCTION = """
 
 Additionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:
@@ -1084,13 +1141,33 @@ if st.session_state.run_model:
             if ai_eligible:
                 os.makedirs("ai_analysis", exist_ok=True)
                 analysis_date = datetime.date.today().strftime("%Y-%m-%d")
-                analysis_file = f"ai_analysis/{ticker}_{timeframe}_{analysis_date}.json"
+                # Use a single cache file per ticker/timeframe (overwrite on revalidate)
+                analysis_file = f"ai_analysis/{ticker}_{timeframe}.json"
                 if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
                     with open(analysis_file, "r") as f:
                         st.session_state.ai_analysis = json.load(f)
                     # Auto-enable overlay if cached analysis has overlay data
                     if st.session_state.ai_analysis.get("overlay"):
                         st.session_state.ai_overlay_visible = True
+                # Compute status for cached analysis against latest close and update cache if changed
+                try:
+                    if st.session_state.ai_analysis is not None:
+                        last_row = df.iloc[-1]
+                        current_close_val = float(last_row["Close"])
+                        overlay = st.session_state.ai_analysis.get("overlay")
+                        status_info = compute_overlay_status(overlay, current_close_val, df)
+                        if status_info and status_info.get("status") != st.session_state.ai_analysis.get("status"):
+                            # merge status into cached analysis and overwrite file atomically
+                            st.session_state.ai_analysis.update(status_info)
+                            tmp_path = analysis_file + ".tmp"
+                            with open(tmp_path, "w") as _tf:
+                                json.dump(st.session_state.ai_analysis, _tf, indent=4)
+                            os.replace(tmp_path, analysis_file)
+                            # ensure overlay visibility if overlay exists
+                            if st.session_state.ai_analysis.get("overlay"):
+                                st.session_state.ai_overlay_visible = True
+                except Exception:
+                    pass
 
             has_overlay = (st.session_state.ai_analysis is not None and
                            st.session_state.ai_analysis.get("overlay") is not None)
@@ -1108,8 +1185,17 @@ if st.session_state.run_model:
                         disabled=True,
                         help="AI analysis is available for daily charts with a date range ≤ 1 year"
                     )
+                    ai_btn_clicked = False
                 else:
-                    ai_btn_clicked = st.button("🤖 Generate AI Analysis", key="ai_analysis_btn")
+                    # Single cache file per ticker/timeframe
+                    cache_path = f"ai_analysis/{ticker}_{timeframe}.json"
+                    cache_exists = os.path.exists(cache_path)
+                    btn_label = "Revalidate AI Analysis" if cache_exists else "🤖 Generate AI Analysis"
+                    ai_btn_clicked = st.button(btn_label, key="ai_analysis_btn")
+                    # Show cache info when available
+                    if cache_exists and st.session_state.ai_analysis:
+                        cache_date = st.session_state.ai_analysis.get("date", "unknown")
+                        st.caption(f"Cached: {cache_date}")
 
             # if timeframe in ["5m", "15m", "30m", "1h", "4h"]: 
             #     df = df.iloc[:-1]
@@ -1496,9 +1582,18 @@ if st.session_state.run_model:
                 # Target price (dotted green)
                 if _overlay.get("target_price"):
                     _tp = _overlay["target_price"]
+                    # If status indicates target hit, annotate accordingly
+                    status = st.session_state.ai_analysis.get("status") if st.session_state.ai_analysis else None
+                    status_date = st.session_state.ai_analysis.get("status_date") if st.session_state.ai_analysis else None
+                    if status == "hit":
+                        ann_text = f"\U0001f3af Target (HIT: {status_date}): {_tp:.2f}"
+                    elif status == "invalidated":
+                        ann_text = f"\U0001f3af Target: {_tp:.2f}"
+                    else:
+                        ann_text = f"\U0001f3af Target: {_tp:.2f}"
                     fig.add_hline(
                         y=_tp, line_dash="dot", line_color="#00ff88", line_width=1.5,
-                        annotation_text=f"\U0001f3af Target: {_tp:.2f}",
+                        annotation_text=ann_text,
                         annotation_position="top left",
                         annotation_font=dict(color="#00ff88", size=11),
                         row=1, col=1
@@ -1507,9 +1602,15 @@ if st.session_state.run_model:
                 # Invalidation price (dotted red)
                 if _overlay.get("invalidation_price"):
                     _inv = _overlay["invalidation_price"]
+                    status = st.session_state.ai_analysis.get("status") if st.session_state.ai_analysis else None
+                    status_date = st.session_state.ai_analysis.get("status_date") if st.session_state.ai_analysis else None
+                    if status == "invalidated":
+                        ann_text = f"\u26d4 Invalidation (TRIGGERED: {status_date}): {_inv:.2f}"
+                    else:
+                        ann_text = f"\u26d4 Invalidation: {_inv:.2f}"
                     fig.add_hline(
                         y=_inv, line_dash="dot", line_color="#ff4444", line_width=1.5,
-                        annotation_text=f"\u26d4 Invalidation: {_inv:.2f}",
+                        annotation_text=ann_text,
                         annotation_position="bottom left",
                         annotation_font=dict(color="#ff4444", size=11),
                         row=1, col=1
@@ -1811,6 +1912,7 @@ if st.session_state.run_model:
                             "with a neckline connecting the troughs.\n"
                             "- If the price action does not clearly match any pattern, say 'No clear pattern' "
                             "rather than forcing a classification.\n"
+                            "\nWhen producing analysis, always compare your recommended `target_price` and `invalidation_price` to the provided `Current Close`. Use a tolerance of 0.5% when checking hits. If the current close has already reached or crossed the target (within tolerance), clearly state: 'Target Achieved on YYYY-MM-DD at PRICE', lower the signal confidence and provide a next-action (either a new target from swing levels or a watch/invalidation plan). If invalidation has already been triggered, clearly state 'Invalidated on YYYY-MM-DD at PRICE' and explain the consequence. Do not change the JSON overlay schema — include any status notes in the textual analysis as described."
                         )
 
                         # --- 4) Check for cached analysis → revalidate or generate fresh ---
@@ -1841,6 +1943,7 @@ if st.session_state.run_model:
                                     "Be specific with price levels and dates. Keep it concise and actionable."
                                     "\n\nIf providing an updated analysis, also include the JSON overlay block "
                                     "at the end (same format as the original request).\n"
+                                    "\nBefore finalizing your response, compare the `Current Close` to your `target_price` and `invalidation_price` using a 0.5% tolerance. If the target is already met or the invalidation triggered, state this explicitly in the analysis (e.g., 'Target Achieved on YYYY-MM-DD at PRICE' or 'Invalidated on YYYY-MM-DD at PRICE') and adjust Signal Confidence and next-action guidance accordingly."
                                     + OVERLAY_JSON_INSTRUCTION
                                 )
 
@@ -1889,8 +1992,20 @@ if st.session_state.run_model:
                                         "response": clean_text,
                                         "overlay": overlay_data
                                     }
-                                    with open(analysis_file, "w") as f:
+                                    # Compute status metadata and attach
+                                    try:
+                                        status_meta = compute_overlay_status(analysis_result.get("overlay"), float(last_row["Close"]), df)
+                                        if status_meta:
+                                            analysis_result.update(status_meta)
+                                    except Exception:
+                                        pass
+
+                                    # Write atomically
+                                    tmp_path = analysis_file + ".tmp"
+                                    with open(tmp_path, "w") as f:
                                         json.dump(analysis_result, f, indent=4)
+                                    os.replace(tmp_path, analysis_file)
+
                                     st.session_state.ai_analysis = analysis_result
                                     st.session_state.ai_overlay_visible = True
                                     st.session_state.ai_toast = "🔄 AI updated the analysis"
@@ -1916,6 +2031,7 @@ if st.session_state.run_model:
                                     "what is the most probable next move? Include a target price and an invalidation level.\n\n"
                                     "5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\n"
                                     "Be specific with price levels and dates where visible. Keep the analysis concise and actionable."
+                                    "\nBefore finalizing your response, compare the `Current Close` to your `target_price` and `invalidation_price` using a 0.5% tolerance. If the target is already met or the invalidation triggered, state this explicitly in the analysis (e.g., 'Target Achieved on YYYY-MM-DD at PRICE' or 'Invalidated on YYYY-MM-DD at PRICE') and adjust Signal Confidence and next-action guidance accordingly."
                                     + OVERLAY_JSON_INSTRUCTION
                                 )
 
@@ -1961,8 +2077,19 @@ if st.session_state.run_model:
                                     "overlay": overlay_data
                                 }
 
-                                with open(analysis_file, "w") as f:
+                                # Compute status metadata and attach (hit/invalidated/near/open)
+                                try:
+                                    status_meta = compute_overlay_status(analysis_result.get("overlay"), float(last_row["Close"]), df)
+                                    if status_meta:
+                                        analysis_result.update(status_meta)
+                                except Exception:
+                                    pass
+
+                                # Write atomically
+                                tmp_path = analysis_file + ".tmp"
+                                with open(tmp_path, "w") as f:
                                     json.dump(analysis_result, f, indent=4)
+                                os.replace(tmp_path, analysis_file)
 
                                 st.session_state.ai_analysis = analysis_result
                                 st.session_state.ai_overlay_visible = True
