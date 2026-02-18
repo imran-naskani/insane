@@ -1,0 +1,46 @@
+{
+    "ticker": "TSLA",
+    "timeframe": "1d",
+    "date": "2026-02-17",
+    "date_range": "2025-02-24 to 2026-02-18",
+    "last_signal": "Turn_Up (LONG)",
+    "last_signal_date": "2026-02-10",
+    "current_close": 410.6300048828125,
+    "model": "gpt-4o",
+    "prompt": "Ticker: TSLA\nTimeframe: 1d\nDate Range: 2025-02-24 to 2026-02-18\nCurrent Close: 410.63\nMomentum Trend: 415.97 (Close is below trend line)\nLast Signal: Turn_Up (LONG) on 2026-02-10\nTOS RSI(9): 37.1\nRSI(14): 42.2\nBacktest Win Rate (Same-Bar): 47.4%\nBacktest Profit Factor (Same-Bar): 2.37\nSwing Highs: 2025-06-23 at 357.54, 2025-07-21 at 338.0, 2025-08-13 at 348.98, 2025-08-27 at 355.39, 2025-10-02 at 470.75, 2025-11-03 at 474.07, 2025-12-22 at 498.83, 2026-01-23 at 452.43\nSwing Lows: 2025-08-20 at 314.6, 2025-09-02 at 325.6, 2025-10-10 at 411.45, 2025-10-23 at 413.9, 2025-11-14 at 382.78, 2026-01-08 at 424.37, 2026-01-20 at 417.44, 2026-02-05 at 387.53\nBased on the chart and context above, provide:\n\n1. **Pattern Recognition**: Identify any classical chart pattern currently forming. FIRST describe the prior trend (direction, strength, duration), THEN classify the pattern. A consolidation after a strong move is likely a flag/pennant (continuation), NOT a double top/bottom (reversal). Only call it a double top if two peaks are at nearly the same price with a meaningful trough between them AND the prior trend shows exhaustion. ONLY identify patterns with straight-line boundaries that can be drawn with trendlines. If you see curved patterns (cup & handle, rounding bottom), describe them in text but note the pattern overlay cannot be drawn due to its curved nature. Describe where the pattern starts and its current stage.\n\n2. **Signal Confidence**: Rate your confidence (1-10) in the most recent trading signal. Explain what supports or undermines it (volume, RSI divergence, momentum alignment).\n\n3. **Key Price Levels**: Identify the most important support and resistance levels visible on the chart. Include approximate price values.\n\n4. **Expected Move**: Based on the trend, momentum, and pattern context, what is the most probable next move? Include a target price and an invalidation level.\n\n5. **Risk Assessment**: Any warning signs or divergences that traders should watch for?\n\nBe specific with price levels and dates where visible. Keep the analysis concise and actionable.\nBefore finalizing your response, compare the `Current Close` to your `target_price` and `invalidation_price` using a 0.5% tolerance. If the target is already met or the invalidation triggered, state this explicitly in the analysis (e.g., 'Target Achieved on YYYY-MM-DD at PRICE' or 'Invalidated on YYYY-MM-DD at PRICE') and adjust Signal Confidence and next-action guidance accordingly.\n\nAdditionally, at the END of your response, include a structured JSON block wrapped in ```json ... ``` code fences with this exact schema:\n```json\n{\n  \"support_levels\": [price1, price2],\n  \"resistance_levels\": [price1, price2],\n  \"direction\": \"BULLISH\",\n  \"pattern\": {\n    \"name\": \"Pattern Name\",\n    \"points\": [\n      {\"date\": \"YYYY-MM-DD\", \"price\": 123.45, \"role\": \"upper\"},\n      {\"date\": \"YYYY-MM-DD\", \"price\": 100.00, \"role\": \"lower\"}\n    ]\n  },\n  \"target_price\": 123.45,\n  \"invalidation_price\": 100.00\n}\n```\nJSON rules:\n- support_levels: 1-3 most important support prices visible on the chart\n- resistance_levels: 1-3 most important resistance prices visible on the chart\n- direction: \"BULLISH\" or \"BEARISH\" \u2014 your directional bias based on the analysis\n- pattern.name: The chart pattern identified \u2014 ONLY linear-boundary patterns that can be drawn with straight trendlines:\n  ALLOWED: Ascending Triangle, Descending Triangle, Symmetrical Triangle, Rising Wedge, Falling Wedge, Bull Flag, Bear Flag, Channel Up, Channel Down, Head & Shoulders, Inverse Head & Shoulders, Double Top, Double Bottom\n  NOT ALLOWED (set pattern to null instead): Cup & Handle, Rounding Bottom, Rounding Top, Saucer, or any pattern requiring curved lines. Describe these in the text analysis but mention the pattern overlay cannot be drawn for this pattern type due to its curved nature.\n- pattern.points: 3-6 key boundary vertices that outline the pattern shape (NOT individual price swings). Each point has:\n  - \"date\": YYYY-MM-DD format\n  - \"price\": numeric price at that vertex\n  - \"role\": either \"upper\" (upper trendline/boundary) or \"lower\" (lower trendline/boundary)\n  For channels/triangles/wedges: place 2-3 points on the upper trendline and 2-3 on the lower trendline. Upper points should form one straight line, lower points another.\n  For bull flag / bear flag: The flag is the CONSOLIDATION zone only (NOT the flagpole). Place 2 upper points along the top edge of the consolidation (recent swing highs within the flag) and 2 lower points along the bottom edge (recent swing lows within the flag). These should form two roughly parallel, slightly sloping lines. Do NOT use the flagpole base or tip as flag boundary points.\n  For head & shoulders: mark the left shoulder peak, head peak, right shoulder peak (upper), and the two neckline points (lower).\n  For double top/bottom: mark the two peaks (upper) and the valley/neckline (lower), or vice versa.\n  IMPORTANT: Each boundary (upper and lower) needs at least 2 points to draw a trendline. Never leave a boundary with only 1 point.\n  Points should be in chronological order.\n- target_price: Your projected target price (numeric). MUST be above current close for BULLISH, below for BEARISH.\n- invalidation_price: Price level that invalidates the thesis (numeric). MUST be below current close for BULLISH, above for BEARISH.\n- All prices MUST be numeric (no strings). All dates MUST be YYYY-MM-DD format.\n- CRITICAL: For pattern points, you MUST use dates and prices ONLY from the \"Swing Highs\" and \"Swing Lows\" lists provided in the context data. Use swing highs for \"upper\" role points and swing lows for \"lower\" role points. Do NOT estimate prices from the chart image.\n- For support_levels, use prices from the Swing Lows list. For resistance_levels, use prices from the Swing Highs list.\n- If no clear pattern exists, or the pattern requires curved lines (cup & handle, rounding bottom, etc.), set pattern to null.\n- IMPORTANT: In your text response, NEVER mention \"JSON\", \"null\", \"set to null\", or any implementation details. If a pattern cannot be overlaid, simply say the pattern overlay cannot be drawn for this pattern type due to its curved nature.",
+    "response": "### Pattern Recognition\n\n**Prior Trend:**  \nThe prior trend was a strong uptrend from early 2025 to late 2025, peaking around December 2025.\n\n**Current Pattern:**  \nThe chart shows a potential **Double Top** pattern forming with peaks around 2025-12-22 (498.83) and 2026-01-23 (452.43), separated by a trough at 2025-11-14 (382.78). This pattern suggests a possible reversal from the previous uptrend.\n\n### Signal Confidence\n\n**Confidence Level:** 5/10  \nThe recent LONG signal is undermined by the current close being below the momentum trend line and RSI levels indicating potential bearishness. The backtest win rate is moderate, but the profit factor is relatively strong, suggesting some potential for gains.\n\n### Key Price Levels\n\n- **Support Levels:** 387.53, 382.78\n- **Resistance Levels:** 452.43, 498.83\n\n### Expected Move\n\n**Probable Next Move:**  \nGiven the Double Top pattern and current bearish indicators, a move towards the support level at 382.78 is likely.\n\n- **Target Price:** 382.78\n- **Invalidation Level:** 452.43\n\n### Risk Assessment\n\n**Warning Signs:**  \n- RSI is below 50, indicating bearish momentum.\n- Price is below the momentum trend line, suggesting further downside risk.\n- Watch for a break below the recent swing low at 387.53, which could accelerate the downward move.",
+    "overlay": {
+        "support_levels": [
+            387.53,
+            382.78
+        ],
+        "resistance_levels": [
+            452.43,
+            498.83
+        ],
+        "direction": "BEARISH",
+        "pattern": {
+            "name": "Double Top",
+            "points": [
+                {
+                    "date": "2025-12-22",
+                    "price": 498.83,
+                    "role": "upper"
+                },
+                {
+                    "date": "2026-01-23",
+                    "price": 452.43,
+                    "role": "upper"
+                },
+                {
+                    "date": "2025-11-14",
+                    "price": 382.78,
+                    "role": "lower"
+                }
+            ]
+        },
+        "target_price": 382.78,
+        "invalidation_price": 452.43
+    },
+    "status": "open"
+}
