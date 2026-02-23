@@ -749,11 +749,21 @@
     {
         "date": "2026-02-20",
         "signal": "UP",
-        "strength": "Weak",
+        "strength": "Strong",
         "turn_up": true,
         "turn_down": false,
         "close": 23.649999618530273,
         "smooth": 23.378824187411496,
         "slope": 0.1513857370832845
+    },
+    {
+        "date": "2026-02-23",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 23.0,
+        "smooth": 23.243107554763313,
+        "slope": -0.13571663264818312
     }
 ]
