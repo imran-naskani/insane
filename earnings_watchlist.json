@@ -1,2136 +1,1926 @@
 {
-    "generated": "2026-02-22 11:49:13",
-    "scan_from": "2026-02-22",
-    "scan_to": "2026-03-01",
-    "count": 304,
+    "generated": "2026-03-01 14:31:01",
+    "scan_from": "2026-03-01",
+    "scan_to": "2026-03-08",
+    "count": 274,
     "watchlist": [
+        {
+            "symbol": "AIRS",
+            "earnings_date": "2026-03-06",
+            "hour": "amc",
+            "eps_estimate": -0.0306,
+            "revenue_estimate": 35201903
+        },
+        {
+            "symbol": "JANX",
+            "earnings_date": "2026-03-06",
+            "hour": "amc",
+            "eps_estimate": -0.6571,
+            "revenue_estimate": 170003
+        },
+        {
+            "symbol": "DTI",
+            "earnings_date": "2026-03-06",
+            "hour": "bmo",
+            "eps_estimate": -0.0202,
+            "revenue_estimate": 38009330
+        },
+        {
+            "symbol": "LGVN",
+            "earnings_date": "2026-03-06",
+            "hour": "bmo",
+            "eps_estimate": -0.4233,
+            "revenue_estimate": 164556
+        },
+        {
+            "symbol": "GIPR",
+            "earnings_date": "2026-03-06",
+            "hour": "",
+            "eps_estimate": -0.4794,
+            "revenue_estimate": 2480640
+        },
+        {
+            "symbol": "TUSK",
+            "earnings_date": "2026-03-06",
+            "hour": "bmo",
+            "eps_estimate": -0.0816,
+            "revenue_estimate": 40072740
+        },
+        {
+            "symbol": "HURC",
+            "earnings_date": "2026-03-06",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "LOAN",
+            "earnings_date": "2026-03-06",
+            "hour": "",
+            "eps_estimate": 0.102,
+            "revenue_estimate": 1482060
+        },
+        {
+            "symbol": "GEVO",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0306,
+            "revenue_estimate": 46902456
+        },
+        {
+            "symbol": "KVAC",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "GPRO",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0408,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "KURA",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.6189,
+            "revenue_estimate": 56272614
+        },
+        {
+            "symbol": "AVIR",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.5406,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "GDYN",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0935,
+            "revenue_estimate": 108035003
+        },
+        {
+            "symbol": "EVAX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.3026,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "ITRN",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.765,
+            "revenue_estimate": 96085020
+        },
+        {
+            "symbol": "AMTX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.2162,
+            "revenue_estimate": 86985090
+        },
+        {
+            "symbol": "FIZZ",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.4488,
+            "revenue_estimate": 276481200
+        },
+        {
+            "symbol": "PKOH",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.7497,
+            "revenue_estimate": 410958000
+        },
+        {
+            "symbol": "ALT",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.2451,
+            "revenue_estimate": 717
+        },
+        {
+            "symbol": "OLPX",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.0083,
+            "revenue_estimate": 106590142
+        },
+        {
+            "symbol": "CLPS",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "BRID",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "DOMO",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0328,
+            "revenue_estimate": 80226396
+        },
+        {
+            "symbol": "LMNR",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": -0.3366,
+            "revenue_estimate": 16544736
+        },
+        {
+            "symbol": "BCIC",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.5444,
+            "revenue_estimate": 17985323
+        },
+        {
+            "symbol": "IRIX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0204,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "COO",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 1.0403,
+            "revenue_estimate": 1036831993
+        },
+        {
+            "symbol": "LXRX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0704,
+            "revenue_estimate": 3204432
+        },
+        {
+            "symbol": "REFR",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "XOMA",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.153,
+            "revenue_estimate": 11351988
+        },
+        {
+            "symbol": "SAMG",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.2244,
+            "revenue_estimate": 32569620
+        },
+        {
+            "symbol": "PMTS",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.5636,
+            "revenue_estimate": 148126695
+        },
+        {
+            "symbol": "PRTS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.204,
+            "revenue_estimate": 121288200
+        },
+        {
+            "symbol": "TEAD",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.1232,
+            "revenue_estimate": 362603115
+        },
+        {
+            "symbol": "PTRN",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0986,
+            "revenue_estimate": 700563744
+        },
+        {
+            "symbol": "MRVL",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.804,
+            "revenue_estimate": 2248705015
+        },
+        {
+            "symbol": "ORKA",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": -0.64,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "NDLS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -1.0608,
+            "revenue_estimate": 124848000
+        },
+        {
+            "symbol": "BKHA",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "NEPH",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0102,
+            "revenue_estimate": 4540020
+        },
+        {
+            "symbol": "KLRS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.5421,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "DRTS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.126,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "ALNT",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.4549,
+            "revenue_estimate": 136004148
+        },
+        {
+            "symbol": "LTRN",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.4692,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BBCP",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0802,
+            "revenue_estimate": 86513003
+        },
+        {
+            "symbol": "ASLE",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.1989,
+            "revenue_estimate": 101699100
+        },
+        {
+            "symbol": "BILI",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 1.8368,
+            "revenue_estimate": 8295515251
+        },
+        {
+            "symbol": "TOUR",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "RGNX",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.8222,
+            "revenue_estimate": 47292871
+        },
+        {
+            "symbol": "ATER",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.5916,
+            "revenue_estimate": 18749640
+        },
+        {
+            "symbol": "TLSI",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.1326,
+            "revenue_estimate": 13169362
+        },
+        {
+            "symbol": "CMCT",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "OCCI",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": 0.2244,
+            "revenue_estimate": 12156360
+        },
+        {
+            "symbol": "VRDN",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -1.1077,
+            "revenue_estimate": 12985854
+        },
+        {
+            "symbol": "AEYE",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0286,
+            "revenue_estimate": 10707552
+        },
+        {
+            "symbol": "TLPH",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0816,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BANX",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "FLL",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.2349,
+            "revenue_estimate": 77065626
+        },
+        {
+            "symbol": "RNAC",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.8704,
+            "revenue_estimate": 96563
+        },
+        {
+            "symbol": "EVGN",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.2652,
+            "revenue_estimate": 280500
+        },
+        {
+            "symbol": "FHTX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.2585,
+            "revenue_estimate": 9689775
+        },
+        {
+            "symbol": "MDWD",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": -0.6443,
+            "revenue_estimate": 6233424
+        },
+        {
+            "symbol": "LQDA",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.1835,
+            "revenue_estimate": 85306680
+        },
+        {
+            "symbol": "III",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0768,
+            "revenue_estimate": 61878862
+        },
+        {
+            "symbol": "SSYS",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.0587,
+            "revenue_estimate": 142104360
+        },
+        {
+            "symbol": "AVO",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": 0.0741,
+            "revenue_estimate": 280140336
+        },
+        {
+            "symbol": "AIMD",
+            "earnings_date": "2026-03-05",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "DSGR",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.323,
+            "revenue_estimate": 506226000
+        },
+        {
+            "symbol": "GENK",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.1836,
+            "revenue_estimate": 59945400
+        },
+        {
+            "symbol": "BVS",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.2188,
+            "revenue_estimate": 156395470
+        },
+        {
+            "symbol": "CTNM",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.4138,
+            "revenue_estimate": 6120000
+        },
+        {
+            "symbol": "SGA",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.0404,
+            "revenue_estimate": 27977000
+        },
+        {
+            "symbol": "CRVS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.1319,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "FNKO",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.0034,
+            "revenue_estimate": 265883400
+        },
+        {
+            "symbol": "OPRX",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.2312,
+            "revenue_estimate": 31722336
+        },
+        {
+            "symbol": "COST",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 4.6434,
+            "revenue_estimate": 70567223213
+        },
+        {
+            "symbol": "OMDA",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.0523,
+            "revenue_estimate": 71064868
+        },
+        {
+            "symbol": "SWBI",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 0.051,
+            "revenue_estimate": 128099250
+        },
+        {
+            "symbol": "CGEM",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": -0.8256,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BRLT",
+            "earnings_date": "2026-03-05",
+            "hour": "bmo",
+            "eps_estimate": 0.0224,
+            "revenue_estimate": 128120496
+        },
+        {
+            "symbol": "KINS",
+            "earnings_date": "2026-03-05",
+            "hour": "amc",
+            "eps_estimate": 1.071,
+            "revenue_estimate": 70380000
+        },
+        {
+            "symbol": "PMVP",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.4131,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "KRMD",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0202,
+            "revenue_estimate": 11037828
+        },
+        {
+            "symbol": "ATNI",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0306,
+            "revenue_estimate": 187272000
+        },
+        {
+            "symbol": "BWMN",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.2681,
+            "revenue_estimate": 130003590
+        },
+        {
+            "symbol": "SLNG",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.051,
+            "revenue_estimate": 22338000
+        },
+        {
+            "symbol": "NAGE",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0224,
+            "revenue_estimate": 32339100
+        },
+        {
+            "symbol": "RPAY",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.2142,
+            "revenue_estimate": 78343140
+        },
+        {
+            "symbol": "DXPE",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 1.2988,
+            "revenue_estimate": 517246080
+        },
+        {
+            "symbol": "NXTC",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -2.465,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "ASPS",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "EWCZ",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.0547,
+            "revenue_estimate": 47209884
+        },
+        {
+            "symbol": "AWRE",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "ALTO",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0204,
+            "revenue_estimate": 239526600
+        },
+        {
+            "symbol": "LUNG",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.3998,
+            "revenue_estimate": 22162896
+        },
+        {
+            "symbol": "NCMI",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.2601,
+            "revenue_estimate": 93739428
+        },
+        {
+            "symbol": "BULL",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0408,
+            "revenue_estimate": 159256680
+        },
+        {
+            "symbol": "RDVT",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.1474,
+            "revenue_estimate": 22444080
+        },
+        {
+            "symbol": "MRCC",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0918,
+            "revenue_estimate": 8037600
+        },
+        {
+            "symbol": "NNBR",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0102,
+            "revenue_estimate": 107470770
+        },
+        {
+            "symbol": "NUVL",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -1.5051,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "RGTI",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0332,
+            "revenue_estimate": 2385372
+        },
+        {
+            "symbol": "EYPT",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": -0.7627,
+            "revenue_estimate": 1030200
+        },
+        {
+            "symbol": "VYNE",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.1836,
+            "revenue_estimate": 204000
+        },
+        {
+            "symbol": "SLDB",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.5135,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "KROS",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.6413,
+            "revenue_estimate": 2812282
+        },
+        {
+            "symbol": "DAKT",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.1326,
+            "revenue_estimate": 184620000
+        },
+        {
+            "symbol": "XNCR",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.6152,
+            "revenue_estimate": 32319903
+        },
+        {
+            "symbol": "NKTR",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -2.5236,
+            "revenue_estimate": 10611702
+        },
+        {
+            "symbol": "CLPT",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.204,
+            "revenue_estimate": 10251000
+        },
+        {
+            "symbol": "PROP",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.1765,
+            "revenue_estimate": 114648000
+        },
+        {
+            "symbol": "INTZ",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0918,
+            "revenue_estimate": 2096610
+        },
+        {
+            "symbol": "OCGN",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": -0.0592,
+            "revenue_estimate": 877200
+        },
+        {
+            "symbol": "INVA",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.561,
+            "revenue_estimate": 104676480
+        },
+        {
+            "symbol": "ICCC",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "OKTA",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.8637,
+            "revenue_estimate": 763770247
+        },
+        {
+            "symbol": "DXR",
+            "earnings_date": "2026-03-04",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "AQST",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.1352,
+            "revenue_estimate": 13549904
+        },
+        {
+            "symbol": "EM",
+            "earnings_date": "2026-03-04",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "CDLX",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0714,
+            "revenue_estimate": 55539255
+        },
+        {
+            "symbol": "CTMX",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0955,
+            "revenue_estimate": 8058000
+        },
+        {
+            "symbol": "GWRS",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.0204,
+            "revenue_estimate": 14025000
+        },
+        {
+            "symbol": "VINP",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 1.2614,
+            "revenue_estimate": 275562180
+        },
+        {
+            "symbol": "MVIS",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.051,
+            "revenue_estimate": 3060000
+        },
+        {
+            "symbol": "AFCG",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.0272,
+            "revenue_estimate": 5940143
+        },
+        {
+            "symbol": "SGHT",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.1522,
+            "revenue_estimate": 20782061
+        },
+        {
+            "symbol": "ACET",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -2.858,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BLLN",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0866,
+            "revenue_estimate": 88904097
+        },
+        {
+            "symbol": "REVB",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -3.7332,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "CCRN",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.0306,
+            "revenue_estimate": 259375290
+        },
+        {
+            "symbol": "MRAM",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.1173,
+            "revenue_estimate": 14739000
+        },
+        {
+            "symbol": "ACFN",
+            "earnings_date": "2026-03-04",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "IMA",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -1.4611,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "EYE",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 0.0609,
+            "revenue_estimate": 500269160
+        },
+        {
+            "symbol": "REAX",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": -0.0332,
+            "revenue_estimate": 484272540
+        },
+        {
+            "symbol": "WIX",
+            "earnings_date": "2026-03-04",
+            "hour": "bmo",
+            "eps_estimate": 1.4454,
+            "revenue_estimate": 533102492
+        },
+        {
+            "symbol": "HDSN",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0842,
+            "revenue_estimate": 38883165
+        },
+        {
+            "symbol": "RAPT",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.7892,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BYND",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.1326,
+            "revenue_estimate": 63820380
+        },
+        {
+            "symbol": "XLO",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.1212,
+            "revenue_estimate": 8039600
+        },
+        {
+            "symbol": "AVGO",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 2.0595,
+            "revenue_estimate": 19510844498
+        },
+        {
+            "symbol": "TSHA",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0969,
+            "revenue_estimate": 2101944
+        },
+        {
+            "symbol": "GO",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.2186,
+            "revenue_estimate": 1259679617
+        },
+        {
+            "symbol": "VMD",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": 0.1263,
+            "revenue_estimate": 78477000
+        },
+        {
+            "symbol": "ALLO",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.22,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "OABI",
+            "earnings_date": "2026-03-04",
+            "hour": "amc",
+            "eps_estimate": -0.0903,
+            "revenue_estimate": 9183498
+        },
+        {
+            "symbol": "ADV",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.1111,
+            "revenue_estimate": 894052000
+        },
+        {
+            "symbol": "OCS",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.4269,
+            "revenue_estimate": 132461
+        },
+        {
+            "symbol": "AXON",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 1.637,
+            "revenue_estimate": 770509744
+        },
+        {
+            "symbol": "WAVE",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": -0.1734,
+            "revenue_estimate": 153000
+        },
+        {
+            "symbol": "SGC",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.2096,
+            "revenue_estimate": 146012670
+        },
+        {
+            "symbol": "PLRX",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.4063,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "STAA",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0583,
+            "revenue_estimate": 76877063
+        },
+        {
+            "symbol": "CYRX",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.2097,
+            "revenue_estimate": 43779756
+        },
+        {
+            "symbol": "QNCX",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.2258,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "MRX",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 1.0329,
+            "revenue_estimate": 514210594
+        },
+        {
+            "symbol": "OFLX",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "BEAM",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -1.0115,
+            "revenue_estimate": 12817952
+        },
+        {
+            "symbol": "GUTS",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1836,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "SAVA",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.306,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "CPIX",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "FSTR",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.6698,
+            "revenue_estimate": 161061396
+        },
+        {
+            "symbol": "SRRK",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.9081,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "OMER",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.5814,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "SOPH",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.2423,
+            "revenue_estimate": 20935500
+        },
+        {
+            "symbol": "FVN",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "NPCE",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1545,
+            "revenue_estimate": 25287075
+        },
+        {
+            "symbol": "GTLB",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.2348,
+            "revenue_estimate": 257346244
+        },
+        {
+            "symbol": "MASS",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.0714,
+            "revenue_estimate": 16159860
+        },
+        {
+            "symbol": "EOLS",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.051,
+            "revenue_estimate": 91460482
+        },
+        {
+            "symbol": "SRAD",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.0933,
+            "revenue_estimate": 376246951
+        },
+        {
+            "symbol": "CYN",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -1.01,
+            "revenue_estimate": 303000
+        },
+        {
+            "symbol": "QUIK",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1122,
+            "revenue_estimate": 3587340
+        },
+        {
+            "symbol": "WW",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -1.2412,
+            "revenue_estimate": 153571970
+        },
+        {
+            "symbol": "CXDO",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0779,
+            "revenue_estimate": 18490560
+        },
+        {
+            "symbol": "SAFT",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "ANTA",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.204,
+            "revenue_estimate": 27591000
+        },
+        {
+            "symbol": "AACB",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "LPSN",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -2.1998,
+            "revenue_estimate": 54031103
+        },
+        {
+            "symbol": "WBTN",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1547,
+            "revenue_estimate": 344232323
+        },
+        {
+            "symbol": "CRCT",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0272,
+            "revenue_estimate": 203668500
+        },
+        {
+            "symbol": "VSNT",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.9826,
+            "revenue_estimate": 1598348843
+        },
+        {
+            "symbol": "BBOT",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": -0.5275,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "RNA",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -1.2709,
+            "revenue_estimate": 3384732
+        },
+        {
+            "symbol": "AMWD",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.2805,
+            "revenue_estimate": 376168350
+        },
+        {
+            "symbol": "OXSQ",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.0714,
+            "revenue_estimate": 10347900
+        },
+        {
+            "symbol": "FRPH",
+            "earnings_date": "2026-03-03",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "ALEC",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.3914,
+            "revenue_estimate": 2725950
+        },
+        {
+            "symbol": "HYFM",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -2.9784,
+            "revenue_estimate": 28137720
+        },
+        {
+            "symbol": "HYMC",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.306,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "CRWD",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 1.1237,
+            "revenue_estimate": 1323093999
+        },
+        {
+            "symbol": "ICCM",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.0459,
+            "revenue_estimate": 1938000
+        },
+        {
+            "symbol": "SND",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0505,
+            "revenue_estimate": 80800000
+        },
+        {
+            "symbol": "EML",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.3636,
+            "revenue_estimate": 69366800
+        },
+        {
+            "symbol": "MCHX",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.0102,
+            "revenue_estimate": 11188380
+        },
+        {
+            "symbol": "ARCT",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.7274,
+            "revenue_estimate": 18022492
+        },
+        {
+            "symbol": "QSI",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1246,
+            "revenue_estimate": 769620
+        },
+        {
+            "symbol": "AMLX",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.3681,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "HCAT",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0928,
+            "revenue_estimate": 75464088
+        },
+        {
+            "symbol": "FTEK",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.0306,
+            "revenue_estimate": 7616340
+        },
+        {
+            "symbol": "EVGO",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.0759,
+            "revenue_estimate": 102602820
+        },
+        {
+            "symbol": "WEYS",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "SWIM",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.0822,
+            "revenue_estimate": 98721852
+        },
+        {
+            "symbol": "ACRS",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.1505,
+            "revenue_estimate": 2112552
+        },
+        {
+            "symbol": "BRCB",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": 0.0221,
+            "revenue_estimate": 54692400
+        },
+        {
+            "symbol": "UPLD",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": 0.1969,
+            "revenue_estimate": 51305316
+        },
+        {
+            "symbol": "SSTI",
+            "earnings_date": "2026-03-03",
+            "hour": "amc",
+            "eps_estimate": -0.153,
+            "revenue_estimate": 25165297
+        },
+        {
+            "symbol": "SRTA",
+            "earnings_date": "2026-03-03",
+            "hour": "bmo",
+            "eps_estimate": -0.0255,
+            "revenue_estimate": 61557000
+        },
+        {
+            "symbol": "HROW",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.3761,
+            "revenue_estimate": 90216195
+        },
+        {
+            "symbol": "KSPI",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 1725.418,
+            "revenue_estimate": 1207574685000
+        },
+        {
+            "symbol": "LIF",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.1316,
+            "revenue_estimate": 140883011
+        },
+        {
+            "symbol": "OUST",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.3529,
+            "revenue_estimate": 41922000
+        },
+        {
+            "symbol": "OLMA",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.5393,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "INAB",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.629,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "CGEN",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 0.051,
+            "revenue_estimate": 1383803
+        },
+        {
+            "symbol": "TIL",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -2.0469,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "OFS",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.2323,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "CRBU",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.3162,
+            "revenue_estimate": 2573317
+        },
+        {
+            "symbol": "PLUG",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.1046,
+            "revenue_estimate": 222121983
+        },
+        {
+            "symbol": "ATRA",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.374,
+            "revenue_estimate": 2291430
+        },
+        {
+            "symbol": "CMMB",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.3162,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "CERS",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.0077,
+            "revenue_estimate": 59236500
+        },
+        {
+            "symbol": "BETR",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": -2.2134,
+            "revenue_estimate": 40104870
+        },
+        {
+            "symbol": "NEXT",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.4821,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "BEEP",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.1122,
+            "revenue_estimate": 8807016
+        },
+        {
+            "symbol": "STNE",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 2.6789,
+            "revenue_estimate": 3853594884
+        },
+        {
+            "symbol": "DAVE",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 3.2558,
+            "revenue_estimate": 160344000
+        },
+        {
+            "symbol": "ARTL",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -1.6014,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "HERE",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "UNIT",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.336,
+            "revenue_estimate": 903514837
+        },
+        {
+            "symbol": "TDUP",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.0408,
+            "revenue_estimate": 78744000
+        },
+        {
+            "symbol": "FATE",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.2751,
+            "revenue_estimate": 1344135
+        },
+        {
+            "symbol": "CYCN",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": -0.3876,
+            "revenue_estimate": 102000
+        },
+        {
+            "symbol": "SNAL",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.0408,
+            "revenue_estimate": 23460000
+        },
+        {
+            "symbol": "SCOR",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 1.9788,
+            "revenue_estimate": 93942000
+        },
+        {
+            "symbol": "HRZN",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.2958,
+            "revenue_estimate": 25889640
+        },
+        {
+            "symbol": "QTRX",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.459,
+            "revenue_estimate": 38901525
+        },
+        {
+            "symbol": "WHF",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 0.276,
+            "revenue_estimate": 17643356
+        },
+        {
+            "symbol": "NFE",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.8636,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "QURE",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.9712,
+            "revenue_estimate": 5419821
+        },
+        {
+            "symbol": "API",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "AAON",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 0.4575,
+            "revenue_estimate": 379797000
+        },
+        {
+            "symbol": "CPSH",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "PASG",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -2.6214,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "EM",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "ASTH",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 0.1081,
+            "revenue_estimate": 949060356
+        },
+        {
+            "symbol": "XERS",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": 0.0449,
+            "revenue_estimate": 83986800
+        },
+        {
+            "symbol": "ADIL",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -2.1896,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "RIOT",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.2912,
+            "revenue_estimate": 164521858
+        },
+        {
+            "symbol": "GASS",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": 0.3264,
+            "revenue_estimate": 40596000
+        },
+        {
+            "symbol": "IHRT",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.136,
+            "revenue_estimate": 1121361990
+        },
+        {
+            "symbol": "CORZ",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.0861,
+            "revenue_estimate": 124517724
+        },
+        {
+            "symbol": "MDB",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 1.4645,
+            "revenue_estimate": 673789028
+        },
+        {
+            "symbol": "SGRY",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.306,
+            "revenue_estimate": 883797921
+        },
+        {
+            "symbol": "CLDX",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -1.0288,
+            "revenue_estimate": 1506203
+        },
+        {
+            "symbol": "ACNT",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.1632,
+            "revenue_estimate": 49878000
+        },
+        {
+            "symbol": "SATS",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.7456,
+            "revenue_estimate": 3837747276
+        },
+        {
+            "symbol": "MPLT",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": -1.0149,
+            "revenue_estimate": 0
+        },
+        {
+            "symbol": "SENS",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.443,
+            "revenue_estimate": 14623995
+        },
+        {
+            "symbol": "LMB",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 1.0454,
+            "revenue_estimate": 199536408
+        },
+        {
+            "symbol": "JRVR",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.4318,
+            "revenue_estimate": 175424700
+        },
+        {
+            "symbol": "GAIA",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.0229,
+            "revenue_estimate": 25857000
+        },
+        {
+            "symbol": "CRDO",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.9744,
+            "revenue_estimate": 403122105
+        },
+        {
+            "symbol": "TREE",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 0.8874,
+            "revenue_estimate": 292216403
+        },
+        {
+            "symbol": "ZYME",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.4246,
+            "revenue_estimate": 13847856
+        },
+        {
+            "symbol": "RIGL",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 1.2717,
+            "revenue_estimate": 70075224
+        },
+        {
+            "symbol": "ASTS",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.1632,
+            "revenue_estimate": 41927242
+        },
+        {
+            "symbol": "URGN",
+            "earnings_date": "2026-03-02",
+            "hour": "bmo",
+            "eps_estimate": -0.5125,
+            "revenue_estimate": 40720827
+        },
+        {
+            "symbol": "KYNB",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -3.9627,
+            "revenue_estimate": 1703400
+        },
+        {
+            "symbol": "WHLR",
+            "earnings_date": "2026-03-02",
+            "hour": "",
+            "eps_estimate": null,
+            "revenue_estimate": null
+        },
+        {
+            "symbol": "TBPH",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": 1.1479,
+            "revenue_estimate": 51877200
+        },
+        {
+            "symbol": "RCKT",
+            "earnings_date": "2026-03-02",
+            "hour": "amc",
+            "eps_estimate": -0.4624,
+            "revenue_estimate": 0
+        },
         {
             "symbol": "RDNT",
             "earnings_date": "2026-03-01",
             "hour": "bmo",
             "eps_estimate": 0.2084,
             "revenue_estimate": 525980340
-        },
-        {
-            "symbol": "AVBP",
-            "earnings_date": "2026-03-01",
-            "hour": "bmo",
-            "eps_estimate": -0.8643,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "GOGO",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": 0.0077,
-            "revenue_estimate": 227106396
-        },
-        {
-            "symbol": "CLMT",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": -0.4039,
-            "revenue_estimate": 1078760333
-        },
-        {
-            "symbol": "DIBS",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": -0.0408,
-            "revenue_estimate": 23546700
-        },
-        {
-            "symbol": "LVRO",
-            "earnings_date": "2026-02-27",
-            "hour": "",
-            "eps_estimate": -0.0035,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "AMRX",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": 0.1883,
-            "revenue_estimate": 824053410
-        },
-        {
-            "symbol": "MKTW",
-            "earnings_date": "2026-02-27",
-            "hour": "amc",
-            "eps_estimate": -0.2244,
-            "revenue_estimate": 72012000
-        },
-        {
-            "symbol": "FLGT",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": 0.0306,
-            "revenue_estimate": 87088283
-        },
-        {
-            "symbol": "ESCA",
-            "earnings_date": "2026-02-27",
-            "hour": "",
-            "eps_estimate": 0.204,
-            "revenue_estimate": 58698960
-        },
-        {
-            "symbol": "PRME",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": -0.2564,
-            "revenue_estimate": 2387371
-        },
-        {
-            "symbol": "FDMT",
-            "earnings_date": "2026-02-27",
-            "hour": "amc",
-            "eps_estimate": -0.7777,
-            "revenue_estimate": 9363600
-        },
-        {
-            "symbol": "FLYE",
-            "earnings_date": "2026-02-27",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "BTSG",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": 0.357,
-            "revenue_estimate": 3449866735
-        },
-        {
-            "symbol": "CMPX",
-            "earnings_date": "2026-02-27",
-            "hour": "amc",
-            "eps_estimate": -0.0963,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "ANIP",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": 2.0353,
-            "revenue_estimate": 236164241
-        },
-        {
-            "symbol": "ALXO",
-            "earnings_date": "2026-02-27",
-            "hour": "bmo",
-            "eps_estimate": -0.3697,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "LIND",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.3284,
-            "revenue_estimate": 171217200
-        },
-        {
-            "symbol": "FIP",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.4299,
-            "revenue_estimate": 170757336
-        },
-        {
-            "symbol": "FDUS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.5042,
-            "revenue_estimate": 40162092
-        },
-        {
-            "symbol": "ACLX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -1.061,
-            "revenue_estimate": 12893881
-        },
-        {
-            "symbol": "ICG",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.005,
-            "revenue_estimate": 6089118
-        },
-        {
-            "symbol": "MNST",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.4929,
-            "revenue_estimate": 2080741023
-        },
-        {
-            "symbol": "NXST",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 3.7975,
-            "revenue_estimate": 1275740958
-        },
-        {
-            "symbol": "KYMR",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.8178,
-            "revenue_estimate": 15093960
-        },
-        {
-            "symbol": "AUPH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.221,
-            "revenue_estimate": 76342236
-        },
-        {
-            "symbol": "ICFI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 1.5218,
-            "revenue_estimate": 449761044
-        },
-        {
-            "symbol": "CDXS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0428,
-            "revenue_estimate": 36550822
-        },
-        {
-            "symbol": "CLOV",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1054,
-            "revenue_estimate": 476397120
-        },
-        {
-            "symbol": "DUOL",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.844,
-            "revenue_estimate": 281485881
-        },
-        {
-            "symbol": "AIRG",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.017,
-            "revenue_estimate": 12954000
-        },
-        {
-            "symbol": "FA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.2708,
-            "revenue_estimate": 403641096
-        },
-        {
-            "symbol": "PLUG",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1046,
-            "revenue_estimate": 222121983
-        },
-        {
-            "symbol": "CAI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0008,
-            "revenue_estimate": 236149493
-        },
-        {
-            "symbol": "AAOI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1151,
-            "revenue_estimate": 135602472
-        },
-        {
-            "symbol": "DCTH",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0646,
-            "revenue_estimate": 20600940
-        },
-        {
-            "symbol": "NTLA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.9739,
-            "revenue_estimate": 13041720
-        },
-        {
-            "symbol": "NVAX",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.4995,
-            "revenue_estimate": 80881338
-        },
-        {
-            "symbol": "AMBA",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1046,
-            "revenue_estimate": 102186660
-        },
-        {
-            "symbol": "PENN",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0802,
-            "revenue_estimate": 1794860666
-        },
-        {
-            "symbol": "QUBT",
-            "earnings_date": "2026-02-26",
-            "hour": "",
-            "eps_estimate": -0.0332,
-            "revenue_estimate": 339150
-        },
-        {
-            "symbol": "ORGO",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.2142,
-            "revenue_estimate": 176154000
-        },
-        {
-            "symbol": "OPRA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.389,
-            "revenue_estimate": 168301866
-        },
-        {
-            "symbol": "FOXF",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.153,
-            "revenue_estimate": 360954397
-        },
-        {
-            "symbol": "CTKB",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0408,
-            "revenue_estimate": 58331076
-        },
-        {
-            "symbol": "BLFS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0221,
-            "revenue_estimate": 24563640
-        },
-        {
-            "symbol": "GHRS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.2754,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "INDV",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.6875,
-            "revenue_estimate": 311732400
-        },
-        {
-            "symbol": "PCT",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.2508,
-            "revenue_estimate": 7577525
-        },
-        {
-            "symbol": "CRDF",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1918,
-            "revenue_estimate": 105570
-        },
-        {
-            "symbol": "FIGR",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1652,
-            "revenue_estimate": 153106467
-        },
-        {
-            "symbol": "ALHC",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1559,
-            "revenue_estimate": 1023453444
-        },
-        {
-            "symbol": "DAIO",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1088,
-            "revenue_estimate": 5517516
-        },
-        {
-            "symbol": "ACIW",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.816,
-            "revenue_estimate": 473976486
-        },
-        {
-            "symbol": "NVNO",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.2856,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "AVPT",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0909,
-            "revenue_estimate": 113169081
-        },
-        {
-            "symbol": "CDRO",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0663,
-            "revenue_estimate": 59292345
-        },
-        {
-            "symbol": "CRNX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -1.4003,
-            "revenue_estimate": 4833096
-        },
-        {
-            "symbol": "OS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0506,
-            "revenue_estimate": 162000820
-        },
-        {
-            "symbol": "MFIC",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.3761,
-            "revenue_estimate": 82202238
-        },
-        {
-            "symbol": "BDSX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.8721,
-            "revenue_estimate": 26242560
-        },
-        {
-            "symbol": "LASR",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1122,
-            "revenue_estimate": 78247260
-        },
-        {
-            "symbol": "MARA",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1282,
-            "revenue_estimate": 262607078
-        },
-        {
-            "symbol": "ADSK",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 2.6927,
-            "revenue_estimate": 1949133963
-        },
-        {
-            "symbol": "PBYI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1938,
-            "revenue_estimate": 69972000
-        },
-        {
-            "symbol": "PLTK",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.1402,
-            "revenue_estimate": 673532703
-        },
-        {
-            "symbol": "COLL",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 2.3725,
-            "revenue_estimate": 210489240
-        },
-        {
-            "symbol": "GDEN",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1663,
-            "revenue_estimate": 169278353
-        },
-        {
-            "symbol": "PCRX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.9225,
-            "revenue_estimate": 204432306
-        },
-        {
-            "symbol": "PHAT",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.3891,
-            "revenue_estimate": 58190775
-        },
-        {
-            "symbol": "GECC",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.3502,
-            "revenue_estimate": 13538796
-        },
-        {
-            "symbol": "ALDX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1714,
-            "revenue_estimate": 24735000
-        },
-        {
-            "symbol": "BWIN",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.2947,
-            "revenue_estimate": 359027250
-        },
-        {
-            "symbol": "PSNL",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.299,
-            "revenue_estimate": 17730996
-        },
-        {
-            "symbol": "EXFY",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0524,
-            "revenue_estimate": 36249525
-        },
-        {
-            "symbol": "GCT",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.7373,
-            "revenue_estimate": 335657673
-        },
-        {
-            "symbol": "OSPN",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.3035,
-            "revenue_estimate": 60974988
-        },
-        {
-            "symbol": "ARBE",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0918,
-            "revenue_estimate": 654330
-        },
-        {
-            "symbol": "BIDU",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 9.8011,
-            "revenue_estimate": 33351332700
-        },
-        {
-            "symbol": "DH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0627,
-            "revenue_estimate": 61356070
-        },
-        {
-            "symbol": "MASI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 1.5082,
-            "revenue_estimate": 416480728
-        },
-        {
-            "symbol": "MNKD",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0147,
-            "revenue_estimate": 99556528
-        },
-        {
-            "symbol": "CRWV",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.5036,
-            "revenue_estimate": 1579009072
-        },
-        {
-            "symbol": "IQ",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0172,
-            "revenue_estimate": 6968850941
-        },
-        {
-            "symbol": "ANIK",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.2193,
-            "revenue_estimate": 29452500
-        },
-        {
-            "symbol": "AEVA",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.4529,
-            "revenue_estimate": 4409715
-        },
-        {
-            "symbol": "AISP",
-            "earnings_date": "2026-02-26",
-            "hour": "",
-            "eps_estimate": 0.0408,
-            "revenue_estimate": 10608000
-        },
-        {
-            "symbol": "MLTX",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -1.0108,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "NTAP",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 2.1087,
-            "revenue_estimate": 1732671582
-        },
-        {
-            "symbol": "DRH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0556,
-            "revenue_estimate": 275840090
-        },
-        {
-            "symbol": "MIDD",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 2.3211,
-            "revenue_estimate": 1005691950
-        },
-        {
-            "symbol": "CELH",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.2103,
-            "revenue_estimate": 653650629
-        },
-        {
-            "symbol": "BRFH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0357,
-            "revenue_estimate": 5780340
-        },
-        {
-            "symbol": "HRTX",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0204,
-            "revenue_estimate": 40323996
-        },
-        {
-            "symbol": "INMB",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.2482,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "OXSQ",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0714,
-            "revenue_estimate": 10347900
-        },
-        {
-            "symbol": "CERT",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.1141,
-            "revenue_estimate": 105256492
-        },
-        {
-            "symbol": "LSTA",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.5202,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "FLNT",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0816,
-            "revenue_estimate": 63822420
-        },
-        {
-            "symbol": "OPK",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0678,
-            "revenue_estimate": 141154711
-        },
-        {
-            "symbol": "KIDS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.343,
-            "revenue_estimate": 61148428
-        },
-        {
-            "symbol": "DNUT",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0316,
-            "revenue_estimate": 394449300
-        },
-        {
-            "symbol": "HTZ",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.5202,
-            "revenue_estimate": 2020298384
-        },
-        {
-            "symbol": "PRVA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0357,
-            "revenue_estimate": 576845893
-        },
-        {
-            "symbol": "OPRT",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.2448,
-            "revenue_estimate": 247995323
-        },
-        {
-            "symbol": "ASUR",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.2596,
-            "revenue_estimate": 39591871
-        },
-        {
-            "symbol": "EOSE",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.1827,
-            "revenue_estimate": 95747655
-        },
-        {
-            "symbol": "PUBM",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0112,
-            "revenue_estimate": 76734875
-        },
-        {
-            "symbol": "DYN",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.7777,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "IART",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.8163,
-            "revenue_estimate": 438213868
-        },
-        {
-            "symbol": "KVHI",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0204,
-            "revenue_estimate": 29926800
-        },
-        {
-            "symbol": "FTDR",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1346,
-            "revenue_estimate": 430055796
-        },
-        {
-            "symbol": "DFTX",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.5117,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "INOD",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.215,
-            "revenue_estimate": 70855830
-        },
-        {
-            "symbol": "PZZA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.3483,
-            "revenue_estimate": 525301968
-        },
-        {
-            "symbol": "NVCR",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.4197,
-            "revenue_estimate": 176821804
-        },
-        {
-            "symbol": "BCRX",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0493,
-            "revenue_estimate": 154352632
-        },
-        {
-            "symbol": "LGND",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 1.5926,
-            "revenue_estimate": 56700667
-        },
-        {
-            "symbol": "CSTL",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.2783,
-            "revenue_estimate": 80628817
-        },
-        {
-            "symbol": "AKBA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.0077,
-            "revenue_estimate": 49340664
-        },
-        {
-            "symbol": "PGNY",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.1479,
-            "revenue_estimate": 313602774
-        },
-        {
-            "symbol": "PAYO",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0589,
-            "revenue_estimate": 288361242
-        },
-        {
-            "symbol": "LNTH",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 1.1926,
-            "revenue_estimate": 375176063
-        },
-        {
-            "symbol": "FCUV",
-            "earnings_date": "2026-02-26",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "FTRE",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.1634,
-            "revenue_estimate": 678526542
-        },
-        {
-            "symbol": "HEPS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "QVCGA",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "AMPH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.9407,
-            "revenue_estimate": 194289600
-        },
-        {
-            "symbol": "INTU",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 3.7396,
-            "revenue_estimate": 4622756871
-        },
-        {
-            "symbol": "ABUS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.0357,
-            "revenue_estimate": 714000
-        },
-        {
-            "symbol": "MDXH",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.1285,
-            "revenue_estimate": 31140600
-        },
-        {
-            "symbol": "HTO",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.505,
-            "revenue_estimate": 219574000
-        },
-        {
-            "symbol": "ABTC",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.0102,
-            "revenue_estimate": 76890660
-        },
-        {
-            "symbol": "NAUT",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": -0.1428,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "ARHS",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": 0.0957,
-            "revenue_estimate": 358335812
-        },
-        {
-            "symbol": "CRAI",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 2.1114,
-            "revenue_estimate": 194352156
-        },
-        {
-            "symbol": "ACMR",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.408,
-            "revenue_estimate": 246112566
-        },
-        {
-            "symbol": "NTRA",
-            "earnings_date": "2026-02-26",
-            "hour": "amc",
-            "eps_estimate": -0.5305,
-            "revenue_estimate": 604264860
-        },
-        {
-            "symbol": "BSY",
-            "earnings_date": "2026-02-26",
-            "hour": "bmo",
-            "eps_estimate": 0.2626,
-            "revenue_estimate": 385640654
-        },
-        {
-            "symbol": "CSTE",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.3876,
-            "revenue_estimate": 95574000
-        },
-        {
-            "symbol": "ALKS",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.3355,
-            "revenue_estimate": 387994362
-        },
-        {
-            "symbol": "CARL",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.4345,
-            "revenue_estimate": 14792040
-        },
-        {
-            "symbol": "GLNG",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.3529,
-            "revenue_estimate": 133243875
-        },
-        {
-            "symbol": "LFST",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.0017,
-            "revenue_estimate": 383831895
-        },
-        {
-            "symbol": "ALT",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0644,
-            "revenue_estimate": 717
-        },
-        {
-            "symbol": "ADMA",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.1887,
-            "revenue_estimate": 142188000
-        },
-        {
-            "symbol": "ACHC",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.0592,
-            "revenue_estimate": 816065871
-        },
-        {
-            "symbol": "CHRD",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.3308,
-            "revenue_estimate": 1090247400
-        },
-        {
-            "symbol": "CCCC",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.3098,
-            "revenue_estimate": 6589200
-        },
-        {
-            "symbol": "BATRA",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.582,
-            "revenue_estimate": 53663000
-        },
-        {
-            "symbol": "MGRC",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.7462,
-            "revenue_estimate": 259405890
-        },
-        {
-            "symbol": "MGNI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.3608,
-            "revenue_estimate": 198032724
-        },
-        {
-            "symbol": "ECPG",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 2.1395,
-            "revenue_estimate": 430633800
-        },
-        {
-            "symbol": "AMSF",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6069,
-            "revenue_estimate": 81916200
-        },
-        {
-            "symbol": "CCAP",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.4449,
-            "revenue_estimate": 40877183
-        },
-        {
-            "symbol": "ICLR",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 3.3281,
-            "revenue_estimate": 2043189468
-        },
-        {
-            "symbol": "METC",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.2415,
-            "revenue_estimate": 146637413
-        },
-        {
-            "symbol": "BBSI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6554,
-            "revenue_estimate": 329898345
-        },
-        {
-            "symbol": "MGEE",
-            "earnings_date": "2026-02-25",
-            "hour": "",
-            "eps_estimate": 0.6528,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "NVDA",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.5513,
-            "revenue_estimate": 66997920159
-        },
-        {
-            "symbol": "MDXG",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.0748,
-            "revenue_estimate": 109068600
-        },
-        {
-            "symbol": "GERN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.0323,
-            "revenue_estimate": 51428910
-        },
-        {
-            "symbol": "IMNN",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -1.1975,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "CLMB",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.2852,
-            "revenue_estimate": 171108060
-        },
-        {
-            "symbol": "IBOC",
-            "earnings_date": "2026-02-25",
-            "hour": "",
-            "eps_estimate": 1.6626,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "ARRY",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.009,
-            "revenue_estimate": 215956062
-        },
-        {
-            "symbol": "LTBR",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "DRVN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.282,
-            "revenue_estimate": 484780775
-        },
-        {
-            "symbol": "APA",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6508,
-            "revenue_estimate": 1864084532
-        },
-        {
-            "symbol": "ARKO",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0102,
-            "revenue_estimate": 1848447570
-        },
-        {
-            "symbol": "LINE",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.1224,
-            "revenue_estimate": 1405588896
-        },
-        {
-            "symbol": "MGPI",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.5128,
-            "revenue_estimate": 134922795
-        },
-        {
-            "symbol": "IRWD",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.0102,
-            "revenue_estimate": 51951996
-        },
-        {
-            "symbol": "CPRX",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.3427,
-            "revenue_estimate": 144874680
-        },
-        {
-            "symbol": "PLAB",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.5457,
-            "revenue_estimate": 225055350
-        },
-        {
-            "symbol": "ARQT",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.1034,
-            "revenue_estimate": 114004675
-        },
-        {
-            "symbol": "ACAD",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.1357,
-            "revenue_estimate": 298387852
-        },
-        {
-            "symbol": "AMRN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0,
-            "revenue_estimate": 51631380
-        },
-        {
-            "symbol": "CRMT",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.2142,
-            "revenue_estimate": 338565203
-        },
-        {
-            "symbol": "LIVN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.8314,
-            "revenue_estimate": 360378688
-        },
-        {
-            "symbol": "PNTG",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.322,
-            "revenue_estimate": 280476835
-        },
-        {
-            "symbol": "EHTH",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 2.5072,
-            "revenue_estimate": 324621324
-        },
-        {
-            "symbol": "ADTN",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.0796,
-            "revenue_estimate": 286493662
-        },
-        {
-            "symbol": "PARK",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.051,
-            "revenue_estimate": 60354930
-        },
-        {
-            "symbol": "NWPX",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6338,
-            "revenue_estimate": 124448843
-        },
-        {
-            "symbol": "DNLI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.7652,
-            "revenue_estimate": 1275000
-        },
-        {
-            "symbol": "DORM",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 2.1838,
-            "revenue_estimate": 585436435
-        },
-        {
-            "symbol": "GSAT",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0204,
-            "revenue_estimate": 72644400
-        },
-        {
-            "symbol": "NMRK",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.6645,
-            "revenue_estimate": 1016858910
-        },
-        {
-            "symbol": "CMPS",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.4023,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "INVZ",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": -0.0765,
-            "revenue_estimate": 16320000
-        },
-        {
-            "symbol": "GPCR",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.4746,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "MDRR",
-            "earnings_date": "2026-02-25",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "LMAT",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6735,
-            "revenue_estimate": 64246281
-        },
-        {
-            "symbol": "EBAY",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.3812,
-            "revenue_estimate": 2935681849
-        },
-        {
-            "symbol": "DHIL",
-            "earnings_date": "2026-02-25",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "PSKY",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0087,
-            "revenue_estimate": 8299917480
-        },
-        {
-            "symbol": "MIRM",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.0433,
-            "revenue_estimate": 144642252
-        },
-        {
-            "symbol": "FTAI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.2856,
-            "revenue_estimate": 711360750
-        },
-        {
-            "symbol": "ALKT",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.1428,
-            "revenue_estimate": 122729970
-        },
-        {
-            "symbol": "ASTE",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.8466,
-            "revenue_estimate": 381689610
-        },
-        {
-            "symbol": "ENVX",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.1798,
-            "revenue_estimate": 10479704
-        },
-        {
-            "symbol": "ERII",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6834,
-            "revenue_estimate": 84160455
-        },
-        {
-            "symbol": "IRON",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -1.785,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "MYRG",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.9077,
-            "revenue_estimate": 915911040
-        },
-        {
-            "symbol": "IEP",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.1717,
-            "revenue_estimate": 2172510000
-        },
-        {
-            "symbol": "OSUR",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.2091,
-            "revenue_estimate": 26972196
-        },
-        {
-            "symbol": "HNST",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0408,
-            "revenue_estimate": 90377712
-        },
-        {
-            "symbol": "NTNX",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.4563,
-            "revenue_estimate": 724554409
-        },
-        {
-            "symbol": "CHDN",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 1.0538,
-            "revenue_estimate": 671634636
-        },
-        {
-            "symbol": "ESEA",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 5.0949,
-            "revenue_estimate": 59064120
-        },
-        {
-            "symbol": "ODD",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.1353,
-            "revenue_estimate": 152554440
-        },
-        {
-            "symbol": "GDRX",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.0934,
-            "revenue_estimate": 197129106
-        },
-        {
-            "symbol": "NRDS",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.178,
-            "revenue_estimate": 215721666
-        },
-        {
-            "symbol": "ALLT",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.0813,
-            "revenue_estimate": 28458000
-        },
-        {
-            "symbol": "MDLN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.2537,
-            "revenue_estimate": 7698190593
-        },
-        {
-            "symbol": "JSPR",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.6817,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "MRVI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.0723,
-            "revenue_estimate": 50026369
-        },
-        {
-            "symbol": "CHYM",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": -0.1564,
-            "revenue_estimate": 589623495
-        },
-        {
-            "symbol": "BLMN",
-            "earnings_date": "2026-02-25",
-            "hour": "bmo",
-            "eps_estimate": 0.2519,
-            "revenue_estimate": 1000748438
-        },
-        {
-            "symbol": "BJRI",
-            "earnings_date": "2026-02-25",
-            "hour": "amc",
-            "eps_estimate": 0.6293,
-            "revenue_estimate": 361585002
-        },
-        {
-            "symbol": "HRMY",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.9199,
-            "revenue_estimate": 245091536
-        },
-        {
-            "symbol": "CORT",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.306,
-            "revenue_estimate": 260034312
-        },
-        {
-            "symbol": "BBIO",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.757,
-            "revenue_estimate": 149780431
-        },
-        {
-            "symbol": "EXLS",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.4738,
-            "revenue_estimate": 542797212
-        },
-        {
-            "symbol": "CLNE",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.0367,
-            "revenue_estimate": 107768508
-        },
-        {
-            "symbol": "CSGP",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.2801,
-            "revenue_estimate": 903742950
-        },
-        {
-            "symbol": "MQ",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.0024,
-            "revenue_estimate": 171867108
-        },
-        {
-            "symbol": "APLS",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.3895,
-            "revenue_estimate": 203206276
-        },
-        {
-            "symbol": "ESPR",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.2642,
-            "revenue_estimate": 182203844
-        },
-        {
-            "symbol": "EXPI",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.0153,
-            "revenue_estimate": 1190925480
-        },
-        {
-            "symbol": "NMFC",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.3238,
-            "revenue_estimate": 80678328
-        },
-        {
-            "symbol": "PTLO",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.0523,
-            "revenue_estimate": 191371604
-        },
-        {
-            "symbol": "MELI",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 11.7245,
-            "revenue_estimate": 8637502871
-        },
-        {
-            "symbol": "LAB",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.0707,
-            "revenue_estimate": 18687020
-        },
-        {
-            "symbol": "AHCO",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.357,
-            "revenue_estimate": 848241690
-        },
-        {
-            "symbol": "CYTK",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -1.4853,
-            "revenue_estimate": 7049475
-        },
-        {
-            "symbol": "AXGN",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.0697,
-            "revenue_estimate": 59930436
-        },
-        {
-            "symbol": "INGN",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.3646,
-            "revenue_estimate": 86751000
-        },
-        {
-            "symbol": "CCC",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.0958,
-            "revenue_estimate": 278122457
-        },
-        {
-            "symbol": "DAWN",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.1632,
-            "revenue_estimate": 48556722
-        },
-        {
-            "symbol": "HSIC",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 1.3252,
-            "revenue_estimate": 3412000429
-        },
-        {
-            "symbol": "FUND",
-            "earnings_date": "2026-02-24",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "IPAR",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.7684,
-            "revenue_estimate": 379751610
-        },
-        {
-            "symbol": "NOVT",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.8976,
-            "revenue_estimate": 260671200
-        },
-        {
-            "symbol": "FSLR",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 5.2358,
-            "revenue_estimate": 1594244965
-        },
-        {
-            "symbol": "ESTA",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.2211,
-            "revenue_estimate": 65063892
-        },
-        {
-            "symbol": "RCKY",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.4947,
-            "revenue_estimate": 136731000
-        },
-        {
-            "symbol": "ARVN",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.6022,
-            "revenue_estimate": 35576814
-        },
-        {
-            "symbol": "FULC",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.3153,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "MMSI",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.9732,
-            "revenue_estimate": 397671021
-        },
-        {
-            "symbol": "FLYW",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.0094,
-            "revenue_estimate": 149343085
-        },
-        {
-            "symbol": "OFIX",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.3162,
-            "revenue_estimate": 223088892
-        },
-        {
-            "symbol": "OPCH",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.4673,
-            "revenue_estimate": 1489398716
-        },
-        {
-            "symbol": "DRS",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.3747,
-            "revenue_estimate": 1013503578
-        },
-        {
-            "symbol": "CORZ",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.0861,
-            "revenue_estimate": 124517724
-        },
-        {
-            "symbol": "CIFR",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.1007,
-            "revenue_estimate": 88583868
-        },
-        {
-            "symbol": "ATEC",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.1309,
-            "revenue_estimate": 215607171
-        },
-        {
-            "symbol": "JAZZ",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 6.6474,
-            "revenue_estimate": 1188538996
-        },
-        {
-            "symbol": "ABCL",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.1775,
-            "revenue_estimate": 6185025
-        },
-        {
-            "symbol": "CBLL",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.4206,
-            "revenue_estimate": 24421350
-        },
-        {
-            "symbol": "IOVA",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": -0.1751,
-            "revenue_estimate": 82321548
-        },
-        {
-            "symbol": "LAND",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.2295,
-            "revenue_estimate": 33366750
-        },
-        {
-            "symbol": "BBLG",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.3468,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "ATRO",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.612,
-            "revenue_estimate": 241399575
-        },
-        {
-            "symbol": "LCID",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -2.6887,
-            "revenue_estimate": 478584000
-        },
-        {
-            "symbol": "CDNA",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.2439,
-            "revenue_estimate": 105307737
-        },
-        {
-            "symbol": "HURN",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 1.989,
-            "revenue_estimate": 442291584
-        },
-        {
-            "symbol": "MOBX",
-            "earnings_date": "2026-02-24",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "IMXI",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.5008,
-            "revenue_estimate": 165996258
-        },
-        {
-            "symbol": "CEG",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 2.2785,
-            "revenue_estimate": 5352507120
-        },
-        {
-            "symbol": "KDP",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.5949,
-            "revenue_estimate": 4404831462
-        },
-        {
-            "symbol": "FWRG",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.0713,
-            "revenue_estimate": 323272027
-        },
-        {
-            "symbol": "IMCR",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.2457,
-            "revenue_estimate": 109455730
-        },
-        {
-            "symbol": "CGBD",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.3825,
-            "revenue_estimate": 69350993
-        },
-        {
-            "symbol": "PCVX",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -1.5797,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "IGIC",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": 0.8109,
-            "revenue_estimate": 162078000
-        },
-        {
-            "symbol": "CECO",
-            "earnings_date": "2026-02-24",
-            "hour": "bmo",
-            "eps_estimate": 0.3958,
-            "revenue_estimate": 207863148
-        },
-        {
-            "symbol": "PRCT",
-            "earnings_date": "2026-02-24",
-            "hour": "amc",
-            "eps_estimate": -0.3307,
-            "revenue_estimate": 96019821
-        },
-        {
-            "symbol": "FRPT",
-            "earnings_date": "2026-02-23",
-            "hour": "bmo",
-            "eps_estimate": 0.394,
-            "revenue_estimate": 292449228
-        },
-        {
-            "symbol": "LINC",
-            "earnings_date": "2026-02-23",
-            "hour": "bmo",
-            "eps_estimate": 0.3592,
-            "revenue_estimate": 135457866
-        },
-        {
-            "symbol": "EVER",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 0.3659,
-            "revenue_estimate": 180356655
-        },
-        {
-            "symbol": "BLZE",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.1071,
-            "revenue_estimate": 38300857
-        },
-        {
-            "symbol": "ERIE",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 1.6218,
-            "revenue_estimate": 1048988400
-        },
-        {
-            "symbol": "ADUS",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 1.7591,
-            "revenue_estimate": 379754160
-        },
-        {
-            "symbol": "OTLK",
-            "earnings_date": "2026-02-23",
-            "hour": "",
-            "eps_estimate": -0.1836,
-            "revenue_estimate": 5125500
-        },
-        {
-            "symbol": "CPSS",
-            "earnings_date": "2026-02-23",
-            "hour": "",
-            "eps_estimate": 0.2346,
-            "revenue_estimate": 112850760
-        },
-        {
-            "symbol": "IDYA",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.9869,
-            "revenue_estimate": 6365636
-        },
-        {
-            "symbol": "HSTM",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 0.1122,
-            "revenue_estimate": 77720532
-        },
-        {
-            "symbol": "KTOS",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 0.1618,
-            "revenue_estimate": 334423442
-        },
-        {
-            "symbol": "BHF",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 5.2677,
-            "revenue_estimate": 2266586955
-        },
-        {
-            "symbol": "ADEA",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 0.6638,
-            "revenue_estimate": 155753235
-        },
-        {
-            "symbol": "AXSM",
-            "earnings_date": "2026-02-23",
-            "hour": "bmo",
-            "eps_estimate": -0.6813,
-            "revenue_estimate": 196487077
-        },
-        {
-            "symbol": "BCYC",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.9559,
-            "revenue_estimate": 7217601
-        },
-        {
-            "symbol": "MYGN",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.0162,
-            "revenue_estimate": 211128861
-        },
-        {
-            "symbol": "CRGO",
-            "earnings_date": "2026-02-23",
-            "hour": "bmo",
-            "eps_estimate": -0.0816,
-            "revenue_estimate": 7600356
-        },
-        {
-            "symbol": "PEPG",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.3604,
-            "revenue_estimate": 0
-        },
-        {
-            "symbol": "BMRN",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 0.637,
-            "revenue_estimate": 844173552
-        },
-        {
-            "symbol": "FANG",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": 2.1505,
-            "revenue_estimate": 3409592647
-        },
-        {
-            "symbol": "DPZ",
-            "earnings_date": "2026-02-23",
-            "hour": "bmo",
-            "eps_estimate": 5.4242,
-            "revenue_estimate": 1534616179
-        },
-        {
-            "symbol": "DHC",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.1768,
-            "revenue_estimate": 396817556
-        },
-        {
-            "symbol": "PRPO",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": null,
-            "revenue_estimate": null
-        },
-        {
-            "symbol": "FWRD",
-            "earnings_date": "2026-02-23",
-            "hour": "amc",
-            "eps_estimate": -0.2601,
-            "revenue_estimate": 642044508
-        },
-        {
-            "symbol": "GROW",
-            "earnings_date": "2026-02-22",
-            "hour": "",
-            "eps_estimate": null,
-            "revenue_estimate": null
         }
     ]
 }
