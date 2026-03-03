@@ -689,7 +689,7 @@ with filters_col:
         ticker = "^RUT"
     elif ticker == "VIX":
         ticker = "^VIX"
-    timeframe_options = ["5m", "15m", "30m", "1h", "4h", "1d"]
+    timeframe_options = ["5m", "15m", "30m", "1h", "4h", "1d"] # "1m", 
     timeframe = st.selectbox("Timeframe", timeframe_options, index=5)   # default = "1d"
     
     # ## ----- Auto Refresh-------
@@ -725,7 +725,7 @@ with filters_col:
     #     if now >= refresh_trigger_time:
     #         st_autorefresh(interval=1000, key="refresh_after_bar_close")
 
-    if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+    if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
         default_start = dt.date.today() - dt.timedelta(days=7)
     else:
         default_start = dt.date.today() - dt.timedelta(days=365*5)    
@@ -735,9 +735,12 @@ with filters_col:
     if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
         extended_start = start_date_user - dt.timedelta(days=23)
         print("Extended Start for Intraday:", extended_start)
+    elif timeframe == "1m":
+        extended_start = start_date_user #- dt.timedelta(days=7)
     elif timeframe == '1d': 
         extended_start = start_date_user - dt.timedelta(days=290)
     
+    print("User Start Date:", start_date_user, "Extended Start Date:", extended_start, "Timeframe:", timeframe)
     # if timeframe  == "1d":
     #     end_date = st.date_input("End Date", value=dt.date.today())
     # else:
@@ -773,8 +776,9 @@ if st.session_state.run_model:
                 timeframe=timeframe
             )
             
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
                 data = data.fillna(0).copy()
+                data = data[data['TOS_Trail'] != 0]  # Drop records where TOS_Trail == 0
             else:
                 data = data.dropna().copy()
 
@@ -815,7 +819,26 @@ if st.session_state.run_model:
                 p_win = 84
             else:
                 p_win = 84  
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            
+            if timeframe == "1m":
+                # 1m: SIMPLE LOGIC — Close vs TOS_Trail with ATR volatility gate + TOS_RSI momentum filter
+                # ATR gate filters out plateau/consolidation zones (low volatility)
+                # TOS_RSI filter requires stronger momentum confirmation (>60 bullish, <40 bearish)
+                atr_threshold = df['ATR'].rolling(60).quantile(0.4)  # 20-bar rolling average of ATR
+                
+                # TOS_Trail delta must be STRONGER than average delta (momentum acceleration)
+                trail_delta = df["TOS_Trail"] - df["TOS_Trail"].shift(1)
+                mean_trail_delta = trail_delta.rolling(450).quantile(0.95)
+                
+                df["Slope_Pos"] = (df["Close"] > df["TOS_Trail"]) & (trail_delta > mean_trail_delta) & (df['ATR'] > atr_threshold) & (df['TOS_RSI'] > 70)
+                df["Slope_Neg"] = (df["Close"] < df["TOS_Trail"]) & (trail_delta < mean_trail_delta) & (df['ATR'] > atr_threshold) & (df['TOS_RSI'] < 30)
+                
+                # Edge detection: first bar where condition flips from False to True
+                df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
+                df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+            
+            elif timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                # INTRADAY (5m+): Kalman smoothing + complex filters
                 # price = (df['High'] + df['Low']) / 2
                 df["Smooth"], df["Slope"] = spicy_sauce(df["Close"])
                 df['price_delta'] = df["Close"] - df["Smooth"]
@@ -846,7 +869,6 @@ if st.session_state.run_model:
                 
                 df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
-                            
             
             else:                                    
                 df["Smooth"], df["Slope"] = secret_sauce(price)
@@ -955,12 +977,61 @@ if st.session_state.run_model:
                     df.at[df.index[i], "Position"] = df["Position"].iloc[i-1]
 
 
+            # ============================================================
+            # 4.5) CANDLE PATTERN DETECTION (for exits)
+            # ============================================================
+            
+            # Bearish Inverted Hammer: long upper wick, small body at bottom
+            body = abs(df["Close"] - df["Open"])
+            upper_wick = df["High"] - df[["Open", "Close"]].max(axis=1)
+            lower_wick = df[["Open", "Close"]].min(axis=1) - df["Low"]
+            
+            df["bearish_inverted_hammer"] = (
+                (upper_wick > 1.5 * body) &  # Upper wick > 2x body
+                (lower_wick < 0.5 * body) &  # Lower wick minimal
+                (df["Close"] < df["Open"])  # Red candle (close < open)
+            )
+            
+            # Bearish Engulfing: current candle engulfs previous, both bearish trend
+            df["bearish_engulfing"] = (
+                (df["Close"] < df["Open"]) &  # Today is red
+                (df["Close"].shift(1) > df["Open"].shift(1)) &  # Yesterday was green
+                (df["Open"] > df["Close"].shift(1)) &  # Today opens above yesterday's close
+                (df["Close"] < df["Open"].shift(1))  # Today closes below yesterday's open
+            )
+            
+            # Bullish Hammer: long lower wick, small body at top
+            df["bullish_hammer"] = (
+                (lower_wick > 1.5 * body) &  # Lower wick > 2x body
+                (upper_wick < 0.5 * body) &  # Upper wick minimal
+                (df["Close"] > df["Open"])  # Green candle (close > open)
+            )
+            
+            # Bullish Engulfing: current candle engulfs previous, both bullish trend
+            df["bullish_engulfing"] = (
+                (df["Close"] > df["Open"]) &  # Today is green
+                (df["Close"].shift(1) < df["Open"].shift(1)) &  # Yesterday was red
+                (df["Open"] < df["Close"].shift(1)) &  # Today opens below yesterday's close
+                (df["Close"] > df["Open"].shift(1))  # Today closes above yesterday's open
+            )
+            
             # ------------------------------------------------------------
             # 5) EXIT LOGIC (RAW EXIT SIGNALS)
             # ------------------------------------------------------------
             
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            if timeframe == "1m":
+                # 1m: Exit on TOS_Trail reversal OR bearish/bullish candle patterns
+                trail_reversal_long = (df["Close"] < df["TOS_Trail"])
+                candle_pattern_exit_long = (df["bearish_inverted_hammer"] | df["bearish_engulfing"])
                 
+                trail_reversal_short = (df["Close"] > df["TOS_Trail"])
+                candle_pattern_exit_short = (df["bullish_hammer"] | df["bullish_engulfing"])
+                
+                df["Sell_Long"] = (df["Position"] == 1) & (trail_reversal_long ) #| candle_pattern_exit_long
+                df["Sell_Short"] = (df["Position"] == -1) & (trail_reversal_short ) #| candle_pattern_exit_short
+            
+            elif timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                # INTRADAY (5m+): Complex exit logic
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
                     (
@@ -1205,7 +1276,7 @@ if st.session_state.run_model:
                             "Smooth",  "price_delta", 
                             "Slope_Pos", "Slope_Neg", "Turn_Up", "Turn_Down"] #"Slope",
 
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
                 indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower', 'VIX']
             else:
                 indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VIX']
@@ -1258,18 +1329,19 @@ if st.session_state.run_model:
             )
 
             # -------------------------------
-            # 2) SMOOTH LINE (Kalman)
+            # 2) SMOOTH LINE (Kalman) — Only for timeframes that computed it
             # -------------------------------
-            fig.add_trace(
-                go.Scatter(
-                    x=df.index,
-                    y=df["Smooth"],
-                    mode="lines",
-                    name="Predicted Momentum",
-                    line=dict(color="orange", width=2)
-                ),
-                row=1, col=1, secondary_y=False
-            )
+            if timeframe != "1m":
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=df["Smooth"],
+                        mode="lines",
+                        name="Predicted Momentum",
+                        line=dict(color="orange", width=2)
+                    ),
+                    row=1, col=1, secondary_y=False
+                )
             
             # -------------------------------
             # ATR Trailing STOP LEVELS
@@ -1490,7 +1562,7 @@ if st.session_state.run_model:
                 margin=dict(t=120)  # give space above
             )
 
-            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+            if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
                 # 🚀 ADD RANGE BREAKS HERE (right after layout)
                 if ticker in ["^GSPC", "^IXIC", "^RUT", "^VIX", "^DJI"]:
                     # Market Indices have different trading hours (9:30am - 4:00pm EST)
@@ -1699,7 +1771,7 @@ if st.session_state.run_model:
             # ------------------------------------------------------------
             # BACKTEST TABLES SIDE BY SIDE
             # ------------------------------------------------------------
-            is_intraday = timeframe in ["5m", "15m", "30m", "1h", "4h"]
+            is_intraday = timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]
             bt_left, bt_right = st.columns([1, 1])
 
             with bt_left:
@@ -1728,7 +1800,7 @@ if st.session_state.run_model:
 
                 st.subheader("📊 Same-Bar Close Backtest Table")
                 # Format dates
-                if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
                     close_df["Entry_Date"] = pd.to_datetime(close_df["Entry_Date"])
                     close_df["Exit_Date"]  = pd.to_datetime(close_df["Exit_Date"])
                 else:    
@@ -1765,7 +1837,7 @@ if st.session_state.run_model:
                 )
                 st.subheader("📊 Next-Bar Open Backtest Table")
                 # Format dates
-                if timeframe in ["5m", "15m", "30m", "1h", "4h"]:   
+                if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:   
                     open_df["Entry_Date"] = pd.to_datetime(open_df["Entry_Date"])
                     open_df["Exit_Date"]  = pd.to_datetime(open_df["Exit_Date"])
                 else:

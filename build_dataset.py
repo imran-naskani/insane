@@ -420,7 +420,7 @@ def add_features(df, p, timeframe=None):
     df["Candle_Body"] = (df["Close"] - df["Open"]) / (df["High"] - df["Low"] + 1e-9)
     
     # -------- VWAP --------
-    if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+    if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
         df["VWAP_Upper"], df["VWAP"], df["VWAP_Lower"] = compute_vwap_with_bands(df)
 
     # -------- TOS ATR --------

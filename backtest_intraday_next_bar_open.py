@@ -13,8 +13,8 @@ def backtest_intraday_next_open(df, trade_capital=10000):
     turn_up = df["Turn_Up"].values
     turn_down = df["Turn_Down"].values
 
-    sell_long = df["Sell_Long_Plot"].values
-    sell_short = df["Sell_Short_Plot"].values
+    sell_long = df["Sell_Long"].values
+    sell_short = df["Sell_Short"].values
     
     dates = df.index
 
