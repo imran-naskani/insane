@@ -1,2 +1,8 @@
 .streamlit/secrets.toml
 .env
+
+# Local helper/scratch scripts (not for commit)
+_*.py
+
+# Ranking output CSVs
+ranking_*.csv

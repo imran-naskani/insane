@@ -247,6 +247,11 @@ def backtest_intraday_close_sell_only(df, capital):
             position = 0
             entry_price = None
             entry_time = None
+            # Flip entry: Turn_Down on the same bar → enter short immediately
+            if row["Turn_Down"] and bar_time < pd.Timestamp("14:30").time():
+                position = -1
+                entry_price = row["Close"]
+                entry_time = row.name
 
         elif position == -1 and row["Sell_Short"]:
             exit_price = row["Close"]
@@ -267,6 +272,11 @@ def backtest_intraday_close_sell_only(df, capital):
             position = 0
             entry_price = None
             entry_time = None
+            # Flip entry: Turn_Up on the same bar → enter long immediately
+            if row["Turn_Up"] and bar_time < pd.Timestamp("14:30").time():
+                position = 1
+                entry_price = row["Close"]
+                entry_time = row.name
 
     trade_df = pd.DataFrame(trades)
     return trade_df, equity

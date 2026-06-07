@@ -21,6 +21,7 @@ import json
 import glob
 from streamlit_autorefresh import st_autorefresh
 from daily_engine import load_ticker_history, snapshot_all_signals_first_time
+from intraday_signals import add_intraday_features, compute_chart_signals
 import os
 
 
@@ -838,39 +839,48 @@ if st.session_state.run_model:
                 df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
             
             elif timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-                # INTRADAY (5m+): Kalman smoothing + complex filters
-                # price = (df['High'] + df['Low']) / 2
-                df["Smooth"], df["Slope"] = spicy_sauce(df["Close"])
-                df['price_delta'] = df["Close"] - df["Smooth"]
-                price_delta = df['price_delta']
-                df["q05"] = df["price_delta"].rolling(p_win).quantile(0.05) # 0.05 quantile
-                df["q35"] = df["price_delta"].rolling(p_win).quantile(0.25)
-                df["q50"] = df["price_delta"].rolling(p_win).quantile(0.50)
-                df["q65"] = df["price_delta"].rolling(p_win).quantile(0.75)
-                df["q95"] = df["price_delta"].rolling(p_win).quantile(0.95) # 0.95 quantile
-                df["date"] = df.index.date
-                day_high = df.groupby("date")["High"].cummax()
-                day_low  = df.groupby("date")["Low"].cummin()
-                df["today_range"] = day_high - day_low
-                df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
-                df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
-                df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.25) #0.05
-                df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.75) #0.95
-                df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
-                daily_thr = floor_5_or_int(df['today_range'].median())
-                vwap_thr  = floor_5_or_int(df['vwap_range'].median())
-                
-                # df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) #  .shift(1)
-                # df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr ))  # .shift(1)
+                # NEW: MR + ORB-Slope signals — see intraday_signals.py and SIGNAL_LOGIC.md
+                # Sets Turn_Up, Turn_Down, Signal_Source ('MR'|'ORB') on df across all sessions.
+                # To revert: comment the two lines below and uncomment the OLD block further down.
+                df = add_intraday_features(df)
+                df = compute_chart_signals(df, ticker)
 
-                df["Slope_Neg"] = ((df['price_delta_shift'] <  df["q01"] ) ) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] < 50)
-                df["Slope_Pos"] = ((df['price_delta_shift'] >  df["q99"] ) ) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] > 50)
-                
-                
-                df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
-                df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+                # ── OLD: 2D Kalman + quantile band signal logic ──────────────────────────
+                # spicy_sauce() 2D Kalman -> Smooth (price) + Slope; price_delta quantile crossings.
+                # Entry: price_delta_shift crosses rolling(84) quantile 0.25/0.75 bands
+                #        with TOS_Trail direction + TOS_RSI + VWAP/daily range filter gates.
+                # Exit:  VWAP_Upper/Lower cross, TOS_Trail cross, or TOS_RSI 70/30 threshold.
+                #
+                # # INTRADAY (5m+): Kalman smoothing + complex filters
+                # # price = (df['High'] + df['Low']) / 2
+                # df["Smooth"], df["Slope"] = spicy_sauce(df["Close"])
+                # df['price_delta'] = df["Close"] - df["Smooth"]
+                # price_delta = df['price_delta']
+                # df["q05"] = df["price_delta"].rolling(p_win).quantile(0.05) # 0.05 quantile
+                # df["q35"] = df["price_delta"].rolling(p_win).quantile(0.25)
+                # df["q50"] = df["price_delta"].rolling(p_win).quantile(0.50)
+                # df["q65"] = df["price_delta"].rolling(p_win).quantile(0.75)
+                # df["q95"] = df["price_delta"].rolling(p_win).quantile(0.95) # 0.95 quantile
+                # df["date"] = df.index.date
+                # day_high = df.groupby("date")["High"].cummax()
+                # day_low  = df.groupby("date")["Low"].cummin()
+                # df["today_range"] = day_high - day_low
+                # df['price_delta_shift'] = df['price_delta'] - df['price_delta'].shift(1)
+                # df['price_delta_shift'] = df['price_delta_shift'].fillna(0)
+                # df["q01"] = df["price_delta_shift"].rolling(p_win).quantile(0.25) #0.05
+                # df["q99"] = df["price_delta_shift"].rolling(p_win).quantile(0.75) #0.95
+                # df['vwap_range'] = round(df["VWAP_Upper"] - df["VWAP_Lower"])
+                # daily_thr = floor_5_or_int(df['today_range'].median())
+                # vwap_thr  = floor_5_or_int(df['vwap_range'].median())
+                # # df["Slope_Neg"] = ((df["price_delta"] < df["q05"]) | (df['price_delta_shift'] <  df["q01"] )) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) #  .shift(1)
+                # # df["Slope_Pos"] = ((df["price_delta"] > df["q95"]) | (df['price_delta_shift'] >  df["q99"] )) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr ))  # .shift(1)
+                # df["Slope_Neg"] = ((df['price_delta_shift'] <  df["q01"] ) ) & (df["Close"] < df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] < 50)
+                # df["Slope_Pos"] = ((df['price_delta_shift'] >  df["q99"] ) ) & (df["Close"] > df["TOS_Trail"]) & ((df['vwap_range'] >= vwap_thr) | (df["today_range"]  >= daily_thr )) & (df['TOS_RSI'] > 50)
+                # df["Turn_Up"]   = df["Slope_Pos"] & (~df["Slope_Pos"].shift(1).fillna(False))
+                # df["Turn_Down"] = df["Slope_Neg"] & (~df["Slope_Neg"].shift(1).fillna(False))
+                # ── END OLD SIGNAL LOGIC ─────────────────────────────────────────────────
             
-            else:                                    
+            else:
                 df["Smooth"], df["Slope"] = secret_sauce(price)
                 df["price_delta"] = df["Close"] - df["Smooth"]
 
@@ -889,6 +899,9 @@ if st.session_state.run_model:
                     (df["Close"] > df["Smooth"]) &
                     (df["Slope"] > df["Slope"].shift(1))
                 )
+
+                # OLS slope + R² for row 4 — same 14-bar window, on daily bars
+                df = add_intraday_features(df)
             
             # # if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
             # #     q_roll = 120
@@ -1031,51 +1044,66 @@ if st.session_state.run_model:
                 df["Sell_Short"] = (df["Position"] == -1) & (trail_reversal_short ) #| candle_pattern_exit_short
             
             elif timeframe in ["5m", "15m", "30m", "1h", "4h"]:
-                # INTRADAY (5m+): Complex exit logic
-                df["Sell_Long"] = (
-                    (df["Position"] == 1) &
-                    (
-                        ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) & 
-                        (df["Close"] < df["VWAP_Upper"]) & (df['vwap_range'] >= vwap_thr)) | 
-                        # ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
-                        # (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
-                        ((df["Close"].shift(1) >= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] < df["TOS_Trail"])) |
-                        ((df["TOS_RSI"].shift(1) > 70) &
-                        (df["TOS_RSI"] < 70)) #| 
-                        # ((df['Close'] < df['Open'].shift(1))) #|
-                        # ((df["Low"].shift(1) >= df["Low"]) &
-                        # (df["Close"].shift(1) >= df["Close"])) |
-                        # ((df["High"].shift(1) >= df["High"]) &
-                        # (df["Close"].shift(1) >= df["Close"])) |
-                        # ((df["High"].shift(1) >= df["High"]) &
-                        # (df["Low"].shift(1) >= df["Low"])) 
-
-                    )
+                # NEW: Exit on flip signal (opposite Turn fires) OR EOD at 14:30 CT.
+                # To revert: comment the five lines below and uncomment the OLD block further down.
+                pos_prev = df["Position"].shift(1).fillna(0)
+                df["Sell_Long"]  = (pos_prev == 1)  & (df["Position"] != 1)
+                df["Sell_Short"] = (pos_prev == -1) & (df["Position"] != -1)
+                # EOD force-exit at 14:30 CT (matches alert_engine and SIGNAL_LOGIC.md)
+                eod_mask = pd.Series(
+                    df.index.time >= pd.Timestamp("14:30").time(), index=df.index
                 )
+                df.loc[eod_mask & (df["Position"] == 1),  "Sell_Long"]  = True
+                df.loc[eod_mask & (df["Position"] == -1), "Sell_Short"] = True
 
-                df["Sell_Short"] = (
-                    (df["Position"] == -1) &
-                    (
-                        ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
-                        (df["Close"] > df["VWAP_Lower"]) & (df['vwap_range'] >= vwap_thr)) |
-                        # ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
-                        # (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) | 
-                        ((df["Close"].shift(1) <= df["TOS_Trail"].shift(1)) &
-                        (df["Close"] > df["TOS_Trail"])) |
-                        ((df["TOS_RSI"].shift(1) < 30) &
-                        (df["TOS_RSI"] > 30)) #|
-                        # ((df['Close'] > df['Open'].shift(1))) #|
-                        # ((df["Low"].shift(1) <= df["Low"]) &
-                        # (df["Close"].shift(1) <= df["Close"])) |
-                        # ((df["High"].shift(1) <= df["High"]) &
-                        # (df["Close"].shift(1) <= df["Close"])) |
-                        # ((df["High"].shift(1) <= df["High"]) &
-                        # (df["Low"].shift(1) <= df["Low"])) 
-                    )
-                )
-
+                # ── OLD: VWAP + TOS_Trail + TOS_RSI exit logic ───────────────────────────
+                # Exit long:  VWAP_Upper cross-down OR TOS_Trail cross-down OR RSI drops < 70
+                # Exit short: VWAP_Lower cross-up  OR TOS_Trail cross-up  OR RSI rises > 30
+                # Note: vwap_thr / daily_thr were computed in the OLD signal block above.
+                #
+                # # INTRADAY (5m+): Complex exit logic
+                # df["Sell_Long"] = (
+                #     (df["Position"] == 1) &
+                #     (
+                #         ((df["Close"].shift(1) >= df["VWAP_Upper"].shift(1)) &
+                #         (df["Close"] < df["VWAP_Upper"]) & (df['vwap_range'] >= vwap_thr)) |
+                #         # ((df["Close"].shift(1) >= df["VWAP"].shift(1)) &
+                #         # (df["Close"] < df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
+                #         ((df["Close"].shift(1) >= df["TOS_Trail"].shift(1)) &
+                #         (df["Close"] < df["TOS_Trail"])) |
+                #         ((df["TOS_RSI"].shift(1) > 70) &
+                #         (df["TOS_RSI"] < 70)) #|
+                #         # ((df['Close'] < df['Open'].shift(1))) #|
+                #         # ((df["Low"].shift(1) >= df["Low"]) &
+                #         # (df["Close"].shift(1) >= df["Close"])) |
+                #         # ((df["High"].shift(1) >= df["High"]) &
+                #         # (df["Close"].shift(1) >= df["Close"])) |
+                #         # ((df["High"].shift(1) >= df["High"]) &
+                #         # (df["Low"].shift(1) >= df["Low"]))
+                #     )
+                # )
+                # df["Sell_Short"] = (
+                #     (df["Position"] == -1) &
+                #     (
+                #         ((df["Close"].shift(1) <= df["VWAP_Lower"].shift(1)) &
+                #         (df["Close"] > df["VWAP_Lower"]) & (df['vwap_range'] >= vwap_thr)) |
+                #         # ((df["Close"].shift(1) <= df["VWAP"].shift(1)) &
+                #         # (df["Close"] > df["VWAP"]) & (df['vwap_range'] >= vwap_thr)) |
+                #         ((df["Close"].shift(1) <= df["TOS_Trail"].shift(1)) &
+                #         (df["Close"] > df["TOS_Trail"])) |
+                #         ((df["TOS_RSI"].shift(1) < 30) &
+                #         (df["TOS_RSI"] > 30)) #|
+                #         # ((df['Close'] > df['Open'].shift(1))) #|
+                #         # ((df["Low"].shift(1) <= df["Low"]) &
+                #         # (df["Close"].shift(1) <= df["Close"])) |
+                #         # ((df["High"].shift(1) <= df["High"]) &
+                #         # (df["Close"].shift(1) <= df["Close"])) |
+                #         # ((df["High"].shift(1) <= df["High"]) &
+                #         # (df["Low"].shift(1) <= df["Low"]))
+                #     )
+                # )
                 # df[['Close', 'Low', 'VWAP_Lower', 'VWAP', 'Position', 'Sell_Short', 'Sell_Long']].to_csv('test.csv')
+                # ── END OLD EXIT LOGIC ───────────────────────────────────────────────────
             else:
                 df["Sell_Long"] = (
                     (df["Position"] == 1) &
@@ -1289,15 +1317,16 @@ if st.session_state.run_model:
             )
 
             fig = make_subplots(
-                rows=3,
+                rows=4,
                 cols=1,
                 shared_xaxes=True,
                 vertical_spacing=0.03,
-                row_heights=[0.60, 0.20, 0.20],
+                row_heights=[0.52, 0.15, 0.15, 0.18],
                 specs=[
-                    [{"secondary_y": True}],   # Row 1 → Candles + ATR
+                    [{"secondary_y": True}],   # Row 1 → Candles + VIX
                     [{"secondary_y": False}],  # Row 2 → Volume
-                    [{"secondary_y": False}]   # Row 3 → RSI
+                    [{"secondary_y": False}],  # Row 3 → RSI
+                    [{"secondary_y": False}],  # Row 4 → OLS Slope + R²  (intraday only)
                 ],
             )
 
@@ -1306,7 +1335,8 @@ if st.session_state.run_model:
                 fixedrange=True,
                 secondary_y=True,
                 showgrid=False,
-                zeroline=False
+                zeroline=False,
+                row=1, col=1
             )
 
             # -------------------------------
@@ -1329,9 +1359,11 @@ if st.session_state.run_model:
             )
 
             # -------------------------------
-            # 2) SMOOTH LINE (Kalman) — Only for timeframes that computed it
+            # 2) SMOOTH LINE (Kalman) — Daily timeframe only (secret_sauce computes df["Smooth"])
+            # Intraday (5m+) now uses MR+ORB-Slope; df["Smooth"] is not computed for those timeframes.
+            # OLD guard was: if timeframe != "1m"  (True for 5m+ when Kalman was still active)
             # -------------------------------
-            if timeframe != "1m":
+            if timeframe == "1d":
                 fig.add_trace(
                     go.Scatter(
                         x=df.index,
@@ -1400,18 +1432,90 @@ if st.session_state.run_model:
             )
 
             # -------------------------------
-            # 3) BUY / SELL MARKERS
+            # Row 4 — OLS Slope + R² (intraday only)
+            # lr_slope: $/bar oscillating around 0 — positive = uptrend, MR signals at zero-crossings
+            # lr_r2:    [0,1] trend quality — near 1 = clean linear trend, near 0 = choppy
+            # Both share the same y-axis; R² naturally lives in [0,1] while slope oscillates wider.
             # -------------------------------
+            if "lr_slope" in df.columns:
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=df["lr_slope"],
+                        mode="lines",
+                        name="OLS Slope",
+                        line=dict(width=1.5, color="aqua"),
+                        opacity=0.85
+                    ),
+                    row=4, col=1
+                )
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=df["lr_r2"],
+                        mode="lines",
+                        name="R²",
+                        line=dict(width=1.5, color="gold", dash="dot"),
+                        opacity=0.80
+                    ),
+                    row=4, col=1
+                )
+                # Zero reference line for slope direction
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=[0] * len(df),
+                        mode="lines",
+                        line=dict(width=0.6, dash="dot", color="rgba(255,255,255,0.25)"),
+                        showlegend=False
+                    ),
+                    row=4, col=1
+                )
+                # R² = 0.5 threshold (gate used by run_new)
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=[0.5] * len(df),
+                        mode="lines",
+                        line=dict(width=0.6, dash="dash", color="rgba(255,215,0,0.35)"),
+                        name="R² gate (0.5)",
+                        showlegend=False
+                    ),
+                    row=4, col=1
+                )
+                fig.update_yaxes(
+                    title_text="Slope / R²",
+                    showgrid=False,
+                    zeroline=True,
+                    zerolinecolor="rgba(255,255,255,0.15)",
+                    row=4, col=1
+                )
+
+            # -------------------------------
+            # 3) BUY / SELL MARKERS
+            # ORB signals → size 22 (larger = high-conviction, holds all day)
+            # MR signals  → size 14 (standard)
+            # Signal_Source only exists for intraday; daily defaults to size 14.
+            # Single trace per direction → single legend entry for both sources.
+            # -------------------------------
+            def _marker_sizes(mask, default=14):
+                if "Signal_Source" not in df.columns:
+                    return default
+                return df.loc[mask, "Signal_Source"].map(
+                    {"ORB": 22, "MR": default}
+                ).fillna(default).tolist()
+
             # Turn Up (BUY)
+            _up_mask = df["Turn_Up"]
             fig.add_trace(
                 go.Scatter(
-                    x=df.index[df["Turn_Up"]],
-                    y=df["Low"][df["Turn_Up"]] - 0.5,
+                    x=df.index[_up_mask],
+                    y=df["Low"][_up_mask] - 0.5,
                     mode="markers",
                     marker=dict(
                         color="lime",
                         symbol="triangle-up",
-                        size=14,
+                        size=_marker_sizes(_up_mask),
                         line=dict(color="black", width=1.4)
                     ),
                     name="Turn Up"
@@ -1438,16 +1542,17 @@ if st.session_state.run_model:
                 )
             )
 
-            # Turn Down (SELL)
+            # Turn Down (SHORT)
+            _down_mask = df["Turn_Down"]
             fig.add_trace(
                 go.Scatter(
-                    x=df.index[df["Turn_Down"]],
-                    y=df["High"][df["Turn_Down"]] + 0.5,
+                    x=df.index[_down_mask],
+                    y=df["High"][_down_mask] + 0.5,
                     mode="markers",
                     marker=dict(
                         color="yellow",
                         symbol="triangle-down",
-                        size=14,
+                        size=_marker_sizes(_down_mask),
                         line=dict(color="black", width=1.4)
                     ),
                     name="Turn Down"
@@ -1600,7 +1705,12 @@ if st.session_state.run_model:
                     hovertemplate="%{y:.2f}",
                     row=3, col=1
                 )
-                
+                fig.update_traces(
+                    hoverinfo="text",
+                    hovertemplate="%{y:.4f}",
+                    row=4, col=1
+                )
+
                 for ax in xaxes:
                     fig.layout[ax].update(
                         showspikes=True,
@@ -1610,12 +1720,6 @@ if st.session_state.run_model:
                         spikedash="dot",
                         spikecolor="rgba(180,180,180,0.8)"
                     )
-
-                fig.update_traces(
-                    hoverinfo="text",
-                    hovertemplate="%{y:.2f}",
-                    row=3, col=1
-                )
 
             fig.update_xaxes(rangeslider_visible=False)
 
@@ -1799,19 +1903,22 @@ if st.session_state.run_model:
                 )
 
                 st.subheader("📊 Same-Bar Close Backtest Table")
-                # Format dates
-                if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
-                    close_df["Entry_Date"] = pd.to_datetime(close_df["Entry_Date"])
-                    close_df["Exit_Date"]  = pd.to_datetime(close_df["Exit_Date"])
-                else:    
-                    close_df["Entry_Date"] = pd.to_datetime(close_df["Entry_Date"]).dt.strftime("%Y-%m-%d")
-                    close_df["Exit_Date"]  = pd.to_datetime(close_df["Exit_Date"]).dt.strftime("%Y-%m-%d")
-                
-                # Remove unwanted column
-                if "Trade" in close_df.columns:
-                    close_df = close_df.drop(columns=["Trade"])
-                st.dataframe(close_df, height=250)
-                close_stats, _ = compute_trade_stats(close_df, capital)
+                if close_df.empty:
+                    st.info("No completed trades in the selected date range.")
+                    close_stats = {}
+                else:
+                    # Format dates
+                    if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
+                        close_df["Entry_Date"] = pd.to_datetime(close_df["Entry_Date"])
+                        close_df["Exit_Date"]  = pd.to_datetime(close_df["Exit_Date"])
+                    else:
+                        close_df["Entry_Date"] = pd.to_datetime(close_df["Entry_Date"]).dt.strftime("%Y-%m-%d")
+                        close_df["Exit_Date"]  = pd.to_datetime(close_df["Exit_Date"]).dt.strftime("%Y-%m-%d")
+                    # Remove unwanted column
+                    if "Trade" in close_df.columns:
+                        close_df = close_df.drop(columns=["Trade"])
+                    st.dataframe(close_df, height=250)
+                    close_stats, _ = compute_trade_stats(close_df, capital)
 
             with bt_right:
                 # ---- Net Profit for Next-Day Open ----
@@ -1836,18 +1943,22 @@ if st.session_state.run_model:
                     unsafe_allow_html=True
                 )
                 st.subheader("📊 Next-Bar Open Backtest Table")
-                # Format dates
-                if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:   
-                    open_df["Entry_Date"] = pd.to_datetime(open_df["Entry_Date"])
-                    open_df["Exit_Date"]  = pd.to_datetime(open_df["Exit_Date"])
+                if open_df.empty:
+                    st.info("No completed trades in the selected date range.")
+                    open_stats = {}
                 else:
-                    open_df["Entry_Date"] = pd.to_datetime(open_df["Entry_Date"]).dt.strftime("%Y-%m-%d")
-                    open_df["Exit_Date"]  = pd.to_datetime(open_df["Exit_Date"]).dt.strftime("%Y-%m-%d")
-                # Remove unwanted column
-                if "Trade" in open_df.columns:
-                    open_df = open_df.drop(columns=["Trade"])
-                st.dataframe(open_df, height=250)
-                open_stats, _ = compute_trade_stats(open_df, capital)
+                    # Format dates
+                    if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
+                        open_df["Entry_Date"] = pd.to_datetime(open_df["Entry_Date"])
+                        open_df["Exit_Date"]  = pd.to_datetime(open_df["Exit_Date"])
+                    else:
+                        open_df["Entry_Date"] = pd.to_datetime(open_df["Entry_Date"]).dt.strftime("%Y-%m-%d")
+                        open_df["Exit_Date"]  = pd.to_datetime(open_df["Exit_Date"]).dt.strftime("%Y-%m-%d")
+                    # Remove unwanted column
+                    if "Trade" in open_df.columns:
+                        open_df = open_df.drop(columns=["Trade"])
+                    st.dataframe(open_df, height=250)
+                    open_stats, _ = compute_trade_stats(open_df, capital)
 
             # ------------------------------------------------------------
             # 6) COMBINED EQUITY CURVE
@@ -1855,8 +1966,10 @@ if st.session_state.run_model:
             st.subheader("📈 Combined Equity Curve — Same-Bar Close vs Next-Bar Open")
 
             fig_eq = go.Figure()
-            fig_eq.add_trace(go.Scatter(x=close_df["Exit_Date"], y=close_df["Total_Equity"], mode="lines", name="Same-Bar Close", line=dict(width=2, color="blue")))
-            fig_eq.add_trace(go.Scatter(x=open_df["Exit_Date"], y=open_df["Total_Equity"], mode="lines", name="Next-Bar Open", line=dict(width=2, color="purple")))
+            if not close_df.empty:
+                fig_eq.add_trace(go.Scatter(x=close_df["Exit_Date"], y=close_df["Total_Equity"], mode="lines", name="Same-Bar Close", line=dict(width=2, color="blue")))
+            if not open_df.empty:
+                fig_eq.add_trace(go.Scatter(x=open_df["Exit_Date"], y=open_df["Total_Equity"], mode="lines", name="Next-Bar Open", line=dict(width=2, color="purple")))
 
             fig_eq.update_layout(
                 height=400,
@@ -1877,11 +1990,17 @@ if st.session_state.run_model:
 
             with stats_left:
                 st.subheader("📊 Trade Statistics — Same-Bar Close")
-                st.table(pd.DataFrame(close_stats, index=[0]).T)
+                if close_stats:
+                    st.table(pd.DataFrame(close_stats, index=[0]).T)
+                else:
+                    st.info("No trades to summarize.")
 
             with stats_right:
                 st.subheader("📊 Trade Statistics — Next-Bar Open")
-                st.table(pd.DataFrame(open_stats, index=[0]).T)
+                if open_stats:
+                    st.table(pd.DataFrame(open_stats, index=[0]).T)
+                else:
+                    st.info("No trades to summarize.")
 
             # ------------------------------------------------------------
             # 8) AI CHART ANALYSIS (DAILY ONLY, ≤ 1 YEAR)
