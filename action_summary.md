@@ -1,3 +1,65 @@
+# Ranking Workflow Summary (Updated 2026-05-31)
+
+## Objective
+
+Build next-week long/short ranking exports from the full signal history universe, then iterate filters and scoring so outputs are practical for trading.
+
+## What Was Implemented
+
+1. Started with AI analysis ranking and moved to full signal_history universe ranking.
+2. Added volume spike features to ranking:
+    - VolSpikeCount1w
+    - VolSpikeIntensity1w
+    - VolumeSpikeAccum (composite)
+3. Maintained separate LONG and SHORT rankings with overlap check.
+4. Added practical filtering iterations:
+    - Price band filter (Close between 10 and 500)
+    - Market cap filters (Large cap, then Mid+Large comparisons)
+    - Freshness gate experiments (SignalAgeDays <= 14), then removed on request
+5. Exported CSV outputs for both base and recent approaches.
+
+## Key Scripts Used
+
+- _rank_chunks_verbose.py: chunked full-universe ranking with progress logging and robust yfinance handling
+- _marketcap_topslice.py: market-cap filtered top-slice review
+- _midpluslarge_compare.py: Mid+Large vs Large-only comparison
+- _midlarge_rescore_check.py: score re-normalization inside filtered universe
+- _fresh_largecap_2w.py: freshness plus large-cap analysis snapshot
+- _export_recent_csvs.py: export recent-approach CSV files
+
+## Current Export Definition (as of 2026-05-31)
+
+Recent exports currently apply:
+
+- Price filter only: Close in [10, 500]
+- Market cap filter: MarketCap >= 10B
+- No freshness gate (removed)
+
+## Output Files Generated
+
+- ranking_nextweek_longs.csv
+- ranking_nextweek_shorts.csv
+- ranking_nextweek_longs_recent.csv
+- ranking_nextweek_shorts_recent.csv
+
+## Latest Confirmed Row Counts
+
+- ranking_nextweek_longs_recent.csv: 254 rows
+- ranking_nextweek_shorts_recent.csv: 228 rows
+
+## Notes on Volume Fields
+
+- VolSpikeCount1w: count of last-5-session spikes above baseline mean + 1 standard deviation
+- VolSpikeIntensity1w: summed positive normalized excess volume above baseline
+- VolumeSpikeAccum: weighted composite of count, intensity, and big spikes
+
+## Operational Notes
+
+- Some yfinance symbols intermittently fail or appear delisted; pipeline continues with partial data.
+- Pandas bottleneck warning is non-blocking in current runs.
+
+---
+
 # INSANE Daily Signal Logic — Critique & Improvement Plan
 
 ## Overview

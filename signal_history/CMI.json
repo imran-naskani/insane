@@ -783,5 +783,25 @@
         "close": 646.6300048828125,
         "smooth": 658.3294083641736,
         "slope": -6.531280552052749
+    },
+    {
+        "date": "2026-06-02",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 672.6699829101562,
+        "smooth": 660.0576120618947,
+        "slope": 7.510104593730887
+    },
+    {
+        "date": "2026-06-05",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 651.219970703125,
+        "smooth": 664.3256878115175,
+        "slope": -7.316365779427883
     }
 ]
