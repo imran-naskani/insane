@@ -26,7 +26,16 @@ import os
 
 
 
+from dotenv import load_dotenv
+load_dotenv()
+
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# DeepSeek client — OpenAI-compatible API, text reasoning (no vision)
+deepseek_client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
+    base_url="https://api.deepseek.com",
+)
 
 # ----------------------------------------------------
 # HELPER FUNCTIONS — AI Overlay
@@ -240,6 +249,10 @@ if "ai_analysis" not in st.session_state:
     st.session_state.ai_analysis = None
 if "ai_ticker" not in st.session_state:
     st.session_state.ai_ticker = None
+if "ai_model" not in st.session_state:
+    st.session_state.ai_model = "GPT-4o"
+if "show_outside_hours" not in st.session_state:
+    st.session_state.show_outside_hours = False
 if "ai_overlay_visible" not in st.session_state:
     st.session_state.ai_overlay_visible = True
 if "ai_toast" not in st.session_state:
@@ -373,6 +386,7 @@ try:
 
         _row = {
             "Ticker": _ticker,
+            "Strength": _last.get("strength", "Strong"),
             "Signal Date": _signal_date,
             "Signal Close": round(_signal_close, 2),
             "Today Close": round(_today_close, 2) if _today_close else None,
@@ -547,10 +561,23 @@ with chat_col:
         # --------------------------------------------------
         # DISPLAY LONG SIGNALS
         # --------------------------------------------------
-        with st.expander(f"🟢 Long Signals ({len(_long_rows)})", expanded=True):
+        def _style_long(row):
+            if row["Strength"] == "Strong":
+                return ["background-color: #1B5E20; color: #ffffff"] * len(row)
+            else:
+                return ["background-color: #C8E6C9; color: #1B5E20"] * len(row)
+
+        _long_strong = sum(1 for r in _long_rows if r.get("Strength") == "Strong")
+        _long_weak   = len(_long_rows) - _long_strong
+
+        with st.expander(
+            f"🟢 Long Signals — {_long_strong} Strong · {_long_weak} Weak",
+            expanded=True
+        ):
             if _long_rows:
+                _df_long = pd.DataFrame(_long_rows).sort_values("Signal Date", ascending=False)
                 st.dataframe(
-                    pd.DataFrame(_long_rows).sort_values("Signal Date", ascending=False),
+                    _df_long.style.apply(_style_long, axis=1),
                     use_container_width=True,
                     height=300,
                     hide_index=True
@@ -561,10 +588,23 @@ with chat_col:
         # --------------------------------------------------
         # DISPLAY SHORT SIGNALS
         # --------------------------------------------------
-        with st.expander(f"🔴 Short Signals ({len(_short_rows)})", expanded=True):
+        def _style_short(row):
+            if row["Strength"] == "Strong":
+                return ["background-color: #F9A825; color: #212121"] * len(row)
+            else:
+                return ["background-color: #FFF9C4; color: #795548"] * len(row)
+
+        _short_strong = sum(1 for r in _short_rows if r.get("Strength") == "Strong")
+        _short_weak   = len(_short_rows) - _short_strong
+
+        with st.expander(
+            f"🔴 Short Signals — {_short_strong} Strong · {_short_weak} Weak",
+            expanded=True
+        ):
             if _short_rows:
+                _df_short = pd.DataFrame(_short_rows).sort_values("Signal Date", ascending=False)
                 st.dataframe(
-                    pd.DataFrame(_short_rows).sort_values("Signal Date", ascending=False),
+                    _df_short.style.apply(_style_short, axis=1),
                     use_container_width=True,
                     height=300,
                     hide_index=True
@@ -690,8 +730,15 @@ with filters_col:
         ticker = "^RUT"
     elif ticker == "VIX":
         ticker = "^VIX"
-    timeframe_options = ["5m", "15m", "30m", "1h", "4h", "1d"] # "1m", 
+    timeframe_options = ["5m", "15m", "30m", "1h", "4h", "1d"] # "1m",
     timeframe = st.selectbox("Timeframe", timeframe_options, index=5)   # default = "1d"
+
+    if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+        st.checkbox(
+            "Show outside market hours",
+            key="show_outside_hours",
+            help="Include pre-market and after-hours bars (08:30–15:00 CT = regular session)"
+        )
     
     # ## ----- Auto Refresh-------
     # # Convert timeframe (like '5m', '15m', '1h') to minutes
@@ -748,8 +795,8 @@ with filters_col:
     #     end_date = st.date_input("End Date", value=dt.date.today() + dt.timedelta(days=1))
     end_date = st.date_input("End Date", value=dt.date.today() + dt.timedelta(days=1))
     capital = st.number_input("Capital ($)", 1000, 1_000_000, 10000, 500)
-    # Clear AI analysis if ticker or timeframe changed (runs on every rerun, not just button click)
-    current_key = f"{ticker}_{timeframe}"
+    # Clear AI analysis if ticker, timeframe, OR model changed
+    current_key = f"{ticker}_{timeframe}_{st.session_state.get('ai_model', 'GPT-4o')}"
     if st.session_state.ai_ticker != current_key:
         st.session_state.ai_analysis = None
         st.session_state.ai_overlay_visible = False
@@ -954,21 +1001,32 @@ if st.session_state.run_model:
                 # Only overwrite from frozen history if it actually exists on disk;
                 # otherwise keep the computed signals for display
                 if len(frozen) > 0:
-                    df["Turn_Up"] = False
+                    df["Turn_Up"]   = False
                     df["Turn_Down"] = False
+                    df["Strength"]  = "Strong"
                     for record in frozen:
                         date = record["date"]
                         mask = df.index.strftime("%Y-%m-%d") == date
                         if mask.any():
                             idx = df.index[mask][0]
+                            strength = record.get("strength", "Strong")
                             if record["signal"] == "UP":
-                                df.at[idx, "Turn_Up"] = True
+                                df.at[idx, "Turn_Up"]  = True
+                                df.at[idx, "Strength"] = strength
                             if record["signal"] == "DOWN":
                                 df.at[idx, "Turn_Down"] = True
+                                df.at[idx, "Strength"]  = strength
 
             df["Turn_Up"] = df["Turn_Up"].fillna(False)
             df["Turn_Down"] = df["Turn_Down"].fillna(False)
 
+            # ── Outside-hours filter (intraday only) ──────────────────────
+            # Applied AFTER signal computation so TOS_Trail warmup and
+            # signal logic see the full data; chart then shows only the
+            # user-selected window.
+            if timeframe in ["5m", "15m", "30m", "1h", "4h"]:
+                if not st.session_state.get("show_outside_hours", False):
+                    df = df.between_time("08:30", "15:00")
 
             # ------------------------------------------------------------
             # 3) INITIALIZE POSITION
@@ -1238,17 +1296,16 @@ if st.session_state.run_model:
 
             # --- Pre-load AI analysis cache (needed for overlay before chart renders) ---
             if ai_eligible:
-                os.makedirs("ai_analysis", exist_ok=True)
-                analysis_date = datetime.date.today().strftime("%Y-%m-%d")
-                # Use a single cache file per ticker/timeframe (overwrite on revalidate)
-                analysis_file = f"ai_analysis/{ticker}_{timeframe}.json"
+                analysis_date  = datetime.date.today().strftime("%Y-%m-%d")
+                _pre_slug      = "deepseek" if st.session_state.get("ai_model") == "DeepSeek" else "openai"
+                _pre_folder    = f"ai_analysis/{_pre_slug}"
+                os.makedirs(_pre_folder, exist_ok=True)
+                analysis_file  = f"{_pre_folder}/{ticker}_{timeframe}.json"
                 if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
                     with open(analysis_file, "r") as f:
                         st.session_state.ai_analysis = json.load(f)
-                    # Auto-enable overlay if cached analysis has overlay data
                     if st.session_state.ai_analysis.get("overlay"):
                         st.session_state.ai_overlay_visible = True
-                # Compute status for cached analysis against latest close and update cache if changed
                 try:
                     if st.session_state.ai_analysis is not None:
                         last_row = df.iloc[-1]
@@ -1256,13 +1313,11 @@ if st.session_state.run_model:
                         overlay = st.session_state.ai_analysis.get("overlay")
                         status_info = compute_overlay_status(overlay, current_close_val, df)
                         if status_info and status_info.get("status") != st.session_state.ai_analysis.get("status"):
-                            # merge status into cached analysis and overwrite file atomically
                             st.session_state.ai_analysis.update(status_info)
                             tmp_path = analysis_file + ".tmp"
                             with open(tmp_path, "w") as _tf:
                                 json.dump(st.session_state.ai_analysis, _tf, indent=4)
                             os.replace(tmp_path, analysis_file)
-                            # ensure overlay visibility if overlay exists
                             if st.session_state.ai_analysis.get("overlay"):
                                 st.session_state.ai_overlay_visible = True
                 except Exception:
@@ -1271,12 +1326,28 @@ if st.session_state.run_model:
             has_overlay = (st.session_state.ai_analysis is not None and
                            st.session_state.ai_analysis.get("overlay") is not None)
 
-            chart_title_col, overlay_col, ai_btn_col = st.columns([5, 1, 2])
+            chart_title_col, overlay_col, model_col, ai_btn_col = st.columns([4, 1, 2, 2])
             with chart_title_col:
                 st.subheader("📌 Price vs Momentum Trend")
             with overlay_col:
                 if has_overlay:
                     st.checkbox("Overlay Pattern", key="ai_overlay_visible")
+            with model_col:
+                if ai_eligible:
+                    ai_model = st.selectbox(
+                        "Model",
+                        ["GPT-4o", "DeepSeek"],
+                        key="ai_model",
+                        label_visibility="collapsed",
+                        help="GPT-4o uses chart vision. DeepSeek uses text context only."
+                    )
+                else:
+                    ai_model = st.session_state.get("ai_model", "GPT-4o")
+
+            # Model-specific cache path so results never overwrite each other
+            _model_slug   = "deepseek" if st.session_state.get("ai_model") == "DeepSeek" else "openai"
+            _model_folder = f"ai_analysis/{_model_slug}"
+
             with ai_btn_col:
                 if not ai_eligible:
                     st.button(
@@ -1286,15 +1357,15 @@ if st.session_state.run_model:
                     )
                     ai_btn_clicked = False
                 else:
-                    # Single cache file per ticker/timeframe
-                    cache_path = f"ai_analysis/{ticker}_{timeframe}.json"
+                    os.makedirs(_model_folder, exist_ok=True)
+                    cache_path = f"{_model_folder}/{ticker}_{timeframe}.json"
                     cache_exists = os.path.exists(cache_path)
                     btn_label = "Revalidate AI Analysis" if cache_exists else "🤖 Generate AI Analysis"
                     ai_btn_clicked = st.button(btn_label, key="ai_analysis_btn")
-                    # Show cache info when available
                     if cache_exists and st.session_state.ai_analysis:
                         cache_date = st.session_state.ai_analysis.get("date", "unknown")
-                        st.caption(f"Cached: {cache_date}")
+                        cached_model = st.session_state.ai_analysis.get("model", "gpt-4o")
+                        st.caption(f"Cached: {cache_date} · {cached_model}")
 
             # if timeframe in ["5m", "15m", "30m", "1h", "4h"]: 
             #     df = df.iloc[:-1]
@@ -1506,14 +1577,23 @@ if st.session_state.run_model:
                 ).fillna(default).tolist()
 
             # Turn Up (BUY)
+            # Daily: dark green = Strong, light green = Weak
+            # Intraday: no strength concept → always lime
             _up_mask = df["Turn_Up"]
+            if "Strength" in df.columns and timeframe == "1d":
+                _up_colors = df.loc[_up_mask, "Strength"].map(
+                    {"Strong": "#1B5E20", "Weak": "#A5D6A7"}
+                ).fillna("#1B5E20").tolist()
+            else:
+                _up_colors = "lime"
+
             fig.add_trace(
                 go.Scatter(
                     x=df.index[_up_mask],
                     y=df["Low"][_up_mask] - 0.5,
                     mode="markers",
                     marker=dict(
-                        color="lime",
+                        color=_up_colors,
                         symbol="triangle-up",
                         size=_marker_sizes(_up_mask),
                         line=dict(color="black", width=1.4)
@@ -1543,14 +1623,23 @@ if st.session_state.run_model:
             )
 
             # Turn Down (SHORT)
+            # Daily: dark amber = Strong, light yellow = Weak
+            # Intraday: no strength concept → always yellow
             _down_mask = df["Turn_Down"]
+            if "Strength" in df.columns and timeframe == "1d":
+                _down_colors = df.loc[_down_mask, "Strength"].map(
+                    {"Strong": "#F9A825", "Weak": "#FFF9C4"}
+                ).fillna("#F9A825").tolist()
+            else:
+                _down_colors = "yellow"
+
             fig.add_trace(
                 go.Scatter(
                     x=df.index[_down_mask],
                     y=df["High"][_down_mask] + 0.5,
                     mode="markers",
                     marker=dict(
-                        color="yellow",
+                        color=_down_colors,
                         symbol="triangle-down",
                         size=_marker_sizes(_down_mask),
                         line=dict(color="black", width=1.4)
@@ -2138,29 +2227,44 @@ if st.session_state.run_model:
                                     + OVERLAY_JSON_INSTRUCTION
                                 )
 
-                                response = client.chat.completions.create(
-                                    model="gpt-4o",
-                                    messages=[
-                                        {"role": "system", "content": system_prompt},
-                                        {
-                                            "role": "user",
-                                            "content": [
-                                                {"type": "text", "text": revalidation_prompt},
-                                                {
-                                                    "type": "image_url",
-                                                    "image_url": {
-                                                        "url": f"data:image/png;base64,{chart_b64}",
-                                                        "detail": "high"
+                                _use_deepseek = st.session_state.get("ai_model") == "DeepSeek"
+                                if _use_deepseek:
+                                    # DeepSeek-v4-pro is a reasoning model — uses internal think
+                                    # tokens that count toward max_tokens, so needs 8000+
+                                    response = deepseek_client.chat.completions.create(
+                                        model="deepseek-v4-pro",
+                                        messages=[
+                                            {"role": "system", "content": system_prompt},
+                                            {"role": "user",   "content": revalidation_prompt},
+                                        ],
+                                        max_tokens=8000,
+                                        temperature=0.3
+                                    )
+                                else:
+                                    # GPT-4o: vision + text
+                                    response = client.chat.completions.create(
+                                        model="gpt-4o",
+                                        messages=[
+                                            {"role": "system", "content": system_prompt},
+                                            {
+                                                "role": "user",
+                                                "content": [
+                                                    {"type": "text", "text": revalidation_prompt},
+                                                    {
+                                                        "type": "image_url",
+                                                        "image_url": {
+                                                            "url": f"data:image/png;base64,{chart_b64}",
+                                                            "detail": "high"
+                                                        }
                                                     }
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    max_tokens=2500,
-                                    temperature=0.3
-                                )
+                                                ]
+                                            }
+                                        ],
+                                        max_tokens=2500,
+                                        temperature=0.3
+                                    )
 
-                                ai_reply = response.choices[0].message.content.strip()
+                                ai_reply = (response.choices[0].message.content or "").strip()
 
                                 if ai_reply.upper().startswith("UNCHANGED"):
                                     # Analysis still valid — use cached (overlay already in cached data)
@@ -2170,6 +2274,7 @@ if st.session_state.run_model:
                                     # Analysis changed — parse overlay and save
                                     clean_text, overlay_data = parse_overlay_from_response(ai_reply)
                                     overlay_data = validate_overlay(overlay_data, float(last_row["Close"]))
+                                    _saved_model = "deepseek-v4-pro" if _use_deepseek else "gpt-4o"
                                     analysis_result = {
                                         "ticker": ticker,
                                         "timeframe": timeframe,
@@ -2178,12 +2283,11 @@ if st.session_state.run_model:
                                         "last_signal": last_signal,
                                         "last_signal_date": last_signal_date,
                                         "current_close": float(last_row["Close"]),
-                                        "model": "gpt-4o",
+                                        "model": _saved_model,
                                         "prompt": revalidation_prompt,
                                         "response": clean_text,
                                         "overlay": overlay_data
                                     }
-                                    # Compute status metadata and attach
                                     try:
                                         status_meta = compute_overlay_status(analysis_result.get("overlay"), float(last_row["Close"]), df)
                                         if status_meta:
@@ -2191,7 +2295,6 @@ if st.session_state.run_model:
                                     except Exception:
                                         pass
 
-                                    # Write atomically
                                     tmp_path = analysis_file + ".tmp"
                                     with open(tmp_path, "w") as f:
                                         json.dump(analysis_result, f, indent=4)
@@ -2226,34 +2329,50 @@ if st.session_state.run_model:
                                     + OVERLAY_JSON_INSTRUCTION
                                 )
 
-                                response = client.chat.completions.create(
-                                    model="gpt-4o",
-                                    messages=[
-                                        {"role": "system", "content": system_prompt},
-                                        {
-                                            "role": "user",
-                                            "content": [
-                                                {"type": "text", "text": user_prompt},
-                                                {
-                                                    "type": "image_url",
-                                                    "image_url": {
-                                                        "url": f"data:image/png;base64,{chart_b64}",
-                                                        "detail": "high"
+                                _use_deepseek = st.session_state.get("ai_model") == "DeepSeek"
+                                if _use_deepseek:
+                                    # DeepSeek-v4-pro is a reasoning model — needs 8000+ tokens
+                                    # to budget for internal <think> reasoning + actual response
+                                    response = deepseek_client.chat.completions.create(
+                                        model="deepseek-v4-pro",
+                                        messages=[
+                                            {"role": "system", "content": system_prompt},
+                                            {"role": "user",   "content": user_prompt},
+                                        ],
+                                        max_tokens=8000,
+                                        temperature=0.3
+                                    )
+                                else:
+                                    # GPT-4o: vision + text
+                                    response = client.chat.completions.create(
+                                        model="gpt-4o",
+                                        messages=[
+                                            {"role": "system", "content": system_prompt},
+                                            {
+                                                "role": "user",
+                                                "content": [
+                                                    {"type": "text", "text": user_prompt},
+                                                    {
+                                                        "type": "image_url",
+                                                        "image_url": {
+                                                            "url": f"data:image/png;base64,{chart_b64}",
+                                                            "detail": "high"
+                                                        }
                                                     }
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    max_tokens=2500,
-                                    temperature=0.3
-                                )
+                                                ]
+                                            }
+                                        ],
+                                        max_tokens=2500,
+                                        temperature=0.3
+                                    )
 
-                                ai_reply = response.choices[0].message.content
+                                ai_reply = response.choices[0].message.content or ""
 
                                 # Parse overlay JSON from response
                                 clean_text, overlay_data = parse_overlay_from_response(ai_reply)
                                 overlay_data = validate_overlay(overlay_data, float(last_row["Close"]))
 
+                                _saved_model = "deepseek-v4-pro" if _use_deepseek else "gpt-4o"
                                 analysis_result = {
                                     "ticker": ticker,
                                     "timeframe": timeframe,
@@ -2262,7 +2381,7 @@ if st.session_state.run_model:
                                     "last_signal": last_signal,
                                     "last_signal_date": last_signal_date,
                                     "current_close": float(last_row["Close"]),
-                                    "model": "gpt-4o",
+                                    "model": _saved_model,
                                     "prompt": user_prompt,
                                     "response": clean_text,
                                     "overlay": overlay_data

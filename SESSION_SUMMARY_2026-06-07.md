@@ -109,3 +109,109 @@ Long/short win rates also match exactly (62%/67% combined, 69%/57% MR standalone
 |---|---|
 | `9cda347` | Replace intraday signal logic with MR + ORB-Slope strategy |
 | `a8707dc` | Auto update 2026-06-07 — signal history, AI analysis, daily data |
+
+---
+
+# Session Update — 2026-06-08
+
+## Overview
+
+Three changes to `insane.py`: Weak/Strong signal color coding on both the dashboard signal tables and the chart markers; DeepSeek V4 Pro as a selectable AI model alongside GPT-4o; and an intraday outside-hours toggle checkbox.
+
+---
+
+## Change 1 — Weak/Strong Signal Color Coding
+
+### Problem
+`daily_engine.py` correctly saves `"strength": "Weak"` or `"strength": "Strong"` on every signal record in `signal_history/`, but `insane.py` never read the field — dashboard showed all signals identically with no visual distinction.
+
+### Signal Tables
+- Added `"Strength"` to the `_row` dict (was silently dropped before)
+- Replaced `st.dataframe()` with `pd.Styler` using `apply(..., axis=1)` per-row coloring
+- Expander titles now show split counts: `🟢 Long Signals — 45 Strong · 17 Weak`
+
+| Signal | Background | Text |
+|---|---|---|
+| Strong Long | `#1B5E20` dark green | white |
+| Weak Long | `#C8E6C9` light green | dark green |
+| Strong Short | `#F9A825` dark amber | dark |
+| Weak Short | `#FFF9C4` light yellow | brown |
+
+### Chart Markers (daily 1d only)
+- Populated `df["Strength"]` from the frozen signal history loop
+- Passed per-point color lists to Plotly `go.Scatter` instead of a single color string
+
+| Marker | Color |
+|---|---|
+| Strong Long ▲ | `#1B5E20` dark green |
+| Weak Long ▲ | `#A5D6A7` light green |
+| Strong Short ▼ | `#F9A825` dark amber |
+| Weak Short ▼ | `#FFF9C4` light yellow |
+
+Intraday markers unchanged — Weak/Strong has no meaning for intraday signals.
+
+---
+
+## Change 2 — DeepSeek V4 Pro AI Model Selector
+
+### UI
+New **"Model"** dropdown added next to the "Generate AI Analysis" button — choices: `GPT-4o` | `DeepSeek`
+
+### Cache — Separate Folders Per Model
+| Model | Cache path |
+|---|---|
+| GPT-4o | `ai_analysis/openai/{ticker}_{timeframe}.json` |
+| DeepSeek | `ai_analysis/deepseek/{ticker}_{timeframe}.json` |
+
+Results never overwrite each other. Cache caption shows both date and model: `Cached: 2026-06-05 · gpt-4o`
+
+### API Routing
+- **GPT-4o**: vision + text (chart PNG captured and sent, unchanged from before)
+- **DeepSeek V4 Pro**: text context only — no vision API on `deepseek-v4-pro`; text context includes close, RSI, swing highs/lows, backtest stats, and all signal history
+
+```python
+deepseek_client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),  # from .env
+    base_url="https://api.deepseek.com",
+)
+```
+
+Available models confirmed via live API: `deepseek-v4-pro`, `deepseek-v4-flash`
+
+### Model Isolation
+`current_key` now includes the model name → switching models immediately clears `st.session_state.ai_analysis` so GPT-4o's overlay never bleeds into DeepSeek's view and vice versa.
+
+### Bug Fixed — Empty DeepSeek Response
+**Root cause:** `deepseek-v4-pro` is a reasoning model. It runs an internal `<think>` chain-of-thought before writing any response, and those reasoning tokens count against `max_tokens`. With the original `max_tokens=2500` and a ~1550-token prompt, reasoning exhausted the entire budget → empty response string saved to cache.
+
+**Diagnosed by:** Live API test showed `reasoning_tokens=353` on a simple 500-token call; confirmed with the full NVDA prompt at `max_tokens=8000` → 3180 chars of content returned correctly.
+
+**Fix:** `max_tokens=8000` for DeepSeek calls only. GPT-4o stays at 2500 (no reasoning overhead).
+
+---
+
+## Change 3 — Intraday Outside Market Hours Checkbox
+
+Checkbox `"Show outside market hours"` added to the left filter panel, visible only when an intraday timeframe is selected.
+
+| State | Effect |
+|---|---|
+| Unchecked (default) | `df.between_time("08:30", "15:00")` — regular CT session only |
+| Checked | All bars shown including pre-market and after-hours |
+
+Filter applied **after** all signal computation so TOS Trail warmup and MR/ORB signal logic still process the full dataset; only the chart view is clipped.
+
+---
+
+## Files Changed This Session
+
+| File | Changes |
+|---|---|
+| `insane.py` | All 3 changes above — color coding, DeepSeek selector, outside-hours checkbox |
+
+## Folders Created
+
+| Path | Purpose |
+|---|---|
+| `ai_analysis/openai/` | GPT-4o analysis cache (model-specific) |
+| `ai_analysis/deepseek/` | DeepSeek V4 Pro analysis cache |
