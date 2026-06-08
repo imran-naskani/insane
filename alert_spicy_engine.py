@@ -21,7 +21,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 # OLD: TICKERS = ["^GSPC", "TSLA", "AAPL"]
 # ^GSPC swapped for SPY: real volume needed for correct ATR; validated in SIGNAL_LOGIC.md backtest
-TICKERS   = ["TSLA", "SPY", "NVDA", "QQQ", "AAPL"]
+TICKERS   = ["TSLA", "SPY", "NVDA", "TQQQ"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
