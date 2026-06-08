@@ -1,6 +1,11 @@
 .streamlit/secrets.toml
 .env
 
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
 # Local helper/scratch scripts (not for commit)
 _*.py
 
