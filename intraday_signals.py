@@ -23,21 +23,25 @@ import pandas as pd
 S_THR = {
     "TSLA": 0.65,
     "SPY":  0.55,
-    "NVDA": 0.65,
     "QQQ":  0.55,
-    "AAPL": 0.60,
+    "TQQQ": 0.55,
 }
 ATR_FLOOR = {
     "TSLA": 1.67,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $2.50)
     "SPY":  0.33,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $0.50)
-    "NVDA": 0.67,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $1.00)
-    "QQQ":  0.67,
-    "AAPL": 1.67,
+    "QQQ":  0.67,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $1.00)
+    "TQQQ": 0.67,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $1.00)
 }
 
-ORB_SLOPE_BARS   = 6     # first 6 bars = 30-min opening window (08:30-08:55 CT)
-ORB_SLOPE_DEG    = 30.0  # angle threshold — tan(30 deg) ~= 0.58 ATR/bar
-ORB_REVERSAL_DEG = 10.0  # min re-computed angle for MR to flip an ORB position
+ORB_SLOPE_BARS    = 6     # first 6 bars = 30-min opening window (08:30-08:55 CT)
+ORB_SLOPE_DEG_DEFAULT = 30.0   # fallback for any ticker not in the dict below
+ORB_SLOPE_DEG = {          # per-ticker ORB angle threshold (degrees)
+    "TSLA": 30.0,
+    "SPY":  30.0,
+    "QQQ":  20.0,
+    "TQQQ": 20.0,
+}
+ORB_REVERSAL_DEG  = 10.0  # min re-computed angle for MR to flip an ORB position
 
 
 # ── Feature engineering ───────────────────────────────────────────────────────
@@ -287,7 +291,8 @@ def compute_chart_signals(df, ticker):
         ]
         if len(session) < ORB_SLOPE_BARS:
             continue
-        lorb, sorb = run_orb_slope(session)
+        orb_deg = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
+        lorb, sorb = run_orb_slope(session, angle_deg=orb_deg)
         orb_long_idx  = lorb[lorb].index
         orb_short_idx = sorb[sorb].index
         df.loc[orb_long_idx,  "Turn_Up"]       = True

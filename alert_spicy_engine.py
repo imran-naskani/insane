@@ -7,6 +7,7 @@ from intraday_signals import (
     add_intraday_features,
     run_new, run_orb_slope, _orb_reversal_confirmed,
     S_THR, ATR_FLOOR, ORB_SLOPE_BARS, ORB_REVERSAL_DEG,
+    ORB_SLOPE_DEG, ORB_SLOPE_DEG_DEFAULT,
 )
 import datetime as dt
 from dotenv import load_dotenv
@@ -21,7 +22,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 # OLD: TICKERS = ["^GSPC", "TSLA", "AAPL"]
 # ^GSPC swapped for SPY: real volume needed for correct ATR; validated in SIGNAL_LOGIC.md backtest
-TICKERS   = ["TSLA", "SPY", "NVDA", "TQQQ"]
+TICKERS   = ["TSLA", "SPY", "QQQ", "TQQQ"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -149,7 +150,8 @@ while True:
             # ── Run new signal logic ───────────────────────────────────────
             lsig_mr,  ssig_mr  = run_new(dv, S_THR.get(ticker, 0.60),
                                           ATR_FLOOR.get(ticker, 0.50))
-            lsig_orb, ssig_orb = run_orb_slope(dv)
+            orb_deg = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
+            lsig_orb, ssig_orb = run_orb_slope(dv, angle_deg=orb_deg)
 
             is_orb_long  = bool(lsig_orb.iloc[-1])
             is_orb_short = bool(ssig_orb.iloc[-1])
