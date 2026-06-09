@@ -565,7 +565,7 @@ with chat_col:
             if row["Strength"] == "Strong":
                 return ["background-color: #1B5E20; color: #ffffff"] * len(row)
             else:
-                return ["background-color: #C8E6C9; color: #1B5E20"] * len(row)
+                return ["background-color: #00E676; color: #003300"] * len(row)
 
         _long_strong = sum(1 for r in _long_rows if r.get("Strength") == "Strong")
         _long_weak   = len(_long_rows) - _long_strong
@@ -592,7 +592,7 @@ with chat_col:
             if row["Strength"] == "Strong":
                 return ["background-color: #F9A825; color: #212121"] * len(row)
             else:
-                return ["background-color: #FFF9C4; color: #795548"] * len(row)
+                return ["background-color: #FFD740; color: #212121"] * len(row)
 
         _short_strong = sum(1 for r in _short_rows if r.get("Strength") == "Strong")
         _short_weak   = len(_short_rows) - _short_strong
@@ -1397,7 +1397,7 @@ if st.session_state.run_model:
                     [{"secondary_y": True}],   # Row 1 → Candles + VIX
                     [{"secondary_y": False}],  # Row 2 → Volume
                     [{"secondary_y": False}],  # Row 3 → RSI
-                    [{"secondary_y": False}],  # Row 4 → OLS Slope + R²  (intraday only)
+                    [{"secondary_y": True}],   # Row 4 → OLS Slope (left) + R² (right)
                 ],
             )
 
@@ -1503,12 +1503,12 @@ if st.session_state.run_model:
             )
 
             # -------------------------------
-            # Row 4 — OLS Slope + R² (intraday only)
-            # lr_slope: $/bar oscillating around 0 — positive = uptrend, MR signals at zero-crossings
-            # lr_r2:    [0,1] trend quality — near 1 = clean linear trend, near 0 = choppy
-            # Both share the same y-axis; R² naturally lives in [0,1] while slope oscillates wider.
+            # Row 4 — OLS Slope (left axis) + R² (right axis)
+            # lr_slope: $/bar oscillating around 0 — left axis
+            # lr_r2:    [0,1] trend quality      — right axis (fixed 0-1 range)
             # -------------------------------
             if "lr_slope" in df.columns:
+                # Slope — left axis
                 fig.add_trace(
                     go.Scatter(
                         x=df.index,
@@ -1518,8 +1518,20 @@ if st.session_state.run_model:
                         line=dict(width=1.5, color="aqua"),
                         opacity=0.85
                     ),
-                    row=4, col=1
+                    row=4, col=1, secondary_y=False
                 )
+                # Zero reference line for slope (left axis)
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index,
+                        y=[0] * len(df),
+                        mode="lines",
+                        line=dict(width=0.6, dash="dot", color="rgba(255,255,255,0.25)"),
+                        showlegend=False
+                    ),
+                    row=4, col=1, secondary_y=False
+                )
+                # R² — right axis
                 fig.add_trace(
                     go.Scatter(
                         x=df.index,
@@ -1529,37 +1541,33 @@ if st.session_state.run_model:
                         line=dict(width=1.5, color="gold", dash="dot"),
                         opacity=0.80
                     ),
-                    row=4, col=1
+                    row=4, col=1, secondary_y=True
                 )
-                # Zero reference line for slope direction
-                fig.add_trace(
-                    go.Scatter(
-                        x=df.index,
-                        y=[0] * len(df),
-                        mode="lines",
-                        line=dict(width=0.6, dash="dot", color="rgba(255,255,255,0.25)"),
-                        showlegend=False
-                    ),
-                    row=4, col=1
-                )
-                # R² = 0.5 threshold (gate used by run_new)
+                # R² = 0.5 gate threshold (right axis)
                 fig.add_trace(
                     go.Scatter(
                         x=df.index,
                         y=[0.5] * len(df),
                         mode="lines",
                         line=dict(width=0.6, dash="dash", color="rgba(255,215,0,0.35)"),
-                        name="R² gate (0.5)",
                         showlegend=False
                     ),
-                    row=4, col=1
+                    row=4, col=1, secondary_y=True
                 )
                 fig.update_yaxes(
-                    title_text="Slope / R²",
+                    title_text="Slope ($/bar)",
                     showgrid=False,
                     zeroline=True,
                     zerolinecolor="rgba(255,255,255,0.15)",
-                    row=4, col=1
+                    row=4, col=1, secondary_y=False
+                )
+                fig.update_yaxes(
+                    title_text="R²",
+                    range=[0, 1],
+                    showgrid=False,
+                    zeroline=False,
+                    tickvals=[0, 0.25, 0.5, 0.75, 1.0],
+                    row=4, col=1, secondary_y=True
                 )
 
             # -------------------------------
@@ -1582,7 +1590,7 @@ if st.session_state.run_model:
             _up_mask = df["Turn_Up"]
             if "Strength" in df.columns and timeframe == "1d":
                 _up_colors = df.loc[_up_mask, "Strength"].map(
-                    {"Strong": "#1B5E20", "Weak": "#A5D6A7"}
+                    {"Strong": "#1B5E20", "Weak": "#00E676"}
                 ).fillna("#1B5E20").tolist()
             else:
                 _up_colors = "lime"
@@ -1628,7 +1636,7 @@ if st.session_state.run_model:
             _down_mask = df["Turn_Down"]
             if "Strength" in df.columns and timeframe == "1d":
                 _down_colors = df.loc[_down_mask, "Strength"].map(
-                    {"Strong": "#F9A825", "Weak": "#FFF9C4"}
+                    {"Strong": "#F9A825", "Weak": "#FFD740"}
                 ).fillna("#F9A825").tolist()
             else:
                 _down_colors = "yellow"
