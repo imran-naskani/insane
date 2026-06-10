@@ -484,72 +484,121 @@ signal, flipping the ORB short. Result: lose the profitable ORB trade AND lose m
 on the wrong-direction MR trade. Example:
 
 ```
-Jun 5 SPY:  ORB SHORT at 09:00 → holds all day → +$10.84 (standalone)
-Combined without gate: ORB SHORT flipped to LONG at 09:50 → -$0.62 + -$11.46 = -$12.08
+Jun 5 SPY:  ORB SHORT at 09:00 -> holds all day -> +$10.84 (standalone)
+Combined without gate: ORB SHORT flipped to LONG at 09:50 -> -$0.62 + -$11.46 = -$12.08
 ```
 
-### The Gate: Re-computed Angle Check
+### The Gate: Extreme-Anchored Accumulation Check (updated 2026-06-09)
 
-Before allowing an MR signal to flip an ORB position, compute the OLS slope from
-the **ORB signal bar** to the **current bar** and convert to degrees. Allow the flip
-only if the trend has genuinely reversed by at least `ORB_REVERSAL_DEG` degrees.
+Before allowing an MR signal to flip an ORB position:
+
+1. Find the **day's extreme** since ORB entry: lowest close for a short ORB, highest for a long ORB
+2. Check growing OLS windows **anchored at that extreme** (5-bar first, then 6-bar)
+3. A window passes only when **both** angle AND R2 exceed per-ticker thresholds (AND logic)
+
+This asks "is there a clean structured bounce off the day's extreme?" rather than "has price
+recovered from the ORB entry?" The original full-span approach was too strict for afternoon
+signals: on V-reversal days the long historical drag kept the slope negative even after a
+genuine bounce.
 
 ```python
-ORB_REVERSAL_DEG = 10.0   # sweet spot from sweep [0, 5, 10, 15, 20, 25, 30]
-                           # 0 = any sign change; 10 = meaningful reversal; 30 = strict
-
 def _orb_reversal_confirmed(dv, orb_bar_idx, orb_dir, current_idx,
-                             threshold=ORB_REVERSAL_DEG):
+                             threshold=ORB_REVERSAL_DEG, r2_thr=0.0,
+                             accum_start=5, slope_bars=6):
     """
     Returns True if MR is allowed to flip the ORB position.
 
-    orb_bar_idx : integer index of the ORB signal bar (bar 6, the last bar of opening window)
-    orb_dir     : 'long' or 'short'  (direction the ORB trade is holding)
-    current_idx : integer index of the bar where MR wants to flip
-    threshold   : degrees required to confirm reversal (default 10.0)
+    orb_bar_idx : session iloc of the ORB signal bar
+    orb_dir     : 'long' or 'short'
+    current_idx : session iloc of the bar where MR wants to flip
+    threshold   : angle threshold in degrees (per-ticker: SPY 20, TSLA 30, QQQ/TQQQ 20, GSPC 10)
+    r2_thr      : R2 quality gate (per-ticker: SPY/QQQ/TQQQ/GSPC 0.60, TSLA 0.80)
     """
-    n_bars = current_idx - orb_bar_idx + 1
-    if n_bars < 2:
+    if current_idx <= orb_bar_idx:
         return False
-
-    closes = dv["Close"].iloc[orb_bar_idx : current_idx + 1].values.astype(float)
-    atr    = float(dv["ATR"].iloc[current_idx])
+    closes_seg = dv["Close"].iloc[orb_bar_idx: current_idx + 1].values.astype(float)
+    if len(closes_seg) == 0:
+        return False
+    atr = float(dv["ATR"].iloc[current_idx])
     if atr <= 0 or np.isnan(atr):
         return False
 
-    x     = np.arange(n_bars, dtype=float)
-    xd    = x - x.mean()
-    slope = np.dot(xd, closes - closes.mean()) / np.dot(xd, xd)
-    angle = np.degrees(np.arctan(slope / atr))
+    # Step 1: find extreme since ORB entry
+    rel   = int(np.argmin(closes_seg)) if orb_dir == "short" else int(np.argmax(closes_seg))
+    ext_i = orb_bar_idx + rel   # absolute session iloc of the extreme bar
 
-    if orb_dir == "short":
-        return angle >=  threshold   # need upward angle to flip a short ORB
-    else:
-        return angle <= -threshold   # need downward angle to flip a long ORB
+    # Step 2: check accum windows anchored at extreme
+    all_closes = dv["Close"].values.astype(float)
+    for nb in range(accum_start, slope_bars + 1):
+        end = ext_i + nb
+        if end - 1 > current_idx:
+            break                         # window extends past current bar
+        w = all_closes[ext_i: end]
+        ang, r2 = _ols_angle_r2(w, atr)
+        if r2_thr > 0 and r2 < r2_thr:
+            continue                      # R2 fails -> try next window
+        if orb_dir == "short" and ang >= threshold:
+            return True
+        if orb_dir == "long"  and ang <= -threshold:
+            return True
+    return False
 ```
 
-**Intuition:** If ORB fired SHORT (strong down open) and MR wants to go LONG,
-the re-computed angle from the ORB bar to now must be >= +10° before the flip is
-allowed. On a genuine down-trending day, this angle stays negative → MR suppressed.
-On a day that opened down but reversed, the angle turns positive → MR allowed.
+### How compute_chart_signals calls the gate
 
-### Threshold Sweep Results
+```python
+# Per-ticker thresholds are passed — same values used for ORB entry
+_orb_reversal_confirmed(session, orb_bar_i, "short", ts_i,
+                        threshold=ang_deg,   # e.g. 20 for SPY
+                        r2_thr=r2_thr)       # e.g. 0.60 for SPY
+```
 
-Sweep over [0, 5, 10, 15, 20, 25, 30] degrees (42 days, TSLA + SPY):
+### Example: SPY Jun 9 2026
 
-| RevDeg | TSLA | SPY | **Total** | SPY ORB leg |
-|--------|------|-----|-----------|------------|
-| 0 deg | +$83.43 | +$2.71 | $+86.14 | -$1.08 |
-| 5 deg | +$83.43 | +$23.72 | $+107.15 | +$9.32 |
-| **10 deg** | +$83.43 | +$26.50 | **$+109.93** | +$10.96 |
-| 15 deg | +$83.43 | +$19.76 | $+103.19 | +$9.09 |
-| 20 deg | +$83.43 | +$19.76 | $+103.19 | +$9.09 |
-| 25 deg | +$83.43 | +$21.76 | $+105.19 | +$10.67 |
-| 30 deg | +$83.43 | +$21.76 | $+105.19 | +$10.67 |
+```
+ORB SHORT fires at 09:05, price = 743.98
+Day's low reached at 11:35, price = 723.34
+Gate check when MR LONG fires at 12:15:
+  extreme at bar 37 (11:35)
+  5-bar anchored [11:35-11:55]: ang=13.46, R2=0.469 -> R2 fails
+  6-bar anchored [11:35-12:00]: ang=20.18, R2=0.696 -> PASS (ang>=20 and R2>=0.6)
+  -> MR LONG at 12:15 is allowed through
+```
 
-At 10°: SPY jumps from $+2.71 → $+26.50. The gate recovers almost all ORB value
-($+10.96 vs standalone $+10.67) while also allowing confirmed-reversal MR flips
-that add $+15.54 of additional value.
+### Example: SPY Jun 5 2026 (false signal correctly blocked)
+
+```
+ORB SHORT fires at 08:50, price = 750.01
+Day's low reached at 11:40
+Gate check when MR LONG fires at 12:35:
+  No 5 or 6 bar window from 11:40 reaches ang>=20 with R2>=0.6
+  -> MR LONG at 12:35 is BLOCKED
+```
+
+### Per-Ticker Gate Parameters
+
+| Ticker | Angle threshold | R2 threshold | Notes |
+|--------|----------------|--------------|-------|
+| SPY | 20 deg | 0.60 | |
+| TSLA | 30 deg | 0.80 | Higher bar — TSLA reversals are clean when they happen |
+| QQQ | 20 deg | 0.60 | |
+| TQQQ | 20 deg | 0.60 | |
+| ^GSPC | 10 deg | 0.60 | Lower angle — index is smoother |
+
+### Backtest Comparison (45 days, Jun 2026)
+
+| Ticker | Dir | OLD PF (full-span) | NEW PF (extreme-anchored) |
+|--------|-----|--------------------|---------------------------|
+| SPY | LONG | 1.44 | 1.12 |
+| SPY | SHORT | 2.85 | 2.02 |
+| TSLA | SHORT | 4.37 | 4.63 (+0.26) |
+| QQQ | LONG | 2.36 | 1.48 |
+| TQQQ | LONG | 2.95 | 3.33 (+0.38) |
+| ^GSPC | TOTAL | 1.89 | 1.38 |
+
+The new gate trades some PF on SPY/QQQ/^GSPC in exchange for catching genuine
+V-reversals that the full-span gate blocked. TSLA and TQQQ improve. Further
+per-ticker threshold tuning (especially R2) is the next optimization lever.
 
 ### Complete `simulate_combined()` Function
 

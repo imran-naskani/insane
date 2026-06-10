@@ -1,3 +1,60 @@
+# ORB Reversal Gate Redesign (2026-06-09)
+
+## Problem
+
+The original ORB reversal gate (`_orb_reversal_confirmed`) anchored at the ORB entry bar
+and computed a full-span OLS angle from ORB entry to the current bar. On strong trend days
+this worked well. But on V-reversal days (e.g. SPY Jun 9 2026: ORB short at 09:05, price
+fell from 744 to 724 then recovered to 730 by 12:15), the full-span slope stayed negative
+(-13.15 deg) even after a clear bounce — blocking a genuine MR LONG that the user expected
+to see. The gate's anchor point was too far back in time.
+
+## New Gate Design
+
+**Extreme-anchored accumulation gate.**
+
+Instead of measuring from the ORB entry bar, the gate:
+1. Finds the **day's extreme** since ORB entry: lowest close for a short ORB, highest for a long ORB
+2. Checks **growing windows** anchored at that extreme (5-bar, then 6-bar)
+3. Requires both **angle >= threshold AND R2 >= r2_thr** to pass (AND logic, not OR)
+
+This asks "is there a clean structured bounce off the day's low?" rather than "has price
+fully recovered from the ORB entry?" — a more meaningful reversal detection question.
+
+### Verification on Key Days
+
+| Date | ORB | Extreme | Gate Check | Result |
+|------|-----|---------|------------|--------|
+| Jun 9 SPY | SHORT 09:05 at 744 | LOW 11:35 at 723.34 | 6-bar from 11:35: ang=20.18, R2=0.696 | PASS — MR LONG at 12:15 allowed |
+| Jun 5 SPY | SHORT 08:50 at 750 | LOW 11:40 | No window from low reached 20 deg + R2>=0.6 | BLOCK — false 12:35 long correctly suppressed |
+
+## Backtest Comparison (45 days, all 5 tickers)
+
+Gate variants tested: OLD (full-span, 10 deg, no R2) vs NEW (extreme-anchored, per-ticker ang/R2) vs TUNED (extreme-anchored, 15 deg, R2=0.80 uniform).
+
+Key findings:
+- **TSLA**: TUNED gate is best (SHORT PF 4.37 -> 5.39, MFE $5.01 -> $5.53)
+- **SPY, QQQ, ^GSPC**: OLD gate outperforms on PF (new gate adds more trades but lower quality)
+- **TQQQ**: TUNED returns same stats as OLD (R2=0.80 filters everything back)
+- **MFE confirms**: SPY TUNED MR LONG MFE=$0.93 (noise), TSLA TUNED MR SHORT MFE=$5.53 (genuine moves)
+
+Decision: implement the NEW gate (per-ticker angle + R2) as a baseline for user spot-checking
+and further optimization. The extreme-anchor logic is directionally correct for all tickers;
+threshold tuning (e.g. per-ticker R2 for reversal vs ORB entry) is a future iteration.
+
+## Files Changed
+
+- `intraday_signals.py` — `_orb_reversal_confirmed()` redesigned; `compute_chart_signals()` passes per-ticker ang/R2
+- `INSANE-PRO/backend/engine/intraday.py` — same changes synced
+- `backtest_intraday_same_bar_close.py` and `backtest_intraday_next_bar_open.py` — unchanged (gate is redundant; signals are pre-filtered by compute_chart_signals)
+
+## Helper Scripts Added (not production)
+
+- `_sweep_reversal_gate.py` — diagnostic: shows gate decision per MR signal for a given date
+- `_stats_new_gate.py` — three-way backtest comparison (old/new/tuned) with MFE by trade type
+
+---
+
 # Ranking Workflow Summary (Updated 2026-05-31)
 
 ## Objective

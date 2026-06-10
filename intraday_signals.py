@@ -4,11 +4,14 @@ Full specification, formulas, and backtest results in SIGNAL_LOGIC.md.
 
 Quick reference
 ---------------
-add_intraday_features(df)         -> adds lr_slope, lr_r2 to a df that has ATR + TOS_Trail
-run_new(dv, s_thr, atr_floor)     -> (long_sig, short_sig)  MR zero-crossings
-run_orb_slope(dv)                 -> (long_sig, short_sig)  ORB at bar 6 of each session
-_orb_reversal_confirmed(...)      -> bool  gate: allow MR to flip an ORB position
-compute_chart_signals(df, ticker) -> df with Turn_Up, Turn_Down, Signal_Source added
+add_intraday_features(df)              -> adds lr_slope, lr_r2 to df
+run_new(dv, s_thr, atr_floor)          -> (long_sig, short_sig)  MR zero-crossings
+run_orb_slope(dv, ...)                 -> (long_sig, short_sig)  ORB accumulation window
+run_orb_sliding(dv, ...)               -> (long_sig, short_sig)  sliding 6-bar ORB
+sliding_qualifies_direction(dv, ...)   -> bool  checks if current 6-bar window qualifies
+                                          (used for MR->ORB upgrade in alert engine)
+_orb_reversal_confirmed(...)           -> bool  gate: allow MR to flip an ORB position
+compute_chart_signals(df, ticker)      -> df with Turn_Up, Turn_Down, Signal_Source added
 
 Used by
 -------
@@ -19,7 +22,7 @@ Used by
 import numpy as np
 import pandas as pd
 
-# ── Per-ticker parameters (SIGNAL_LOGIC.md Section 8) ────────────────────────
+# ── Per-ticker MR parameters ──────────────────────────────────────────────────
 S_THR = {
     "TSLA": 0.65,
     "SPY":  0.55,
@@ -33,15 +36,60 @@ ATR_FLOOR = {
     "TQQQ": 0.67,   # STRIKE_GAP / 1.5  (STRIKE_GAP = $1.00)
 }
 
-ORB_SLOPE_BARS    = 6     # first 6 bars = 30-min opening window (08:30-08:55 CT)
-ORB_SLOPE_DEG_DEFAULT = 30.0   # fallback for any ticker not in the dict below
-ORB_SLOPE_DEG = {          # per-ticker ORB angle threshold (degrees)
-    "TSLA": 30.0,
-    "SPY":  30.0,
-    "QQQ":  20.0,
-    "TQQQ": 20.0,
+# ── Per-ticker ORB parameters ─────────────────────────────────────────────────
+ORB_SLOPE_BARS        = 6       # opening window width (6 x 5min = 30 min, 08:30-08:55 CT)
+ORB_SLOPE_DEG_DEFAULT = 30.0    # angle threshold fallback
+ORB_SLOPE_DEG = {               # per-ticker angle threshold
+    "TSLA":  30.0,
+    "SPY":   20.0,
+    "QQQ":   20.0,
+    "TQQQ":  20.0,
+    "^GSPC": 10.0,
 }
-ORB_REVERSAL_DEG  = 10.0  # min re-computed angle for MR to flip an ORB position
+
+ORB_R2_THR_DEFAULT = 0.0        # no R2 gate by default (backward-compatible)
+ORB_R2_THR = {                  # per-ticker R2 quality gate on ORB/sliding windows
+    "TSLA":  0.80,
+    "SPY":   0.60,
+    "QQQ":   0.60,
+    "TQQQ":  0.60,
+    "^GSPC": 0.60,
+}
+
+ORB_ACCUM_START_DEFAULT = None  # None = fixed bar 6 only
+ORB_ACCUM_START = {             # accumulation: check growing windows from this bar
+    "TSLA":  5,                 # checks bars 1-5, then 1-6 (fires at first qualifying)
+    "SPY":   5,
+    "^GSPC": 5,
+    "QQQ":   None,              # fixed bar 6 only
+    "TQQQ":  None,
+}
+
+ORB_SLIDE_LIM = 18              # sliding window: scan up to bar 18 (~09:55 CT, 0-indexed=17)
+ORB_USE_SLIDING_DEFAULT = False
+ORB_USE_SLIDING = {             # whether to run sliding window when fixed/accum ORB misses
+    "TSLA":  True,
+    "SPY":   True,
+    "QQQ":   True,
+    "TQQQ":  True,
+    "^GSPC": False,             # no sliding for SPX — accum 5-6 alone is best
+}
+
+ORB_REVERSAL_DEG = 10.0         # min re-computed angle for MR to flip an ORB position
+
+
+# ── Internal OLS helpers ──────────────────────────────────────────────────────
+
+def _ols_angle_r2(closes, atr):
+    """OLS slope angle (degrees) and R² for a price array."""
+    closes = np.asarray(closes, dtype=float)
+    n  = len(closes)
+    x  = np.arange(n, dtype=float); xd = x - x.mean()
+    s  = np.dot(xd, closes - closes.mean()) / np.dot(xd, xd)
+    ang = np.degrees(np.arctan(s / atr)) if atr > 0 else 0.0
+    c   = np.corrcoef(x, closes)[0, 1]
+    r2  = float(c ** 2) if np.isfinite(c) else 0.0
+    return ang, r2
 
 
 # ── Feature engineering ───────────────────────────────────────────────────────
@@ -59,7 +107,6 @@ def rolling_linreg_fast(series, window=14):
     x      = np.arange(window, dtype=float)
     xd     = x - x.mean()
     denom  = np.dot(xd, xd)
-
     slopes = np.full(len(values), np.nan)
     r2s    = np.full(len(values), np.nan)
 
@@ -77,12 +124,8 @@ def rolling_linreg_fast(series, window=14):
 
 def add_intraday_features(df):
     """
-    Add lr_slope and lr_r2 to a df that already has ATR and TOS_Trail
-    (both provided by build_feature_dataset for 5m timeframe).
-
-    IMPORTANT: call on the FULL multi-day df before any session filtering.
-    TOS_Trail is stateful and must carry across day boundaries.
-    NaN warmup bars are filled with 0 (first 13 bars have no signal by design).
+    Add lr_slope and lr_r2 to a df that already has ATR and TOS_Trail.
+    Call on the FULL multi-day df before any session filtering.
     """
     df = df.copy()
     slopes, r2s    = rolling_linreg_fast(df["Close"], window=14)
@@ -95,10 +138,6 @@ def add_intraday_features(df):
 # ── Signal generation ─────────────────────────────────────────────────────────
 
 def _cooldown(mask, cd):
-    """
-    Suppress the cd bars immediately after each True signal.
-    Prevents rapid same-direction re-triggers within the cooldown window.
-    """
     arr = mask.to_numpy(dtype=bool).copy()
     i = 0
     while i < len(arr):
@@ -113,175 +152,223 @@ def _cooldown(mask, cd):
 def run_new(dv, s_thr, atr_floor=0.0):
     """
     Strategy A — Mean Reversion (MR).
-
-    Fires when ATR-normalized OLS slope crosses zero, provided prior-trend
-    quality gates all pass.
-
-    Gates (all required)
-    --------------------
-    wneg/wpos : strong prior trend in any of the 8 bars before the crossing
-    wr2       : R^2 > 0.50 in those same 8 bars (linear, not choppy)
-    prox      : price within 2x ATR of TOS trailing stop (not overextended)
-    atr_ok    : ATR above per-ticker floor (quiet-day filter)
-    cooldown  : 8-bar suppression after each signal
-
-    Parameters
-    ----------
-    dv        : session DataFrame with lr_slope, lr_r2, ATR, TOS_Trail, Close
-    s_thr     : slope_sq threshold for "strong trend" (per-ticker from S_THR)
-    atr_floor : minimum ATR to generate any signal (per-ticker from ATR_FLOOR)
-
-    Returns
-    -------
-    (long_sig, short_sig) : boolean pd.Series indexed like dv
+    Fires when ATR-normalized OLS slope crosses zero with prior-trend quality gates.
     """
-    snorm    = dv["lr_slope"] / dv["ATR"].replace(0, np.nan)
-    s        = np.tanh(5 * snorm).fillna(0)   # bounded (-1, +1); saturates at ~0.2 ATR/bar
-    s_1      = s.shift(1).fillna(0)
-
-    r2_gate  = (1 / (1 + np.exp(-14 * (dv["lr_r2"] - 0.50)))) > 0.50  # sigmoid at R^2=0.50
-    prox     = abs(dv["Close"] - dv["TOS_Trail"]) <= dv["ATR"] * 2.0
-    atr_ok   = dv["ATR"] >= atr_floor
+    snorm   = dv["lr_slope"] / dv["ATR"].replace(0, np.nan)
+    s       = np.tanh(5 * snorm).fillna(0)
+    s_1     = s.shift(1).fillna(0)
+    r2_gate = (1 / (1 + np.exp(-14 * (dv["lr_r2"] - 0.50)))) > 0.50
+    prox    = abs(dv["Close"] - dv["TOS_Trail"]) <= dv["ATR"] * 2.0
+    atr_ok  = dv["ATR"] >= atr_floor
 
     wneg = pd.Series(False, index=s.index)
     wpos = pd.Series(False, index=s.index)
     wr2  = pd.Series(False, index=s.index)
-    for k in range(1, 9):  # look back 1..8 bars
+    for k in range(1, 9):
         wneg |= s.shift(k) <= -s_thr
         wpos |= s.shift(k) >=  s_thr
         wr2  |= r2_gate.shift(k).fillna(False)
 
-    zcu = (s > 0) & (s_1 <= 0)   # upward zero-crossing   -> LONG candidate
-    zcd = (s < 0) & (s_1 >= 0)   # downward zero-crossing -> SHORT candidate
-
+    zcu = (s > 0) & (s_1 <= 0)
+    zcd = (s < 0) & (s_1 >= 0)
     return (
         _cooldown(zcu & wneg & prox & wr2 & atr_ok, 8),
         _cooldown(zcd & wpos & prox & wr2 & atr_ok, 8),
     )
 
 
-def run_orb_slope(dv, slope_bars=ORB_SLOPE_BARS, angle_deg=ORB_SLOPE_DEG):
+def run_orb_slope(dv, slope_bars=ORB_SLOPE_BARS, angle_deg=ORB_SLOPE_DEG_DEFAULT,
+                  r2_thr=0.0, accum_start=None):
     """
     Strategy B — Opening Range Breakout via slope angle.
 
-    Fits OLS to the first slope_bars (6) bars of the session, normalizes the
-    slope by ATR, converts to degrees via arctan.  Fires at most once per
-    session at the last bar of the opening window (~08:55 CT).
-
-    Entry is at the Open of the NEXT bar (bar 7, ~09:00 CT).
+    If accum_start is not None, checks growing windows from accum_start through
+    slope_bars (e.g. accum_start=5 checks bars 1-5 then 1-6). Fires on the first
+    qualifying window. R2 gate skipped on non-qualifying windows (waits for next bar).
 
     Parameters
     ----------
-    dv        : today's session DataFrame (08:30-15:00 CT), features pre-computed
-    slope_bars: number of opening bars (default 6 = 30 min)
-    angle_deg : threshold in degrees (default 30 — tan(30 deg) ~= 0.58 ATR/bar)
+    dv          : today's session DataFrame (08:30-15:00 CT)
+    slope_bars  : opening window size in bars (default 6)
+    angle_deg   : angle threshold in degrees
+    r2_thr      : minimum R2 for the window (0.0 = no gate)
+    accum_start : first bar to check (None = fixed slope_bars only)
 
     Returns
     -------
-    (long_sig, short_sig) : boolean pd.Series, True on bar 6 when angle qualifies
+    (long_sig, short_sig) : boolean pd.Series, True at the signal bar
     """
     long_sig  = pd.Series(False, index=dv.index)
     short_sig = pd.Series(False, index=dv.index)
 
-    if len(dv) < slope_bars:
-        return long_sig, short_sig
+    checks = list(range(accum_start, slope_bars + 1)) if accum_start else [slope_bars]
 
-    window = dv.iloc[:slope_bars]
-    closes = window["Close"].values.astype(float)
-    atr    = float(window["ATR"].iloc[-1])
+    for nb in checks:
+        if len(dv) < nb:
+            break
+        window = dv.iloc[:nb]
+        atr    = float(window["ATR"].iloc[-1])
+        if atr <= 0 or np.isnan(atr):
+            continue
+        closes = window["Close"].values.astype(float)
+        ang, r2 = _ols_angle_r2(closes, atr)
 
-    if atr <= 0 or np.isnan(atr):
-        return long_sig, short_sig
+        if r2_thr > 0 and r2 < r2_thr:
+            continue   # quality not yet there — try next (larger) window
 
-    x      = np.arange(slope_bars, dtype=float)
-    xd     = x - x.mean()
-    slope  = np.dot(xd, closes - closes.mean()) / np.dot(xd, xd)
-    angle  = np.degrees(np.arctan(slope / atr))
-
-    last_bar = window.index[-1]   # timestamp of bar 6 — signal bar
-    if angle >= angle_deg:
-        long_sig.loc[last_bar]  = True
-    elif angle <= -angle_deg:
-        short_sig.loc[last_bar] = True
+        last_bar = window.index[-1]
+        if ang >= angle_deg:
+            long_sig.loc[last_bar]  = True
+            return long_sig, short_sig
+        elif ang <= -angle_deg:
+            short_sig.loc[last_bar] = True
+            return long_sig, short_sig
 
     return long_sig, short_sig
 
 
-def _orb_reversal_confirmed(dv, orb_bar_idx, orb_dir, current_idx,
-                            threshold=ORB_REVERSAL_DEG):
+def run_orb_sliding(dv, angle_deg, r2_thr=0.0, slide_lim=ORB_SLIDE_LIM):
     """
-    Reversal gate: returns True if MR is allowed to flip the active ORB position.
+    Sliding 6-bar ORB window. Scans bars 7 through slide_lim looking for the
+    first 6-bar window that meets the angle + R2 threshold.
 
-    Re-computes the OLS angle from the ORB signal bar to the current bar.
-    The flip is allowed only if the trend has genuinely reversed by at least
-    `threshold` degrees (default 10, tuned via sweep in SIGNAL_LOGIC.md).
+    Caller is responsible for only calling this when fixed/accum ORB has NOT fired.
 
     Parameters
     ----------
-    dv          : today's session DataFrame
-    orb_bar_idx : integer iloc of the ORB signal bar (always ORB_SLOPE_BARS-1 = 5)
-    orb_dir     : 'long' or 'short' — direction the ORB position is holding
-    current_idx : integer iloc of the bar where MR wants to flip
-    threshold   : degrees required to confirm reversal
+    dv        : today's session DataFrame
+    angle_deg : angle threshold
+    r2_thr    : minimum R2 (0.0 = no gate)
+    slide_lim : last bar index to scan (0-based, default 17 = bar 18)
 
     Returns
     -------
-    bool : True = allow flip; False = suppress MR signal (gate blocks it)
+    (long_sig, short_sig) : boolean pd.Series, True at the last bar of the
+                            qualifying window (entry on next bar open)
     """
-    n_bars = current_idx - orb_bar_idx + 1
-    if n_bars < 2:
-        return False
+    long_sig  = pd.Series(False, index=dv.index)
+    short_sig = pd.Series(False, index=dv.index)
 
-    closes = dv["Close"].iloc[orb_bar_idx : current_idx + 1].values.astype(float)
-    atr    = float(dv["ATR"].iloc[current_idx])
+    for i in range(ORB_SLOPE_BARS - 1, min(len(dv) - 1, slide_lim)):
+        w     = dv.iloc[i - ORB_SLOPE_BARS + 1: i + 1]
+        atr_w = float(w["ATR"].iloc[-1])
+        if atr_w <= 0:
+            continue
+        ang_w, r2_w = _ols_angle_r2(w["Close"].values.astype(float), atr_w)
+        if r2_thr > 0 and r2_w < r2_thr:
+            continue
+        if ang_w >= angle_deg:
+            long_sig.loc[w.index[-1]]  = True
+            return long_sig, short_sig
+        elif ang_w <= -angle_deg:
+            short_sig.loc[w.index[-1]] = True
+            return long_sig, short_sig
+
+    return long_sig, short_sig
+
+
+def sliding_qualifies_direction(dv, bar_i, angle_deg, r2_thr, direction):
+    """
+    Check if the 6-bar window ending at bar_i qualifies in the given direction.
+    Used by the alert engine for MR->ORB upgrade: when in an MR position, call
+    this each bar — if it returns True, upgrade pos_src to 'orb'.
+
+    No time restriction (runs any time during the session).
+
+    Parameters
+    ----------
+    dv        : today's session DataFrame
+    bar_i     : integer iloc of the current bar (last bar of the 6-bar window)
+    angle_deg : angle threshold
+    r2_thr    : minimum R2 (0.0 = no gate)
+    direction : 'long' or 'short'
+
+    Returns
+    -------
+    bool : True if the window qualifies in the given direction
+    """
+    if bar_i < ORB_SLOPE_BARS - 1:
+        return False
+    w = dv.iloc[bar_i - ORB_SLOPE_BARS + 1: bar_i + 1]
+    if len(w) < ORB_SLOPE_BARS:
+        return False
+    atr = float(w["ATR"].iloc[-1])
+    if atr <= 0:
+        return False
+    ang, r2 = _ols_angle_r2(w["Close"].values.astype(float), atr)
+    if r2_thr > 0 and r2 < r2_thr:
+        return False
+    if direction == "long":  return ang >= angle_deg
+    if direction == "short": return ang <= -angle_deg
+    return False
+
+
+def _orb_reversal_confirmed(dv, orb_bar_idx, orb_dir, current_idx,
+                            threshold=ORB_REVERSAL_DEG, r2_thr=0.0,
+                            accum_start=5, slope_bars=6):
+    """
+    Reversal gate: returns True if MR is allowed to flip the active ORB position.
+    Anchors at the day's extreme (lowest for short ORB, highest for long ORB) since
+    ORB entry, then checks accum 5-6 bar OLS windows from that extreme.
+    Both angle AND R2 must pass (AND logic).
+    """
+    if current_idx <= orb_bar_idx:
+        return False
+    closes = dv["Close"].iloc[orb_bar_idx: current_idx + 1].values.astype(float)
+    if len(closes) == 0:
+        return False
+    atr = float(dv["ATR"].iloc[current_idx])
     if atr <= 0 or np.isnan(atr):
         return False
 
-    x      = np.arange(n_bars, dtype=float)
-    xd     = x - x.mean()
-    slope  = np.dot(xd, closes - closes.mean()) / np.dot(xd, xd)
-    angle  = np.degrees(np.arctan(slope / atr))
+    # Find extreme since ORB entry
+    rel   = int(np.argmin(closes)) if orb_dir == "short" else int(np.argmax(closes))
+    ext_i = orb_bar_idx + rel      # absolute session iloc of extreme
 
-    if orb_dir == "short":
-        return angle >= threshold    # upward angle needed to flip a short ORB
-    else:
-        return angle <= -threshold   # downward angle needed to flip a long ORB
+    # Check accum windows anchored at extreme
+    all_closes = dv["Close"].values.astype(float)
+    for nb in range(accum_start, slope_bars + 1):
+        end = ext_i + nb
+        if end - 1 > current_idx:
+            break
+        w = all_closes[ext_i: end]
+        ang, r2 = _ols_angle_r2(w, atr)
+        if r2_thr > 0 and r2 < r2_thr:
+            continue                      # R2 fails — try next window
+        if orb_dir == "short" and ang >= threshold:
+            return True
+        if orb_dir == "long"  and ang <= -threshold:
+            return True
+    return False
 
 
 # ── Chart display helper (used by insane.py) ──────────────────────────────────
 
 def compute_chart_signals(df, ticker):
     """
-    Compute MR + ORB signals across ALL sessions in df for historical chart display.
+    Compute MR + ORB (accumulation + sliding) signals across ALL sessions in df.
     Adds Turn_Up, Turn_Down, Signal_Source columns to df.
-
-    Note: the ORB reversal gate is NOT applied here — it is a live-trading
-    concept that requires session state.  For historical display, all signals
-    are shown as-is.
-
-    Prerequisites
-    -------------
-    Call add_intraday_features(df) before this function.
-    df must cover the full multi-day range (not pre-filtered to one session).
+    ORB reversal gate IS applied: MR signals that cannot flip an active ORB
+    position are suppressed so chart matches backtest and live engine.
     """
     s_thr     = S_THR.get(ticker, 0.60)
     atr_floor = ATR_FLOOR.get(ticker, 0.50)
+    ang_deg   = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
+    r2_thr    = ORB_R2_THR.get(ticker, ORB_R2_THR_DEFAULT)
+    accum     = ORB_ACCUM_START.get(ticker, ORB_ACCUM_START_DEFAULT)
+    use_slide = ORB_USE_SLIDING.get(ticker, ORB_USE_SLIDING_DEFAULT)
 
     df = df.copy()
     df["Turn_Up"]       = False
     df["Turn_Down"]     = False
     df["Signal_Source"] = ""
 
-    # MR: run on full multi-day df — features (lr_slope, ATR, TOS_Trail) carry across sessions
+    # Compute MR signals on full df (TOS_Trail warmup requires full history)
     lmr, smr = run_new(df, s_thr, atr_floor)
-    df.loc[lmr, "Turn_Up"]       = True
-    df.loc[lmr, "Signal_Source"] = "MR"
-    df.loc[smr, "Turn_Down"]     = True
-    df.loc[smr, "Signal_Source"] = "MR"
 
-    # ORB: must be computed per-session (first 6 bars of each trading day)
     session_start = pd.Timestamp("08:30").time()
     session_end   = pd.Timestamp("15:00").time()
+
     for d in sorted(set(df.index.date)):
         mask    = df.index.date == d
         session = df[mask]
@@ -291,13 +378,68 @@ def compute_chart_signals(df, ticker):
         ]
         if len(session) < ORB_SLOPE_BARS:
             continue
-        orb_deg = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
-        lorb, sorb = run_orb_slope(session, angle_deg=orb_deg)
-        orb_long_idx  = lorb[lorb].index
-        orb_short_idx = sorb[sorb].index
-        df.loc[orb_long_idx,  "Turn_Up"]       = True
-        df.loc[orb_long_idx,  "Signal_Source"] = "ORB"
-        df.loc[orb_short_idx, "Turn_Down"]     = True
-        df.loc[orb_short_idx, "Signal_Source"] = "ORB"
+
+        # ── ORB / sliding ─────────────────────────────────────────────────
+        lorb, sorb = run_orb_slope(session, angle_deg=ang_deg,
+                                   r2_thr=r2_thr, accum_start=accum)
+        orb_fired = lorb.any() or sorb.any()
+        if not orb_fired and use_slide:
+            lsl, ssl = run_orb_sliding(session, ang_deg, r2_thr)
+            lorb = lorb | lsl
+            sorb = sorb | ssl
+
+        # Mark ORB signals and capture gate anchor
+        orb_bar_i = None
+        orb_dir   = None
+        if sorb.any():
+            orb_ts    = sorb[sorb].index[0]
+            orb_bar_i = session.index.get_loc(orb_ts)
+            orb_dir   = "short"
+            df.at[orb_ts, "Turn_Down"]     = True
+            df.at[orb_ts, "Signal_Source"] = "ORB"
+        elif lorb.any():
+            orb_ts    = lorb[lorb].index[0]
+            orb_bar_i = session.index.get_loc(orb_ts)
+            orb_dir   = "long"
+            df.at[orb_ts, "Turn_Up"]       = True
+            df.at[orb_ts, "Signal_Source"] = "ORB"
+
+        # ── MR signals with reversal gate ─────────────────────────────────
+        # in_orb: True while ORB position is active (gate applies)
+        in_orb = orb_bar_i is not None
+
+        for ts in session.index:
+            is_ml = bool(lmr.get(ts, False)) if ts in lmr.index else False
+            is_ms = bool(smr.get(ts, False)) if ts in smr.index else False
+            if not (is_ml or is_ms):
+                continue
+
+            ts_i = session.index.get_loc(ts)
+
+            if in_orb:
+                # Gate: MR must confirm reversal to flip ORB position
+                if is_ml and orb_dir == "short":
+                    if _orb_reversal_confirmed(session, orb_bar_i, "short", ts_i,
+                                               threshold=ang_deg, r2_thr=r2_thr):
+                        df.at[ts, "Turn_Up"]       = True
+                        df.at[ts, "Signal_Source"] = "MR"
+                        in_orb = False   # ORB flipped — now MR position
+                    # else: gate blocks, don't mark
+                elif is_ms and orb_dir == "long":
+                    if _orb_reversal_confirmed(session, orb_bar_i, "long", ts_i,
+                                               threshold=ang_deg, r2_thr=r2_thr):
+                        df.at[ts, "Turn_Down"]     = True
+                        df.at[ts, "Signal_Source"] = "MR"
+                        in_orb = False
+                    # else: gate blocks, don't mark
+                # MR same direction as ORB: not a flip, skip
+            else:
+                # No active ORB — mark MR freely
+                if is_ml:
+                    df.at[ts, "Turn_Up"]       = True
+                    df.at[ts, "Signal_Source"] = "MR"
+                elif is_ms:
+                    df.at[ts, "Turn_Down"]     = True
+                    df.at[ts, "Signal_Source"] = "MR"
 
     return df

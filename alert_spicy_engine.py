@@ -5,9 +5,13 @@ from build_dataset import build_feature_dataset
 # from model import spicy_sauce              # OLD: 2D Kalman — replaced by OLS slope in intraday_signals
 from intraday_signals import (
     add_intraday_features,
-    run_new, run_orb_slope, _orb_reversal_confirmed,
+    run_new, run_orb_slope, run_orb_sliding, sliding_qualifies_direction,
+    _orb_reversal_confirmed,
     S_THR, ATR_FLOOR, ORB_SLOPE_BARS, ORB_REVERSAL_DEG,
     ORB_SLOPE_DEG, ORB_SLOPE_DEG_DEFAULT,
+    ORB_R2_THR, ORB_R2_THR_DEFAULT,
+    ORB_ACCUM_START, ORB_ACCUM_START_DEFAULT,
+    ORB_USE_SLIDING, ORB_USE_SLIDING_DEFAULT,
 )
 import datetime as dt
 from dotenv import load_dotenv
@@ -22,7 +26,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 # OLD: TICKERS = ["^GSPC", "TSLA", "AAPL"]
 # ^GSPC swapped for SPY: real volume needed for correct ATR; validated in SIGNAL_LOGIC.md backtest
-TICKERS   = ["TSLA", "SPY", "QQQ", "TQQQ"]
+TICKERS   = ["TSLA", "SPY", "^GSPC", "QQQ", "TQQQ"]
 TIMEFRAME = "5m"
 
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -36,7 +40,7 @@ def _fresh_session():
         "date":         None,
         "orb_fired":    False,
         "orb_dir":      None,         # 'long' | 'short'
-        "orb_bar_loc":  None,         # always ORB_SLOPE_BARS-1 (=5) when fired
+        "orb_bar_loc":  None,         # iloc of ORB/sliding/accum signal bar (dynamic)
         "position":     None,         # 'long' | 'short' | None
         "position_src": None,         # 'orb' | 'mr'
         "last_alert":   None,         # (bar_time, signal_type) for dedup
@@ -150,22 +154,40 @@ while True:
             # ── Run new signal logic ───────────────────────────────────────
             lsig_mr,  ssig_mr  = run_new(dv, S_THR.get(ticker, 0.60),
                                           ATR_FLOOR.get(ticker, 0.50))
-            orb_deg = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
-            lsig_orb, ssig_orb = run_orb_slope(dv, angle_deg=orb_deg)
 
-            is_orb_long  = bool(lsig_orb.iloc[-1])
-            is_orb_short = bool(ssig_orb.iloc[-1])
+            # Per-ticker ORB parameters (locked strategy)
+            orb_deg    = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
+            r2_thr     = ORB_R2_THR.get(ticker, ORB_R2_THR_DEFAULT)
+            accum_start = ORB_ACCUM_START.get(ticker, ORB_ACCUM_START_DEFAULT)
+            use_sliding = ORB_USE_SLIDING.get(ticker, ORB_USE_SLIDING_DEFAULT)
+
+            # ORB: accumulation window + R2 gate, or fixed 6-bar
+            lsig_orb, ssig_orb = run_orb_slope(dv, angle_deg=orb_deg,
+                                                r2_thr=r2_thr, accum_start=accum_start)
+            orb_fired = lsig_orb.iloc[-1] or ssig_orb.iloc[-1]
+
+            # Sliding window: only if ORB hasn't fired yet today
+            lsig_slide, ssig_slide = pd.Series(False, index=dv.index), pd.Series(False, index=dv.index)
+            if not state["orb_fired"] and not orb_fired and use_sliding:
+                lsig_slide, ssig_slide = run_orb_sliding(dv, orb_deg, r2_thr)
+
+            # Combined ORB signals (accum/fixed + sliding)
+            lsig_orb_combined = lsig_orb | lsig_slide
+            ssig_orb_combined = ssig_orb | ssig_slide
+
+            is_orb_long  = bool(lsig_orb_combined.iloc[-1])
+            is_orb_short = bool(ssig_orb_combined.iloc[-1])
             is_mr_long   = bool(lsig_mr.iloc[-1])
             is_mr_short  = bool(ssig_mr.iloc[-1])
 
             signal      = None
             signal_type = None
 
-            # ── ORB (fires once per session at bar 6, ~08:55 CT) ──────────
+            # ── ORB: accumulation / fixed / sliding (fires once per session) ─
             if is_orb_long and not state["orb_fired"]:
                 state.update(
                     orb_fired=True, orb_dir="long",
-                    orb_bar_loc=ORB_SLOPE_BARS - 1,
+                    orb_bar_loc=last_idx,   # dynamic: bar 5, 6, or sliding bar 7-18
                     position="long", position_src="orb"
                 )
                 signal      = "ORB Signal -- LONG (hold to EOD)"
@@ -174,7 +196,7 @@ while True:
             elif is_orb_short and not state["orb_fired"]:
                 state.update(
                     orb_fired=True, orb_dir="short",
-                    orb_bar_loc=ORB_SLOPE_BARS - 1,
+                    orb_bar_loc=last_idx,   # dynamic
                     position="short", position_src="orb"
                 )
                 signal      = "ORB Signal -- SHORT (hold to EOD)"
@@ -286,6 +308,19 @@ while True:
             #         (signal_type == prev[1] and signal_type in ("TURN_UP", "TURN_DOWN"))
             #     )
             # ── END OLD SIGNAL LOGIC ──────────────────────────────────────
+
+            # ── MR→ORB upgrade: if sliding confirms same direction ──────────
+            # When in an MR position, check if the current 6-bar window qualifies
+            # as an ORB sliding signal in the same direction. If so, upgrade to
+            # pos_src='orb' to add reversal gate protection (effective immediately).
+            if state["position"] == "long" and state["position_src"] == "mr":
+                if sliding_qualifies_direction(dv, last_idx, orb_deg, r2_thr, "long"):
+                    state.update(position_src="orb", orb_bar_loc=last_idx)
+                    # Note: no signal update — upgrade happens silently
+
+            elif state["position"] == "short" and state["position_src"] == "mr":
+                if sliding_qualifies_direction(dv, last_idx, orb_deg, r2_thr, "short"):
+                    state.update(position_src="orb", orb_bar_loc=last_idx)
 
             # ── Dedup and collect ─────────────────────────────────────────
             if signal:

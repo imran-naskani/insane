@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import ta
+from intraday_signals import _orb_reversal_confirmed
 
 # Backtest
 def backtest_intraday_close(df, trade_capital=10000):
@@ -180,7 +181,9 @@ def backtest_intraday_close(df, trade_capital=10000):
 def backtest_intraday_close_sell_only(df, capital):
     position = 0          # 1 = LONG, -1 = SHORT, 0 = FLAT
     entry_price = None
-    entry_time = None
+    entry_time  = None
+    position_src = None   # 'orb' | 'mr'
+    orb_bar_i    = None   # iloc of ORB entry bar (for reversal gate)
 
     equity = capital
     trades = []
@@ -189,94 +192,79 @@ def backtest_intraday_close_sell_only(df, capital):
         row = df.iloc[i]
         bar_time = row.name.time()
 
-        # ----- SKIP EXTENDED HOURS -----
-        if bar_time < pd.Timestamp("09:30").time() or bar_time > pd.Timestamp("15:55").time():
+        # ----- SKIP EXTENDED HOURS (Central Time) -----
+        if bar_time < pd.Timestamp("08:25").time() or bar_time > pd.Timestamp("14:55").time():
             continue
 
-        # ----- FORCED EOD EXIT (2:55 PM) -----
-        if position != 0 and bar_time >= pd.Timestamp("15:55").time():
+        # ----- FORCED EOD EXIT (14:30 CT) -----
+        if position != 0 and bar_time >= pd.Timestamp("14:30").time():
             exit_price = row["Close"]
             pnl = (exit_price - entry_price) if position == 1 else (entry_price - exit_price)
             equity += pnl
-
             trades.append({
-                "Entry_Date": entry_time,
-                "Exit_Date": row.name,
+                "Entry_Date": entry_time, "Exit_Date": row.name,
                 "Direction": "LONG" if position == 1 else "SHORT",
-                "Entry_Price": entry_price,
-                "Exit_Price": exit_price,
-                "PnL_$": pnl,
-                "Return_%": (pnl / entry_price) * 100,
+                "Entry_Price": entry_price, "Exit_Price": exit_price,
+                "PnL_$": pnl, "Return_%": (pnl / entry_price) * 100,
                 "Total_Equity": equity
             })
-
-            position = 0
-            entry_price = None
-            entry_time = None
+            position = 0; entry_price = entry_time = position_src = orb_bar_i = None
             continue
 
         # ----- ENTRY -----
         if position == 0:
+            src = row.get("Signal_Source", "MR") if hasattr(row, "get") else df["Signal_Source"].iloc[i]
             if row["Turn_Up"]:
-                position = 1
-                entry_price = row["Close"]
-                entry_time = row.name
-
+                position = 1; entry_price = row["Close"]; entry_time = row.name
+                position_src = src; orb_bar_i = i if src == "ORB" else None
             elif row["Turn_Down"]:
-                position = -1
-                entry_price = row["Close"]
-                entry_time = row.name
+                position = -1; entry_price = row["Close"]; entry_time = row.name
+                position_src = src; orb_bar_i = i if src == "ORB" else None
 
-        # ----- EXIT (SELL SIGNALS ONLY) -----
+        # ----- EXIT (SELL SIGNALS ONLY, with ORB reversal gate) -----
         elif position == 1 and row["Sell_Long"]:
+            # Gate: if ORB long, MR must confirm reversal before exiting
+            if position_src == "ORB" and orb_bar_i is not None:
+                if not _orb_reversal_confirmed(df, orb_bar_i, "long", i):
+                    continue   # gate blocks — hold long
+
             exit_price = row["Close"]
             pnl = exit_price - entry_price
             equity += pnl
-
             trades.append({
-                "Entry_Date": entry_time,
-                "Exit_Date": row.name,
+                "Entry_Date": entry_time, "Exit_Date": row.name,
                 "Direction": "LONG",
-                "Entry_Price": entry_price,
-                "Exit_Price": exit_price,
-                "PnL_$": pnl,
-                "Return_%": (pnl / entry_price) * 100,
+                "Entry_Price": entry_price, "Exit_Price": exit_price,
+                "PnL_$": pnl, "Return_%": (pnl / entry_price) * 100,
                 "Total_Equity": equity
             })
-
-            position = 0
-            entry_price = None
-            entry_time = None
-            # Flip entry: Turn_Down on the same bar → enter short immediately
+            position = 0; entry_price = entry_time = position_src = orb_bar_i = None
             if row["Turn_Down"] and bar_time < pd.Timestamp("14:30").time():
-                position = -1
-                entry_price = row["Close"]
-                entry_time = row.name
+                src = df["Signal_Source"].iloc[i]
+                position = -1; entry_price = row["Close"]; entry_time = row.name
+                position_src = src; orb_bar_i = i if src == "ORB" else None
 
         elif position == -1 and row["Sell_Short"]:
+            # Gate: if ORB short, MR must confirm reversal before exiting
+            if position_src == "ORB" and orb_bar_i is not None:
+                if not _orb_reversal_confirmed(df, orb_bar_i, "short", i):
+                    continue   # gate blocks — hold short
+
             exit_price = row["Close"]
             pnl = entry_price - exit_price
             equity += pnl
-
             trades.append({
-                "Entry_Date": entry_time,
-                "Exit_Date": row.name,
+                "Entry_Date": entry_time, "Exit_Date": row.name,
                 "Direction": "SHORT",
-                "Entry_Price": entry_price,
-                "Exit_Price": exit_price,
-                "PnL_$": pnl,
-                "Return_%": (pnl / entry_price) * 100,
+                "Entry_Price": entry_price, "Exit_Price": exit_price,
+                "PnL_$": pnl, "Return_%": (pnl / entry_price) * 100,
                 "Total_Equity": equity
             })
-
-            position = 0
-            entry_price = None
-            entry_time = None
-            # Flip entry: Turn_Up on the same bar → enter long immediately
+            position = 0; entry_price = entry_time = position_src = orb_bar_i = None
             if row["Turn_Up"] and bar_time < pd.Timestamp("14:30").time():
-                position = 1
-                entry_price = row["Close"]
-                entry_time = row.name
+                src = df["Signal_Source"].iloc[i]
+                position = 1; entry_price = row["Close"]; entry_time = row.name
+                position_src = src; orb_bar_i = i if src == "ORB" else None
 
     trade_df = pd.DataFrame(trades)
     return trade_df, equity
