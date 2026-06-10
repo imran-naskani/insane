@@ -150,10 +150,14 @@ def _cooldown(mask, cd):
     return pd.Series(arr, index=mask.index)
 
 
-def run_new(dv, s_thr, atr_floor=0.0):
+def run_new(dv, s_thr, atr_floor=0.0, skip_wr2=False):
     """
     Strategy A — Mean Reversion (MR).
     Fires when ATR-normalized OLS slope crosses zero with prior-trend quality gates.
+
+    skip_wr2: when True, omits the rolling R2 lookback gate. Used for ORB reversals
+    where the ORB entry R2 already proves prior trend quality and the rolling wr2
+    misaligns with the zero-crossing on fast V-reversals.
     """
     snorm   = dv["lr_slope"] / dv["ATR"].replace(0, np.nan)
     s       = np.tanh(5 * snorm).fillna(0)
@@ -172,6 +176,11 @@ def run_new(dv, s_thr, atr_floor=0.0):
 
     zcu = (s > 0) & (s_1 <= 0)
     zcd = (s < 0) & (s_1 >= 0)
+    if skip_wr2:
+        return (
+            _cooldown(zcu & wneg & prox & atr_ok, 8),
+            _cooldown(zcd & wpos & prox & atr_ok, 8),
+        )
     return (
         _cooldown(zcu & wneg & prox & wr2 & atr_ok, 8),
         _cooldown(zcd & wpos & prox & wr2 & atr_ok, 8),
@@ -366,7 +375,10 @@ def compute_chart_signals(df, ticker):
     df["Signal_Source"] = ""
 
     # Compute MR signals on full df (TOS_Trail warmup requires full history)
-    lmr, smr = run_new(df, s_thr, atr_floor)
+    # Two passes: full (standalone MR) and skip_wr2 (ORB reversals — ORB entry R2
+    # already proves prior trend quality; rolling wr2 misaligns on V-reversals)
+    lmr,     smr     = run_new(df, s_thr, atr_floor)
+    lmr_rev, smr_rev = run_new(df, s_thr, atr_floor, skip_wr2=True)
 
     session_start = pd.Timestamp("08:30").time()
     session_end   = pd.Timestamp("15:00").time()
@@ -411,32 +423,33 @@ def compute_chart_signals(df, ticker):
         in_orb = orb_bar_i is not None
 
         for ts in session.index:
-            is_ml = bool(lmr.get(ts, False)) if ts in lmr.index else False
-            is_ms = bool(smr.get(ts, False)) if ts in smr.index else False
-            if not (is_ml or is_ms):
-                continue
-
             ts_i = session.index.get_loc(ts)
 
             if in_orb:
+                # ORB reversal: use skip_wr2 signals
+                is_ml = bool(lmr_rev.get(ts, False)) if ts in lmr_rev.index else False
+                is_ms = bool(smr_rev.get(ts, False)) if ts in smr_rev.index else False
+                if not (is_ml or is_ms):
+                    continue
                 # Gate: MR must confirm reversal to flip ORB position
                 if is_ml and orb_dir == "short":
                     if _orb_reversal_confirmed(session, orb_bar_i, "short", ts_i,
                                                threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         df.at[ts, "Turn_Up"]       = True
                         df.at[ts, "Signal_Source"] = "MR"
-                        in_orb = False   # ORB flipped — now MR position
-                    # else: gate blocks, don't mark
+                        in_orb = False
                 elif is_ms and orb_dir == "long":
                     if _orb_reversal_confirmed(session, orb_bar_i, "long", ts_i,
                                                threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         df.at[ts, "Turn_Down"]     = True
                         df.at[ts, "Signal_Source"] = "MR"
                         in_orb = False
-                    # else: gate blocks, don't mark
-                # MR same direction as ORB: not a flip, skip
             else:
-                # No active ORB — mark MR freely
+                # Standalone MR: use full signals (wr2 active)
+                is_ml = bool(lmr.get(ts, False)) if ts in lmr.index else False
+                is_ms = bool(smr.get(ts, False)) if ts in smr.index else False
+                if not (is_ml or is_ms):
+                    continue
                 if is_ml:
                     df.at[ts, "Turn_Up"]       = True
                     df.at[ts, "Signal_Source"] = "MR"

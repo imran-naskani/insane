@@ -154,6 +154,10 @@ while True:
             # ── Run new signal logic ───────────────────────────────────────
             lsig_mr,  ssig_mr  = run_new(dv, S_THR.get(ticker, 0.60),
                                           ATR_FLOOR.get(ticker, 0.50))
+            # skip_wr2 variant for ORB reversals: wr2 misaligns on V-reversals
+            lsig_mr_rev, ssig_mr_rev = run_new(dv, S_THR.get(ticker, 0.60),
+                                               ATR_FLOOR.get(ticker, 0.50),
+                                               skip_wr2=True)
 
             # Per-ticker ORB parameters (locked strategy)
             orb_deg    = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
@@ -177,8 +181,10 @@ while True:
 
             is_orb_long  = bool(lsig_orb_combined.iloc[-1])
             is_orb_short = bool(ssig_orb_combined.iloc[-1])
-            is_mr_long   = bool(lsig_mr.iloc[-1])
-            is_mr_short  = bool(ssig_mr.iloc[-1])
+            is_mr_long      = bool(lsig_mr.iloc[-1])
+            is_mr_short     = bool(ssig_mr.iloc[-1])
+            is_mr_long_rev  = bool(lsig_mr_rev.iloc[-1])
+            is_mr_short_rev = bool(ssig_mr_rev.iloc[-1])
 
             signal      = None
             signal_type = None
@@ -203,29 +209,34 @@ while True:
                 signal_type = "ORB_SHORT"
 
             # ── MR long ───────────────────────────────────────────────────
-            elif is_mr_long and state["position"] != "long":
-                # Reversal gate: MR wants to flip an active ORB short
+            elif (is_mr_long_rev or is_mr_long) and state["position"] != "long":
                 if state["position"] == "short" and state["position_src"] == "orb":
-                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "short", last_idx,
-                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
+                    # ORB reversal: use skip_wr2 signal + gate
+                    if is_mr_long_rev and _orb_reversal_confirmed(
+                            dv, state["orb_bar_loc"], "short", last_idx,
+                            threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="long", position_src="mr")
                         signal      = "MR Flip -- LONG (ORB reversal confirmed)"
                         signal_type = "MR_LONG"
                     # else: gate blocks — suppress silently
-                else:
+                elif is_mr_long:
+                    # Standalone MR: full signal (wr2 active)
                     state.update(position="long", position_src="mr")
                     signal      = "MR Signal -- LONG"
                     signal_type = "MR_LONG"
 
             # ── MR short ──────────────────────────────────────────────────
-            elif is_mr_short and state["position"] != "short":
+            elif (is_mr_short_rev or is_mr_short) and state["position"] != "short":
                 if state["position"] == "long" and state["position_src"] == "orb":
-                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "long", last_idx,
-                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
+                    # ORB reversal: use skip_wr2 signal + gate
+                    if is_mr_short_rev and _orb_reversal_confirmed(
+                            dv, state["orb_bar_loc"], "long", last_idx,
+                            threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="short", position_src="mr")
                         signal      = "MR Flip -- SHORT (ORB reversal confirmed)"
                         signal_type = "MR_SHORT"
-                else:
+                elif is_mr_short:
+                    # Standalone MR: full signal (wr2 active)
                     state.update(position="short", position_src="mr")
                     signal      = "MR Signal -- SHORT"
                     signal_type = "MR_SHORT"
