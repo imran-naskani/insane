@@ -1,3 +1,53 @@
+# ORB Reversal Gate Tuning (2026-06-10)
+
+## Changes
+
+Two targeted improvements to `_orb_reversal_confirmed`:
+
+### 1. Post-extreme anchor (`ext_i + 1`)
+
+Previously the accumulation window started **at** the day's extreme bar (included). Now it starts from the **bar after** the extreme. This removes the bias introduced by the extreme bar itself — the reversal structure should be measured from where price begins moving away from the extreme, not from the turning point.
+
+Effect: ~2-3° steeper angles on 5-bar windows, and cleaner R2 since the extreme bar is typically a low-momentum bar that dilutes the regression.
+
+### 2. Uniform `REVERSAL_ANGLE = 20.0` for all tickers
+
+Previously the reversal gate reused per-ticker ORB entry angles (TSLA: 30°, ^GSPC: 10°, others: 20°). These were too strict for TSLA (blocked valid flips like TSLA Jun 3 10:30 SHORT) and too loose for ^GSPC.
+
+A 45-day sweep across 5 angle thresholds (10/15/20/25/30°) with next-bar accumulation showed 20° as the optimal uniform threshold:
+- MR_REV SHORTs: SPY PF=1.61, QQQ PF=1.57, ^GSPC PF=6.60, TSLA 100% win
+- MR_REV LONGs: QQQ PF=5.72 (best at 20°), others thin but positive
+
+ORB entry angles (`ORB_SLOPE_DEG`) are **unchanged** — only the reversal gate uses `REVERSAL_ANGLE`.
+
+### Fail safe experiments (not implemented)
+
+Tested two fail safe variants: flip on ORB open breach, and exit-only on ORB bar LOW breach. Both degraded overall stats vs gate only — the breach condition fires too frequently, clearing ORB state and flooding the system with ungated MR signals of lower quality. TSLA was the only ticker where exit-only marginally helped (ALL LONG PF 3.52 → 4.32). Decision: keep gate only.
+
+## Files Changed
+
+- `intraday_signals.py` — `ext_i + 1` anchor; `REVERSAL_ANGLE = 20.0` constant; `compute_chart_signals` passes `REVERSAL_ANGLE`
+- `alert_spicy_engine.py` — imports `REVERSAL_ANGLE`; both gate calls pass `threshold=REVERSAL_ANGLE, r2_thr=r2_thr`
+- `INSANE-PRO/backend/engine/intraday.py` — same two changes synced (not committed separately)
+
+## Helper Scripts Added
+
+- `_sweep_reversal_gate.py` — updated to accept `--ticker` argument (was SPY-only)
+- `_sweep_reversal_angles.py` — sweeps 5 angle thresholds across all tickers, shows MR_REV stats per direction with MFE
+- `_test_orb_failsafe.py` — three-way comparison: gate only vs fail safe flip vs fail safe exit, full stats per category
+
+## Gate Summary (production)
+
+| Parameter | Value |
+|-----------|-------|
+| Anchor | bar AFTER day's extreme (`ext_i + 1`) |
+| Window sizes | 5-bar then 6-bar (accum) |
+| Angle threshold | 20° uniform (all tickers) |
+| R2 gate | per-ticker (TSLA=0.80, others=0.60) |
+| Logic | angle AND R2 both must pass |
+
+---
+
 # ORB Reversal Gate Redesign (2026-06-09)
 
 ## Problem

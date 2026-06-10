@@ -38,7 +38,7 @@ ATR_FLOOR = {
 
 # ── Per-ticker ORB parameters ─────────────────────────────────────────────────
 ORB_SLOPE_BARS        = 6       # opening window width (6 x 5min = 30 min, 08:30-08:55 CT)
-ORB_SLOPE_DEG_DEFAULT = 30.0    # angle threshold fallback
+ORB_SLOPE_DEG_DEFAULT = 20.0    # angle threshold fallback (most common across tuned tickers)
 ORB_SLOPE_DEG = {               # per-ticker angle threshold
     "TSLA":  30.0,
     "SPY":   20.0,
@@ -47,7 +47,7 @@ ORB_SLOPE_DEG = {               # per-ticker angle threshold
     "^GSPC": 10.0,
 }
 
-ORB_R2_THR_DEFAULT = 0.0        # no R2 gate by default (backward-compatible)
+ORB_R2_THR_DEFAULT = 0.60       # R2 gate fallback (most common across tuned tickers)
 ORB_R2_THR = {                  # per-ticker R2 quality gate on ORB/sliding windows
     "TSLA":  0.80,
     "SPY":   0.60,
@@ -56,7 +56,7 @@ ORB_R2_THR = {                  # per-ticker R2 quality gate on ORB/sliding wind
     "^GSPC": 0.60,
 }
 
-ORB_ACCUM_START_DEFAULT = None  # None = fixed bar 6 only
+ORB_ACCUM_START_DEFAULT = 5     # accumulation 5→6 bars (most common across tuned tickers)
 ORB_ACCUM_START = {             # accumulation: check growing windows from this bar
     "TSLA":  5,                 # checks bars 1-5, then 1-6 (fires at first qualifying)
     "SPY":   5,
@@ -66,7 +66,7 @@ ORB_ACCUM_START = {             # accumulation: check growing windows from this 
 }
 
 ORB_SLIDE_LIM = 18              # sliding window: scan up to bar 18 (~09:55 CT, 0-indexed=17)
-ORB_USE_SLIDING_DEFAULT = False
+ORB_USE_SLIDING_DEFAULT = True  # sliding enabled by default (most common across tuned tickers)
 ORB_USE_SLIDING = {             # whether to run sliding window when fixed/accum ORB misses
     "TSLA":  True,
     "SPY":   True,
