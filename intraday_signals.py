@@ -40,7 +40,7 @@ ATR_FLOOR = {
 ORB_SLOPE_BARS        = 6       # opening window width (6 x 5min = 30 min, 08:30-08:55 CT)
 ORB_SLOPE_DEG_DEFAULT = 20.0    # angle threshold fallback (most common across tuned tickers)
 ORB_SLOPE_DEG = {               # per-ticker angle threshold
-    "TSLA":  30.0,
+    "TSLA":  25.0,
     "SPY":   20.0,
     "QQQ":   20.0,
     "TQQQ":  20.0,
