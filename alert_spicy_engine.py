@@ -5,7 +5,8 @@ from build_dataset import build_feature_dataset
 # from model import spicy_sauce              # OLD: 2D Kalman — replaced by OLS slope in intraday_signals
 from intraday_signals import (
     add_intraday_features,
-    run_new, run_orb_slope, run_orb_sliding, sliding_qualifies_direction,
+    run_new, run_orb_slope, run_orb_sliding,
+    mr_orb_upgrade_qualifies,
     _orb_reversal_confirmed, REVERSAL_ANGLE,
     S_THR, ATR_FLOOR, ORB_SLOPE_BARS, ORB_REVERSAL_DEG,
     ORB_SLOPE_DEG, ORB_SLOPE_DEG_DEFAULT,
@@ -44,6 +45,7 @@ def _fresh_session():
         "position":     None,         # 'long' | 'short' | None
         "position_src": None,         # 'orb' | 'mr'
         "last_alert":   None,         # (bar_time, signal_type) for dedup
+        "mr_entry_bar": None,         # iloc of last MR entry (upgrade accumulation anchor)
     }
 
 session_state = {t: _fresh_session() for t in TICKERS}
@@ -129,9 +131,18 @@ while True:
             dv = dv[(dv.index.time >= SESSION_START) &
                     (dv.index.time <= SESSION_END)]
 
-            if len(dv) < 14:  # need 14 bars for OLS warmup
-                print(f"{ticker}: {len(dv)} session bars — waiting for warmup")
+            # ── Per-ticker ORB parameters (locked strategy) ───────────────
+            orb_deg     = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
+            r2_thr      = ORB_R2_THR.get(ticker, ORB_R2_THR_DEFAULT)
+            accum_start = ORB_ACCUM_START.get(ticker, ORB_ACCUM_START_DEFAULT)
+            use_sliding = ORB_USE_SLIDING.get(ticker, ORB_USE_SLIDING_DEFAULT)
+            _accum      = accum_start if accum_start is not None else ORB_ACCUM_START_DEFAULT
+
+            # ORB needs accum_start bars; MR needs 14 bars for OLS warmup
+            if len(dv) < _accum:
+                print(f"{ticker}: {len(dv)} session bars — waiting for ORB warmup")
                 continue
+            mr_ready = len(dv) >= 14
 
             bar_time     = dv.index[-1]
             last_idx     = len(dv) - 1
@@ -152,18 +163,17 @@ while True:
                 continue
 
             # ── Run new signal logic ───────────────────────────────────────
-            lsig_mr,  ssig_mr  = run_new(dv, S_THR.get(ticker, 0.60),
-                                          ATR_FLOOR.get(ticker, 0.50))
-            # skip_wr2 variant for ORB reversals: wr2 misaligns on V-reversals
-            lsig_mr_rev, ssig_mr_rev = run_new(dv, S_THR.get(ticker, 0.60),
-                                               ATR_FLOOR.get(ticker, 0.50),
-                                               skip_wr2=True)
-
-            # Per-ticker ORB parameters (locked strategy)
-            orb_deg    = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
-            r2_thr     = ORB_R2_THR.get(ticker, ORB_R2_THR_DEFAULT)
-            accum_start = ORB_ACCUM_START.get(ticker, ORB_ACCUM_START_DEFAULT)
-            use_sliding = ORB_USE_SLIDING.get(ticker, ORB_USE_SLIDING_DEFAULT)
+            # MR signals require 14-bar OLS warmup; skip until ready
+            if mr_ready:
+                lsig_mr,  ssig_mr  = run_new(dv, S_THR.get(ticker, 0.60),
+                                              ATR_FLOOR.get(ticker, 0.50))
+                # orb_reversal variant: drops wr2/wpos/wneg — ORB entry proves prior trend
+                lsig_mr_rev, ssig_mr_rev = run_new(dv, S_THR.get(ticker, 0.60),
+                                                   ATR_FLOOR.get(ticker, 0.50),
+                                                   orb_reversal=True)
+            else:
+                lsig_mr = ssig_mr = pd.Series(False, index=dv.index)
+                lsig_mr_rev = ssig_mr_rev = pd.Series(False, index=dv.index)
 
             # ORB: accumulation window + R2 gate, or fixed 6-bar
             lsig_orb, ssig_orb = run_orb_slope(dv, angle_deg=orb_deg,
@@ -211,33 +221,37 @@ while True:
             # ── MR long ───────────────────────────────────────────────────
             elif (is_mr_long_rev or is_mr_long) and state["position"] != "long":
                 if state["position"] == "short" and state["position_src"] == "orb":
-                    # ORB reversal: use skip_wr2 signal + gate
+                    # ORB reversal: prior-trend gates dropped, _orb_reversal_confirmed is the gate
                     if is_mr_long_rev and _orb_reversal_confirmed(
                             dv, state["orb_bar_loc"], "short", last_idx,
                             threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
-                        state.update(position="long", position_src="mr")
+                        state.update(position="long", position_src="mr",
+                                     mr_entry_bar=last_idx)
                         signal      = "MR Flip -- LONG (ORB reversal confirmed)"
                         signal_type = "MR_LONG"
                     # else: gate blocks — suppress silently
                 elif is_mr_long:
                     # Standalone MR: full signal (wr2 active)
-                    state.update(position="long", position_src="mr")
+                    state.update(position="long", position_src="mr",
+                                 mr_entry_bar=last_idx)
                     signal      = "MR Signal -- LONG"
                     signal_type = "MR_LONG"
 
             # ── MR short ──────────────────────────────────────────────────
             elif (is_mr_short_rev or is_mr_short) and state["position"] != "short":
                 if state["position"] == "long" and state["position_src"] == "orb":
-                    # ORB reversal: use skip_wr2 signal + gate
+                    # ORB reversal: prior-trend gates dropped, _orb_reversal_confirmed is the gate
                     if is_mr_short_rev and _orb_reversal_confirmed(
                             dv, state["orb_bar_loc"], "long", last_idx,
                             threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
-                        state.update(position="short", position_src="mr")
+                        state.update(position="short", position_src="mr",
+                                     mr_entry_bar=last_idx)
                         signal      = "MR Flip -- SHORT (ORB reversal confirmed)"
                         signal_type = "MR_SHORT"
                 elif is_mr_short:
                     # Standalone MR: full signal (wr2 active)
-                    state.update(position="short", position_src="mr")
+                    state.update(position="short", position_src="mr",
+                                 mr_entry_bar=last_idx)
                     signal      = "MR Signal -- SHORT"
                     signal_type = "MR_SHORT"
 
@@ -322,18 +336,24 @@ while True:
             #     )
             # ── END OLD SIGNAL LOGIC ──────────────────────────────────────
 
-            # ── MR→ORB upgrade: if sliding confirms same direction ──────────
-            # When in an MR position, check if the current 6-bar window qualifies
-            # as an ORB sliding signal in the same direction. If so, upgrade to
-            # pos_src='orb' to add reversal gate protection (effective immediately).
-            if state["position"] == "long" and state["position_src"] == "mr":
-                if sliding_qualifies_direction(dv, last_idx, orb_deg, r2_thr, "long"):
+            # ── MR→ORB upgrade: accumulate from MR entry bar ──────────────
+            # Phase 1: growing window from mr_entry_bar (accum_start → ORB_SLOPE_BARS bars)
+            # Phase 2: sliding ORB_SLOPE_BARS window once Phase 1 window expires.
+            if state["position"] in ("long", "short") and state["position_src"] == "mr":
+                if mr_orb_upgrade_qualifies(dv, state["mr_entry_bar"], last_idx,
+                                            orb_deg, r2_thr, state["position"], _accum):
                     state.update(position_src="orb", orb_bar_loc=last_idx)
-                    # Note: no signal update — upgrade happens silently
-
-            elif state["position"] == "short" and state["position_src"] == "mr":
-                if sliding_qualifies_direction(dv, last_idx, orb_deg, r2_thr, "short"):
-                    state.update(position_src="orb", orb_bar_loc=last_idx)
+                    upgrade_dir = state["position"].upper()
+                    upgrade_type = f"MR_ORB_UP_{upgrade_dir}"
+                    prev = state["last_alert"]
+                    if prev is None or prev[1] != upgrade_type:
+                        combined_msgs.append(
+                            f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
+                            f"MR Upgraded to ORB -- {upgrade_dir} (reversal gate now active)\n"
+                            f"Time: {display_time}\n"
+                            f"Price: {dv['Close'].iloc[-1]:.2f}"
+                        )
+                        state["last_alert"] = (bar_time, upgrade_type)
 
             # ── Dedup and collect ─────────────────────────────────────────
             if signal:
