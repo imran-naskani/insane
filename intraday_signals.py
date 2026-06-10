@@ -75,7 +75,8 @@ ORB_USE_SLIDING = {             # whether to run sliding window when fixed/accum
     "^GSPC": False,             # no sliding for SPX — accum 5-6 alone is best
 }
 
-ORB_REVERSAL_DEG = 10.0         # min re-computed angle for MR to flip an ORB position
+ORB_REVERSAL_DEG    = 10.0      # legacy default (kept for backtest scripts)
+REVERSAL_ANGLE      = 20.0      # uniform reversal gate angle for all tickers (ext_i+1 anchor)
 
 
 # ── Internal OLS helpers ──────────────────────────────────────────────────────
@@ -325,13 +326,14 @@ def _orb_reversal_confirmed(dv, orb_bar_idx, orb_dir, current_idx,
     rel   = int(np.argmin(closes)) if orb_dir == "short" else int(np.argmax(closes))
     ext_i = orb_bar_idx + rel      # absolute session iloc of extreme
 
-    # Check accum windows anchored at extreme
+    # Check accum windows starting from bar AFTER the extreme
+    anchor     = ext_i + 1
     all_closes = dv["Close"].values.astype(float)
     for nb in range(accum_start, slope_bars + 1):
-        end = ext_i + nb
+        end = anchor + nb
         if end - 1 > current_idx:
             break
-        w = all_closes[ext_i: end]
+        w = all_closes[anchor: end]
         ang, r2 = _ols_angle_r2(w, atr)
         if r2_thr > 0 and r2 < r2_thr:
             continue                      # R2 fails — try next window
@@ -420,14 +422,14 @@ def compute_chart_signals(df, ticker):
                 # Gate: MR must confirm reversal to flip ORB position
                 if is_ml and orb_dir == "short":
                     if _orb_reversal_confirmed(session, orb_bar_i, "short", ts_i,
-                                               threshold=ang_deg, r2_thr=r2_thr):
+                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         df.at[ts, "Turn_Up"]       = True
                         df.at[ts, "Signal_Source"] = "MR"
                         in_orb = False   # ORB flipped — now MR position
                     # else: gate blocks, don't mark
                 elif is_ms and orb_dir == "long":
                     if _orb_reversal_confirmed(session, orb_bar_i, "long", ts_i,
-                                               threshold=ang_deg, r2_thr=r2_thr):
+                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         df.at[ts, "Turn_Down"]     = True
                         df.at[ts, "Signal_Source"] = "MR"
                         in_orb = False

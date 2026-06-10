@@ -6,7 +6,7 @@ from build_dataset import build_feature_dataset
 from intraday_signals import (
     add_intraday_features,
     run_new, run_orb_slope, run_orb_sliding, sliding_qualifies_direction,
-    _orb_reversal_confirmed,
+    _orb_reversal_confirmed, REVERSAL_ANGLE,
     S_THR, ATR_FLOOR, ORB_SLOPE_BARS, ORB_REVERSAL_DEG,
     ORB_SLOPE_DEG, ORB_SLOPE_DEG_DEFAULT,
     ORB_R2_THR, ORB_R2_THR_DEFAULT,
@@ -206,7 +206,8 @@ while True:
             elif is_mr_long and state["position"] != "long":
                 # Reversal gate: MR wants to flip an active ORB short
                 if state["position"] == "short" and state["position_src"] == "orb":
-                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "short", last_idx):
+                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "short", last_idx,
+                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="long", position_src="mr")
                         signal      = "MR Flip -- LONG (ORB reversal confirmed)"
                         signal_type = "MR_LONG"
@@ -219,7 +220,8 @@ while True:
             # ── MR short ──────────────────────────────────────────────────
             elif is_mr_short and state["position"] != "short":
                 if state["position"] == "long" and state["position_src"] == "orb":
-                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "long", last_idx):
+                    if _orb_reversal_confirmed(dv, state["orb_bar_loc"], "long", last_idx,
+                                               threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="short", position_src="mr")
                         signal      = "MR Flip -- SHORT (ORB reversal confirmed)"
                         signal_type = "MR_SHORT"
