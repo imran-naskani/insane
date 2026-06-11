@@ -6,7 +6,7 @@ load_dotenv()
 
 _CHANNEL_KEYS = {
     "main":    ("TELEGRAM_BOT_TOKEN",        "TELEGRAM_CHAT_ID"),
-    "options": ("TELEGRAM_OPTION_BOT_TOKEN", "TELEGRAM_OPTION_CHAT_ID"),
+    "options": ("TELEGRAM_BOT_TOKEN",        "TELEGRAM_CHAT_ID"),
 }
 
 
