@@ -1,4 +1,6 @@
 import time
+import logging
+import os
 import pandas as pd
 from build_dataset import build_feature_dataset
 # from build_dataset import floor_5_or_int   # OLD: used for VWAP/range thresholds — no longer needed
@@ -20,6 +22,19 @@ load_dotenv()
 
 import telegram
 from options_executor import OptionsExecutor
+
+# ── LOGGING ───────────────────────────────────────────────────────────────────
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler(f"logs/alert_engine_{dt.date.today():%Y-%m-%d}.log"),
+        logging.StreamHandler(),
+    ],
+)
+log = logging.getLogger(__name__)
 
 end_date   = dt.date.today() + dt.timedelta(days=1)
 start_date = end_date - dt.timedelta(days=31)
@@ -67,12 +82,12 @@ EOD_CUTOFF    = pd.Timestamp("14:30").time()
 _executor = OptionsExecutor()
 try:
     _executor.connect()
-    print("[executor] Connected to IB TWS/Gateway")
+    log.info("[executor] Connected to IB TWS/Gateway")
 except Exception as _e:
-    print(f"[executor] Could not connect to IB ({_e}). Options execution disabled.")
+    log.warning(f"[executor] Could not connect to IB ({_e}). Options execution disabled.")
     _executor = None
 
-print("INSANE Alert Engine started (5m) -- MR + ORB-Slope strategy")
+log.info("INSANE Alert Engine started (5m) -- MR + ORB-Slope strategy")
 MAX_RETRIES = 10
 RETRY_SLEEP = 2
 
@@ -99,12 +114,12 @@ while True:
                     )
                     break
                 except Exception as e:
-                    print(f"{ticker} attempt {attempt}/{MAX_RETRIES} failed: {e}")
+                    log.warning(f"{ticker} attempt {attempt}/{MAX_RETRIES} failed: {e}")
                     if attempt < MAX_RETRIES:
                         time.sleep(RETRY_SLEEP)
 
             if df is None:
-                print(f"{ticker} skipped after {MAX_RETRIES} failures")
+                log.warning(f"{ticker} skipped after {MAX_RETRIES} failures")
                 continue
 
             # ── Timezone ──────────────────────────────────────────────────
@@ -139,7 +154,7 @@ while True:
 
             # ORB needs accum_start bars; MR needs 14 bars for OLS warmup
             if len(dv) < _accum:
-                print(f"{ticker}: {len(dv)} session bars — waiting for ORB warmup")
+                log.info(f"{ticker}: {len(dv)} session bars — waiting for ORB warmup")
                 continue
             mr_ready = len(dv) >= 14
 
@@ -374,7 +389,7 @@ while True:
                         exec_dir = "long" if "LONG" in signal_type else "short"
                         _executor.on_signal(ticker, exec_dir)
             else:
-                print(f"{ticker} @ {display_time}: no signal")
+                log.debug(f"{ticker} @ {display_time}: no signal")
 
         # ── Send ONE combined Telegram message ────────────────────────────
         if combined_msgs:
@@ -383,8 +398,8 @@ while True:
                 + "\n\n".join(combined_msgs)
             )
             telegram.send_alert(final_msg)
-            print(f"[{dt.datetime.now()}] Combined alert sent")
+            log.info("Combined alert sent")
 
     except Exception as e:
-        print("Alert engine error:", e)
+        log.error(f"Alert engine error: {e}", exc_info=True)
         time.sleep(60)
