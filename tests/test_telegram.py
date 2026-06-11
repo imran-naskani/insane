@@ -2,16 +2,18 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-os.environ.setdefault("TELEGRAM_BOT_TOKEN",         "test-main-token")
-os.environ.setdefault("TELEGRAM_CHAT_ID",            "test-main-chat")
-os.environ.setdefault("TELEGRAM_OPTION_BOT_TOKEN",  "test-opts-token")
-os.environ.setdefault("TELEGRAM_OPTION_CHAT_ID",     "test-opts-chat")
-
 import telegram as tg
+
+_MAIN_ENV = {
+    "TELEGRAM_BOT_TOKEN":        "test-main-token",
+    "TELEGRAM_CHAT_ID":           "test-main-chat",
+    "TELEGRAM_OPTION_BOT_TOKEN": "test-opts-token",
+    "TELEGRAM_OPTION_CHAT_ID":    "test-opts-chat",
+}
 
 
 def test_send_alert_main_channel_uses_main_token():
-    with patch("telegram.requests.post") as mock_post:
+    with patch.dict(os.environ, _MAIN_ENV), patch("telegram.requests.post") as mock_post:
         mock_post.return_value = MagicMock(status_code=200)
         mock_post.return_value.raise_for_status = MagicMock()
         tg.send_alert("hello", channel="main")
@@ -22,7 +24,7 @@ def test_send_alert_main_channel_uses_main_token():
 
 
 def test_send_alert_options_channel_uses_options_token():
-    with patch("telegram.requests.post") as mock_post:
+    with patch.dict(os.environ, _MAIN_ENV), patch("telegram.requests.post") as mock_post:
         mock_post.return_value = MagicMock(status_code=200)
         mock_post.return_value.raise_for_status = MagicMock()
         tg.send_alert("trade alert", channel="options")
@@ -32,7 +34,7 @@ def test_send_alert_options_channel_uses_options_token():
 
 
 def test_send_alert_default_channel_is_main():
-    with patch("telegram.requests.post") as mock_post:
+    with patch.dict(os.environ, _MAIN_ENV), patch("telegram.requests.post") as mock_post:
         mock_post.return_value = MagicMock(status_code=200)
         mock_post.return_value.raise_for_status = MagicMock()
         tg.send_alert("hello")
@@ -41,5 +43,5 @@ def test_send_alert_default_channel_is_main():
 
 
 def test_send_alert_swallows_network_exception():
-    with patch("telegram.requests.post", side_effect=Exception("timeout")):
+    with patch.dict(os.environ, _MAIN_ENV), patch("telegram.requests.post", side_effect=Exception("timeout")):
         tg.send_alert("test", channel="main")  # must not raise

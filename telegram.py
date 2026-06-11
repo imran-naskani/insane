@@ -4,17 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_CHANNELS = {
-    "main":    (os.environ.get("TELEGRAM_BOT_TOKEN"),        os.environ.get("TELEGRAM_CHAT_ID")),
-    "options": (os.environ.get("TELEGRAM_OPTION_BOT_TOKEN"), os.environ.get("TELEGRAM_OPTION_CHAT_ID")),
+_CHANNEL_KEYS = {
+    "main":    ("TELEGRAM_BOT_TOKEN",        "TELEGRAM_CHAT_ID"),
+    "options": ("TELEGRAM_OPTION_BOT_TOKEN", "TELEGRAM_OPTION_CHAT_ID"),
 }
 
 
 def send_alert(msg: str, channel: str = "main") -> None:
-    if channel not in _CHANNELS:
+    if channel not in _CHANNEL_KEYS:
         print(f"[telegram] unknown channel '{channel}'")
         return
-    token, chat_id = _CHANNELS[channel]
+    token_key, chat_key = _CHANNEL_KEYS[channel]
+    token, chat_id = os.environ.get(token_key), os.environ.get(chat_key)
     if not token or not chat_id:
         print(f"[telegram] channel '{channel}' not configured")
         return
