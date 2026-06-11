@@ -182,3 +182,64 @@ def test_append_trade_appends_on_second_call(tmp_path, monkeypatch):
         rows = list(csv.DictReader(f))
     assert len(rows) == 2
     assert rows[1]["ticker"] == "TSLA"
+
+
+def test_handle_signal_ignores_unknown_ticker():
+    ex = _bare_executor()
+    ex._open_position  = MagicMock()
+    ex._exit_position  = MagicMock()
+    # AAPL is not in EXECUTOR_TICKERS — nothing should happen
+    ex._handle_signal("AAPL", "long")
+    ex._open_position.assert_not_called()
+    ex._exit_position.assert_not_called()
+
+
+def test_handle_signal_skips_same_direction(monkeypatch):
+    ex = _bare_executor()
+    ex._positions["SPY"] = {
+        "direction": "long", "entry_price": 1.50, "high_water_mark": 1.50,
+        "trailing_active": False, "fill_time": dt.datetime.now().isoformat(),
+        "contracts": 1, "symbol": "SPY...",
+        "contract": MagicMock(), "ticker_obj": MagicMock(), "contract_params": {},
+    }
+    ex._open_position = MagicMock()
+    ex._exit_position = MagicMock()
+    monkeypatch.setattr("options_executor.dt.datetime", MagicMock(
+        now=MagicMock(return_value=dt.datetime(2026, 6, 10, 9, 45))
+    ))
+    ex._handle_signal("SPY", "long")
+    ex._open_position.assert_not_called()
+
+
+def test_handle_signal_exits_then_enters_on_reversal(monkeypatch):
+    ex = _bare_executor()
+    ex._positions["SPY"] = {
+        "direction": "long", "entry_price": 1.50, "high_water_mark": 1.50,
+        "trailing_active": False, "fill_time": dt.datetime.now().isoformat(),
+        "contracts": 1, "symbol": "SPY...",
+        "contract": MagicMock(), "ticker_obj": MagicMock(), "contract_params": {},
+    }
+    ex._exit_position = MagicMock()
+    ex._open_position = MagicMock()
+    monkeypatch.setattr("options_executor.dt.datetime", MagicMock(
+        now=MagicMock(return_value=dt.datetime(2026, 6, 10, 9, 45))
+    ))
+    ex._handle_signal("SPY", "short")
+    ex._exit_position.assert_called_once_with("SPY", "Signal Reversal")
+    ex._open_position.assert_called_once()
+
+
+def test_handle_signal_skips_after_entry_cutoff(monkeypatch):
+    ex = _bare_executor()
+    ex._open_position = MagicMock()
+    monkeypatch.setattr("options_executor.dt.datetime", MagicMock(
+        now=MagicMock(return_value=dt.datetime(2026, 6, 10, 14, 15))
+    ))
+    ex._handle_signal("SPY", "long")
+    ex._open_position.assert_not_called()
+
+
+def test_on_signal_swallows_exception():
+    ex = _bare_executor()
+    ex._handle_signal = MagicMock(side_effect=RuntimeError("boom"))
+    ex.on_signal("SPY", "long")   # must not raise

@@ -172,10 +172,31 @@ class OptionsExecutor:
     # ── Stubs — implemented in Tasks 4-6 ─────────────────────────────────────
 
     def on_signal(self, ticker: str, direction: str) -> None:
-        raise NotImplementedError
+        """Called from alert engine. direction: 'long' | 'short'. Never raises."""
+        try:
+            self._handle_signal(ticker, direction)
+        except Exception as e:
+            print(f"[executor] on_signal error ({ticker} {direction}): {e}")
 
     def _handle_signal(self, ticker: str, direction: str) -> None:
-        raise NotImplementedError
+        if ticker not in EXECUTOR_TICKERS:
+            return
+
+        now = dt.datetime.now()
+        if now.time() >= ENTRY_CUTOFF:
+            print(f"[executor] {ticker}: past entry cutoff ({now.strftime('%H:%M')}), skipping")
+            return
+
+        with self._lock:
+            pos = self._positions.get(ticker)
+
+        if pos is not None:
+            if pos["direction"] == direction:
+                print(f"[executor] {ticker}: already {direction}, skipping")
+                return
+            self._exit_position(ticker, "Signal Reversal")
+
+        self._open_position(ticker, direction, now)
 
     def _open_position(self, ticker: str, direction: str, now: dt.datetime) -> None:
         raise NotImplementedError
