@@ -1,0 +1,35 @@
+{
+  "ticker": "TSLA",
+  "generated_at": "2026-06-11T17:15:06.961405",
+  "lookback_days": 14,
+  "summary": {
+    "total_trades": 1,
+    "win_rate": 100.0,
+    "avg_pnl_pct": 47.59,
+    "total_pnl_pct": 47.59,
+    "best_trade": 47.59,
+    "worst_trade": 47.59,
+    "exit_reasons": {
+      "Trailing Stop": 1
+    }
+  },
+  "trades": [
+    {
+      "ticker": "TSLA",
+      "date": "2026-06-10",
+      "signal_type": "ORB_SHORT",
+      "strike": 392.5,
+      "expiry": "20260610",
+      "right": "P",
+      "direction": "short",
+      "entry_price": 3.95,
+      "exit_price": 5.83,
+      "high_water_mark": 8.98,
+      "pnl_pct": 47.59,
+      "hold_minutes": 100,
+      "exit_reason": "Trailing Stop",
+      "entry_time": "2026-06-10T09:00:00-05:00",
+      "exit_time": "2026-06-10T10:40:00-05:00"
+    }
+  ]
+}
