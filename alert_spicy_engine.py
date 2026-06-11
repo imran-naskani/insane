@@ -16,10 +16,10 @@ from intraday_signals import (
 )
 import datetime as dt
 from dotenv import load_dotenv
-import os
-import requests
-
 load_dotenv()
+
+import telegram
+from options_executor import OptionsExecutor
 
 end_date   = dt.date.today() + dt.timedelta(days=1)
 start_date = end_date - dt.timedelta(days=31)
@@ -29,9 +29,6 @@ start_date = end_date - dt.timedelta(days=31)
 # ^GSPC swapped for SPY: real volume needed for correct ATR; validated in SIGNAL_LOGIC.md backtest
 TICKERS   = ["TSLA", "SPY", "^GSPC", "QQQ", "TQQQ"]
 TIMEFRAME = "5m"
-
-BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-CHAT_ID   = os.environ["TELEGRAM_CHAT_ID"]
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────
 # Tracks position, ORB state, and alert dedup per ticker. Resets each trading day.
@@ -51,12 +48,6 @@ def _fresh_session():
 session_state = {t: _fresh_session() for t in TICKERS}
 
 # ── HELPERS ───────────────────────────────────────────────────────────────────
-def send_telegram(msg: str):
-    url     = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"}
-    r = requests.post(url, json=payload, timeout=10)
-    r.raise_for_status()
-
 def get_last_closed_bar(df: pd.DataFrame) -> pd.DataFrame:
     """Drop the currently forming 5m candle."""
     return df.iloc[:-1]
@@ -73,6 +64,14 @@ SESSION_END   = pd.Timestamp("15:00").time()
 EOD_CUTOFF    = pd.Timestamp("14:30").time()
 
 # ── MAIN LOOP ─────────────────────────────────────────────────────────────────
+_executor = OptionsExecutor()
+try:
+    _executor.connect()
+    print("[executor] Connected to IB TWS/Gateway")
+except Exception as _e:
+    print(f"[executor] Could not connect to IB ({_e}). Options execution disabled.")
+    _executor = None
+
 print("INSANE Alert Engine started (5m) -- MR + ORB-Slope strategy")
 MAX_RETRIES = 10
 RETRY_SLEEP = 2
@@ -367,6 +366,13 @@ while True:
                         f"Price: {dv['Close'].iloc[-1]:.2f}"
                     )
                     state["last_alert"] = (bar_time, signal_type)
+                    if (
+                        _executor is not None
+                        and ticker in ("SPY", "TSLA")
+                        and signal_type in ("ORB_LONG", "MR_LONG", "ORB_SHORT", "MR_SHORT")
+                    ):
+                        exec_dir = "long" if "LONG" in signal_type else "short"
+                        _executor.on_signal(ticker, exec_dir)
             else:
                 print(f"{ticker} @ {display_time}: no signal")
 
@@ -376,7 +382,7 @@ while True:
                 "INSANE ALERT\n\n"
                 + "\n\n".join(combined_msgs)
             )
-            send_telegram(final_msg)
+            telegram.send_alert(final_msg)
             print(f"[{dt.datetime.now()}] Combined alert sent")
 
     except Exception as e:
