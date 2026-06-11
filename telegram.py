@@ -11,7 +11,10 @@ _CHANNELS = {
 
 
 def send_alert(msg: str, channel: str = "main") -> None:
-    token, chat_id = _CHANNELS.get(channel, _CHANNELS["main"])
+    if channel not in _CHANNELS:
+        print(f"[telegram] unknown channel '{channel}'")
+        return
+    token, chat_id = _CHANNELS[channel]
     if not token or not chat_id:
         print(f"[telegram] channel '{channel}' not configured")
         return
