@@ -102,3 +102,83 @@ def test_stop_loss_takes_priority_over_trailing():
     should, reason = _check_exit(1.00, 0.40, 2.00, True)
     assert should is True
     assert "Stop Loss" in reason
+
+
+# ── Persistence tests ─────────────────────────────────────────────────────────
+
+import json
+import csv
+import threading
+import pytest
+from options_executor import OptionsExecutor, POSITIONS_FILE, TRADES_FILE
+
+
+def _bare_executor():
+    """Create OptionsExecutor without calling __init__ (no IB connection)."""
+    ex = OptionsExecutor.__new__(OptionsExecutor)
+    ex._ib        = MagicMock()
+    ex._positions = {}
+    ex._lock      = threading.Lock()
+    ex._running   = False
+    ex._thread    = None
+    return ex
+
+
+def test_save_positions_excludes_non_serialisable_fields(tmp_path, monkeypatch):
+    monkeypatch.setattr("options_executor.POSITIONS_FILE", str(tmp_path / "pos.json"))
+    ex = _bare_executor()
+    ex._positions["SPY"] = {
+        "contract":        MagicMock(),   # must NOT appear in JSON
+        "ticker_obj":      MagicMock(),   # must NOT appear in JSON
+        "contract_params": {"symbol": "SPY", "lastTradeDateOrContractMonth": "20260610",
+                            "strike": 595.0, "right": "C", "exchange": "SMART",
+                            "currency": "USD", "multiplier": "100"},
+        "symbol":          "SPY260610C00595000",
+        "direction":       "long",
+        "entry_price":     1.50,
+        "high_water_mark": 1.80,
+        "trailing_active": False,
+        "fill_time":       "2026-06-10T09:45:00",
+        "contracts":       1,
+    }
+    ex._save_positions()
+    with open(str(tmp_path / "pos.json")) as f:
+        data = json.load(f)
+    assert "SPY" in data
+    assert data["SPY"]["entry_price"] == 1.50
+    assert "contract" not in data["SPY"]
+    assert "ticker_obj" not in data["SPY"]
+
+
+def test_append_trade_writes_csv_row(tmp_path, monkeypatch):
+    monkeypatch.setattr("options_executor.TRADES_FILE", str(tmp_path / "trades.csv"))
+    ex = _bare_executor()
+    pos = {
+        "direction":   "long",
+        "symbol":      "SPY260610C00595000",
+        "entry_price": 1.50,
+        "fill_time":   "2026-06-10T09:45:00",
+        "contracts":   1,
+    }
+    ex._append_trade("SPY", pos, 2.30, "Trailing Stop")
+    with open(str(tmp_path / "trades.csv")) as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 1
+    assert rows[0]["ticker"]      == "SPY"
+    assert rows[0]["exit_reason"] == "Trailing Stop"
+    assert float(rows[0]["entry_price"]) == 1.50
+    assert float(rows[0]["exit_price"])  == 2.30
+    assert float(rows[0]["pnl_pct"])     == pytest.approx(53.33, abs=0.1)
+
+
+def test_append_trade_appends_on_second_call(tmp_path, monkeypatch):
+    monkeypatch.setattr("options_executor.TRADES_FILE", str(tmp_path / "trades.csv"))
+    ex = _bare_executor()
+    pos = {"direction": "long", "symbol": "X", "entry_price": 1.00,
+           "fill_time": "2026-06-10T09:45:00", "contracts": 1}
+    ex._append_trade("SPY",  pos, 1.50, "Trailing Stop")
+    ex._append_trade("TSLA", pos, 0.50, "Stop Loss (50%)")
+    with open(str(tmp_path / "trades.csv")) as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 2
+    assert rows[1]["ticker"] == "TSLA"

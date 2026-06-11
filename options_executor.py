@@ -70,3 +70,127 @@ def _check_exit(
     if trailing_active and current_price <= high_water_mark * TRAIL_FROM_HWM:
         return True, "Trailing Stop"
     return False, None
+
+
+class OptionsExecutor:
+
+    def __init__(self):
+        self._ib      = IB()
+        self._positions = {}    # ticker -> position state dict
+        self._lock    = threading.Lock()
+        self._running = False
+        self._thread  = None
+
+    # ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    def connect(self, host: str = "127.0.0.1", port: int = 4002, client_id: int = 111):
+        self._ib.connect(host, port, clientId=client_id, timeout=10)
+        self._load_positions()
+        self._running = True
+        self._thread  = threading.Thread(target=self._tracking_loop, daemon=True)
+        self._thread.start()
+
+    def disconnect(self):
+        self._running = False
+        if self._ib.isConnected():
+            self._ib.disconnect()
+
+    # ── Persistence ───────────────────────────────────────────────────────────
+
+    def _save_positions(self):
+        data = {}
+        with self._lock:
+            for ticker, pos in self._positions.items():
+                data[ticker] = {
+                    k: v for k, v in pos.items()
+                    if k not in ("contract", "ticker_obj")
+                }
+        try:
+            with open(POSITIONS_FILE, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"[executor] save error: {e}")
+
+    def _load_positions(self):
+        if not os.path.exists(POSITIONS_FILE):
+            return
+        try:
+            with open(POSITIONS_FILE) as f:
+                data = json.load(f)
+        except Exception:
+            return
+
+        today = dt.date.today()
+        for ticker, state in data.items():
+            fill_dt = dt.datetime.fromisoformat(state["fill_time"])
+            if fill_dt.date() < today:
+                print(f"[executor] Skipping expired position for {ticker}")
+                continue
+            try:
+                contract = Option(**state["contract_params"])
+                self._ib.qualifyContracts(contract)
+                ticker_obj = self._ib.reqMktData(contract, "", False, False)
+                self._positions[ticker] = {
+                    **state,
+                    "contract":   contract,
+                    "ticker_obj": ticker_obj,
+                }
+                print(f"[executor] Recovered open position: {ticker}")
+            except Exception as e:
+                print(f"[executor] Could not recover {ticker}: {e}")
+
+    def _append_trade(self, ticker: str, pos: dict, exit_price: float, reason: str):
+        file_exists = os.path.exists(TRADES_FILE)
+        fill_dt     = dt.datetime.fromisoformat(pos["fill_time"])
+        hold_mins   = int((dt.datetime.now() - fill_dt).total_seconds() / 60)
+        pnl_pct     = round((exit_price - pos["entry_price"]) / pos["entry_price"] * 100, 2)
+        fieldnames  = [
+            "ticker", "direction", "option_symbol", "entry_price",
+            "exit_price", "pnl_pct", "hold_minutes", "exit_reason",
+            "entry_time", "exit_time",
+        ]
+        try:
+            with open(TRADES_FILE, "a", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                if not file_exists:
+                    writer.writeheader()
+                writer.writerow({
+                    "ticker":        ticker,
+                    "direction":     pos["direction"],
+                    "option_symbol": pos["symbol"],
+                    "entry_price":   pos["entry_price"],
+                    "exit_price":    exit_price,
+                    "pnl_pct":       pnl_pct,
+                    "hold_minutes":  hold_mins,
+                    "exit_reason":   reason,
+                    "entry_time":    pos["fill_time"],
+                    "exit_time":     dt.datetime.now().isoformat(),
+                })
+        except Exception as e:
+            print(f"[executor] trade log error: {e}")
+
+    # ── Stubs — implemented in Tasks 4-6 ─────────────────────────────────────
+
+    def on_signal(self, ticker: str, direction: str) -> None:
+        raise NotImplementedError
+
+    def _handle_signal(self, ticker: str, direction: str) -> None:
+        raise NotImplementedError
+
+    def _open_position(self, ticker: str, direction: str, now: dt.datetime) -> None:
+        raise NotImplementedError
+
+    def _select_option(self, ticker: str, contract, direction: str, current_price: float):
+        raise NotImplementedError
+
+    def _place_order(self, ticker: str, opt_contract, direction: str, current_price: float):
+        raise NotImplementedError
+
+    def _tracking_loop(self):
+        raise NotImplementedError
+
+    def _exit_position(self, ticker: str, reason: str) -> None:
+        raise NotImplementedError
+
+    def _reconnect(self):
+        raise NotImplementedError
