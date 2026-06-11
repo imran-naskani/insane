@@ -346,10 +346,118 @@ class OptionsExecutor:
         return None
 
     def _tracking_loop(self):
-        raise NotImplementedError
+        while self._running:
+            time.sleep(TRACK_INTERVAL)
+
+            if not self._ib.isConnected():
+                print("[executor] IB disconnected — attempting reconnect")
+                self._reconnect()
+                continue
+
+            self._ib.sleep(0)   # flush incoming tick events from IB event loop
+
+            now = dt.datetime.now()
+            with self._lock:
+                tickers = list(self._positions.keys())
+
+            for ticker in tickers:
+                with self._lock:
+                    pos = self._positions.get(ticker)
+                if pos is None:
+                    continue
+
+                # Read live streaming price (no new IB request needed)
+                ticker_obj = pos["ticker_obj"]
+                mid = ticker_obj.midpoint()
+                if not mid or mid <= 0:
+                    if ticker_obj.bid and ticker_obj.ask and ticker_obj.bid > 0:
+                        mid = (ticker_obj.bid + ticker_obj.ask) / 2
+                    else:
+                        continue   # no price yet this cycle
+
+                entry = pos["entry_price"]
+                hwm   = pos["high_water_mark"]
+                trail = pos["trailing_active"]
+
+                # Update high-water mark
+                if mid > hwm:
+                    with self._lock:
+                        if self._positions.get(ticker):
+                            self._positions[ticker]["high_water_mark"] = mid
+                    hwm = mid
+
+                # Arm trailing stop once up 50%
+                if not trail and mid >= entry * TRAIL_ACTIVATE:
+                    with self._lock:
+                        if self._positions.get(ticker):
+                            self._positions[ticker]["trailing_active"] = True
+                    trail = True
+                    self._save_positions()
+                    print(f"[executor] {ticker}: trailing stop armed at ${mid:.2f}")
+
+                # EOD forced exit (highest priority — checked before rule exits)
+                if now.time() >= EOD_CUTOFF:
+                    self._exit_position(ticker, "EOD")
+                    continue
+
+                # Rule-based exits: stop loss then trailing
+                should_exit, reason = _check_exit(entry, mid, hwm, trail)
+                if should_exit:
+                    self._exit_position(ticker, reason)
 
     def _exit_position(self, ticker: str, reason: str) -> None:
-        raise NotImplementedError
+        with self._lock:
+            pos = self._positions.get(ticker)
+        if pos is None:
+            return
+
+        exit_price = pos["entry_price"]   # fallback if market order fails
+        try:
+            self._ib.cancelMktData(pos["contract"])
+            order = MarketOrder("SELL", pos["contracts"])
+            trade = self._ib.placeOrder(pos["contract"], order)
+
+            deadline = time.time() + 30
+            while time.time() < deadline:
+                self._ib.sleep(1)
+                if trade.orderStatus.status == "Filled":
+                    exit_price = trade.orderStatus.avgFillPrice
+                    break
+        except Exception as e:
+            print(f"[executor] exit order error ({ticker}): {e}")
+
+        pnl_pct   = (exit_price - pos["entry_price"]) / pos["entry_price"] * 100
+        fill_dt   = dt.datetime.fromisoformat(pos["fill_time"])
+        hold_mins = int((dt.datetime.now() - fill_dt).total_seconds() / 60)
+        right     = "CALL" if pos["direction"] == "long" else "PUT"
+
+        telegram.send_alert(
+            f"*{ticker}* | {right} EXIT | Reason: {reason}\n"
+            f"Entry: ${pos['entry_price']:.2f} → Exit: ${exit_price:.2f} | "
+            f"P&L: {pnl_pct:+.1f}% | Hold: {hold_mins}m",
+            channel="options",
+        )
+
+        self._append_trade(ticker, pos, exit_price, reason)
+
+        with self._lock:
+            self._positions.pop(ticker, None)
+        self._save_positions()
 
     def _reconnect(self):
-        raise NotImplementedError
+        attempts = 0
+        while self._running and not self._ib.isConnected():
+            attempts += 1
+            try:
+                self._ib.connect("127.0.0.1", 4002, clientId=111, timeout=10)
+                print(f"[executor] Reconnected to IB (attempt {attempts})")
+                # Re-subscribe streaming data for all open positions
+                with self._lock:
+                    for ticker, pos in self._positions.items():
+                        if pos.get("contract"):
+                            ticker_obj = self._ib.reqMktData(pos["contract"], "", False, False)
+                            self._positions[ticker]["ticker_obj"] = ticker_obj
+                return
+            except Exception as e:
+                print(f"[executor] Reconnect attempt {attempts} failed: {e}")
+                time.sleep(30)
