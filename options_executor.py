@@ -199,13 +199,151 @@ class OptionsExecutor:
         self._open_position(ticker, direction, now)
 
     def _open_position(self, ticker: str, direction: str, now: dt.datetime) -> None:
-        raise NotImplementedError
+        contract = EXECUTOR_TICKERS[ticker]
+        self._ib.qualifyContracts(contract)
+
+        # Get current underlying price
+        snap = self._ib.reqMktData(contract, "", True, False)
+        self._ib.sleep(1.0)
+        current_price = (
+            snap.last
+            or snap.close
+            or ((snap.bid + snap.ask) / 2 if snap.bid and snap.ask else None)
+        )
+        self._ib.cancelMktData(contract)
+
+        if not current_price:
+            print(f"[executor] {ticker}: could not get underlying price")
+            return
+
+        opt_contract, strike, expiry = self._select_option(
+            ticker, contract, direction, current_price
+        )
+        if opt_contract is None:
+            return
+
+        fill_price = self._place_order(ticker, opt_contract, direction, current_price)
+        right = "CALL" if direction == "long" else "PUT"
+
+        if fill_price is None:
+            telegram.send_alert(
+                f"*{ticker}* | {right} entry missed — unfilled after "
+                f"{ORDER_MAX_RETRIES * ORDER_RETRY_SECS}s",
+                channel="options",
+            )
+            return
+
+        # Subscribe live streaming for position tracking
+        ticker_obj   = self._ib.reqMktData(opt_contract, "", False, False)
+        expiry_label = "0DTE" if expiry == now.strftime("%Y%m%d") else "1DTE"
+
+        pos_state = {
+            "contract": opt_contract,
+            "contract_params": {
+                "symbol":                       opt_contract.symbol,
+                "lastTradeDateOrContractMonth": opt_contract.lastTradeDateOrContractMonth,
+                "strike":                       opt_contract.strike,
+                "right":                        opt_contract.right,
+                "exchange":                     opt_contract.exchange,
+                "currency":                     opt_contract.currency,
+                "multiplier":                   opt_contract.multiplier,
+            },
+            "ticker_obj":      ticker_obj,
+            "symbol":          opt_contract.localSymbol,
+            "direction":       direction,
+            "entry_price":     fill_price,
+            "high_water_mark": fill_price,
+            "trailing_active": False,
+            "fill_time":       now.isoformat(),
+            "contracts":       1,
+        }
+
+        with self._lock:
+            self._positions[ticker] = pos_state
+        self._save_positions()
+
+        telegram.send_alert(
+            f"*{ticker}* | {right} ATM | Strike: {strike:.0f} | {expiry_label} | "
+            f"Fill: ${fill_price:.2f} | "
+            f"Signal: {'ORB/MR Long' if direction == 'long' else 'ORB/MR Short'}",
+            channel="options",
+        )
 
     def _select_option(self, ticker: str, contract, direction: str, current_price: float):
-        raise NotImplementedError
+        """Returns (Option, strike, expiry_str) or (None, None, None)."""
+        try:
+            cds = self._ib.reqContractDetails(contract)
+            if not cds:
+                print(f"[executor] {ticker}: no contract details from IB")
+                return None, None, None
+            con = cds[0].contract
+
+            chains = self._ib.reqSecDefOptParams(
+                con.symbol, con.exchange, con.secType, con.conId
+            )
+            if not chains:
+                print(f"[executor] {ticker}: no option chain from IB")
+                return None, None, None
+            chain = chains[0]
+
+            now    = dt.datetime.now()
+            expiry = _select_expiry(list(chain.expirations), dt.date.today(), now.time())
+            if expiry is None:
+                print(f"[executor] {ticker}: no suitable expiry (need 0DTE or 1DTE)")
+                return None, None, None
+
+            strike = _find_atm_strike(list(chain.strikes), current_price)
+            right  = "C" if direction == "long" else "P"
+
+            opt = Option(
+                symbol=con.symbol,
+                lastTradeDateOrContractMonth=expiry,
+                strike=strike,
+                right=right,
+                exchange="SMART",
+                currency="USD",
+                multiplier="100",
+            )
+            self._ib.qualifyContracts(opt)
+            return opt, strike, expiry
+        except Exception as e:
+            print(f"[executor] _select_option error ({ticker}): {e}")
+            return None, None, None
 
     def _place_order(self, ticker: str, opt_contract, direction: str, current_price: float):
-        raise NotImplementedError
+        """
+        Place limit order at bid/ask midpoint. Widen by 1 cent per retry.
+        Returns fill price (float) or None if all retries exhausted.
+        """
+        for attempt in range(ORDER_MAX_RETRIES):
+            snap = self._ib.reqMktData(opt_contract, "", True, False)
+            self._ib.sleep(1.0)
+            bid = snap.bid
+            ask = snap.ask
+            self._ib.cancelMktData(opt_contract)
+
+            if not bid or not ask or bid <= 0 or ask <= 0:
+                print(f"[executor] {ticker}: no bid/ask on attempt {attempt + 1}")
+                time.sleep(ORDER_RETRY_SECS)
+                continue
+
+            limit_price = round((bid + ask) / 2 + attempt * 0.01, 2)
+            order = LimitOrder("BUY", 1, limit_price)
+            trade = self._ib.placeOrder(opt_contract, order)
+            print(f"[executor] {ticker}: limit order ${limit_price:.2f} (attempt {attempt + 1})")
+
+            deadline = time.time() + ORDER_RETRY_SECS
+            while time.time() < deadline:
+                self._ib.sleep(1)
+                if trade.orderStatus.status == "Filled":
+                    fill = trade.orderStatus.avgFillPrice
+                    print(f"[executor] {ticker}: filled at ${fill:.2f}")
+                    return fill
+
+            self._ib.cancelOrder(order)
+            print(f"[executor] {ticker}: unfilled on attempt {attempt + 1}, retrying")
+
+        return None
 
     def _tracking_loop(self):
         raise NotImplementedError
