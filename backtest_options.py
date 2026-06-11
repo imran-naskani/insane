@@ -52,7 +52,8 @@ log = logging.getLogger(__name__)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 TICKERS        = ["SPY", "TSLA"]
 TIMEFRAME      = "5m"
-LOOKBACK_DAYS  = 14   # IB purges 0DTE contracts within days; run daily to accumulate
+SIGNAL_DAYS    = 31   # match live engine history so TOS_Trail warmup is identical
+OPTION_DAYS    = 2    # IB retains expired 0DTE contracts for ~1 trading day
 
 # Mirror options_executor.py constants exactly
 STOP_LOSS_PCT  = 0.50    # exit if premium drops to 50% of entry
@@ -99,9 +100,9 @@ def generate_signals(ticker: str) -> list:
     Returns list of signal dicts with bar_time, direction, signal_type, underlying_price.
     """
     end_date   = dt.date.today()
-    start_date = end_date - dt.timedelta(days=LOOKBACK_DAYS)   # 55 days within yfinance 60-day 5m limit
+    start_date = end_date - dt.timedelta(days=SIGNAL_DAYS)   # 31 days matches live engine TOS_Trail warmup
 
-    log.info(f"[{ticker}] fetching {LOOKBACK_DAYS}-day 5m data from yfinance...")
+    log.info(f"[{ticker}] fetching {SIGNAL_DAYS}-day 5m data from yfinance...")
     df = build_feature_dataset(
         ticker,
         start_date=start_date.strftime("%Y-%m-%d"),
@@ -126,8 +127,11 @@ def generate_signals(ticker: str) -> list:
     use_sliding = ORB_USE_SLIDING.get(ticker, ORB_USE_SLIDING_DEFAULT)
     _accum      = accum_start if accum_start is not None else ORB_ACCUM_START_DEFAULT
 
-    cutoff      = pd.Timestamp(end_date - dt.timedelta(days=LOOKBACK_DAYS)).tz_localize("US/Central")
-    trading_days = sorted(set(df[df.index >= cutoff].index.date))
+    # Signal generation: full SIGNAL_DAYS for correct TOS_Trail warmup
+    # Option lookup: only last OPTION_DAYS (IB purges expired contracts fast)
+    signal_cutoff = pd.Timestamp(end_date - dt.timedelta(days=SIGNAL_DAYS)).tz_localize("US/Central")
+    option_cutoff = end_date - dt.timedelta(days=OPTION_DAYS)
+    trading_days  = sorted(set(df[df.index >= signal_cutoff].index.date))
 
     signals = []
 
@@ -434,8 +438,14 @@ def run_backtest(ticker: str, ib: IB) -> list:
     for s in all_signals:
         by_date.setdefault(s["date"], []).append(s)
 
+    option_cutoff = dt.date.today() - dt.timedelta(days=OPTION_DAYS)
+
     for sig in all_signals:
         bar_time = pd.Timestamp(sig["bar_time"])
+
+        # Only fetch option data for signals within IB's retention window
+        if dt.date.fromisoformat(sig["date"]) < option_cutoff:
+            continue
 
         if bar_time.time() >= ENTRY_CUTOFF:
             continue

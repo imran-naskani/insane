@@ -3,16 +3,15 @@
   "generated_at": "2026-06-11T17:15:03.591365",
   "lookback_days": 14,
   "summary": {
-    "total_trades": 3,
-    "win_rate": 33.3,
-    "avg_pnl_pct": -13.19,
-    "total_pnl_pct": -39.58,
+    "total_trades": 2,
+    "win_rate": 50.0,
+    "avg_pnl_pct": 5.56,
+    "total_pnl_pct": 11.12,
     "best_trade": 41.34,
-    "worst_trade": -50.7,
+    "worst_trade": -30.22,
     "exit_reasons": {
       "Signal Reversal": 1,
-      "Trailing Stop": 1,
-      "Stop Loss (50%)": 1
+      "Trailing Stop": 1
     }
   },
   "trades": [
@@ -49,23 +48,6 @@
       "exit_reason": "Trailing Stop",
       "entry_time": "2026-06-10T09:50:00-05:00",
       "exit_time": "2026-06-10T10:40:00-05:00"
-    },
-    {
-      "ticker": "SPY",
-      "date": "2026-06-10",
-      "signal_type": "MR_LONG",
-      "strike": 732.0,
-      "expiry": "20260610",
-      "right": "C",
-      "direction": "long",
-      "entry_price": 1.42,
-      "exit_price": 0.7,
-      "high_water_mark": 1.42,
-      "pnl_pct": -50.7,
-      "hold_minutes": 15,
-      "exit_reason": "Stop Loss (50%)",
-      "entry_time": "2026-06-10T13:00:00-05:00",
-      "exit_time": "2026-06-10T13:15:00-05:00"
     }
   ]
 }
