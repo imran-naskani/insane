@@ -2012,11 +2012,21 @@
     {
         "date": "2026-06-11",
         "signal": "UP",
-        "strength": "Weak",
+        "strength": "Strong",
         "turn_up": true,
         "turn_down": false,
         "close": 1.9800000190734863,
         "smooth": 1.8697599235229818,
         "slope": 0.06154236780298561
+    },
+    {
+        "date": "2026-06-12",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 1.840000033378601,
+        "smooth": 1.8590982176114004,
+        "slope": -0.010661705911581443
     }
 ]
