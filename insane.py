@@ -2100,7 +2100,85 @@ if st.session_state.run_model:
                     st.info("No trades to summarize.")
 
             # ------------------------------------------------------------
-            # 8) AI CHART ANALYSIS (DAILY ONLY, ≤ 1 YEAR)
+            # 8) OPTIONS BACKTEST (expander — reads fresh from disk every render)
+            # ------------------------------------------------------------
+            _opt_bt_file = f"option_backtest_{ticker}.json"
+            _opt_available = os.path.exists(_opt_bt_file)
+            _exp_label = (
+                f"🎯 Options Backtest — {ticker}"
+                if _opt_available
+                else f"🎯 Options Backtest — {ticker}  (no data: run backtest_options.py)"
+            )
+            with st.expander(_exp_label, expanded=_opt_available):
+                if not _opt_available:
+                    st.info("Run `python backtest_options.py` in the INSANE folder to generate results.")
+                else:
+                    import json as _json
+                    with open(_opt_bt_file) as _f:
+                        _opt_bt = _json.load(_f)
+                    _opt_trades  = _opt_bt.get("trades", [])
+                    _opt_summary = _opt_bt.get("summary", {})
+                    _gen_at      = (_opt_bt.get("generated_at") or "")[:16].replace("T", " ")
+                    st.caption(f"Generated {_gen_at}  ·  {_opt_bt.get('lookback_days', '?')}d window  ·  ORB: no stop loss  ·  MR: 50% stop loss")
+
+                    if _opt_summary:
+                        _sc1, _sc2, _sc3, _sc4, _sc5, _sc6 = st.columns(6)
+                        _sc1.metric("Trades",      _opt_summary.get("total_trades", 0))
+                        _sc2.metric("Win Rate",    f"{_opt_summary.get('win_rate', 0):.1f}%")
+                        _sc3.metric("Avg PnL %",   f"{_opt_summary.get('avg_pnl_pct', 0):+.1f}%")
+                        _sc4.metric("Total PnL $", f"${_opt_summary.get('total_pnl_dollar', 0):+,.0f}")
+                        _sc5.metric("Best",        f"{_opt_summary.get('best_trade', 0):+.1f}%")
+                        _sc6.metric("Worst",       f"{_opt_summary.get('worst_trade', 0):+.1f}%")
+
+                    if _opt_trades:
+                        _opt_df = pd.DataFrame([{
+                            "Date":        t["date"],
+                            "Type":        t.get("trade_type", t["signal_type"]),
+                            "Dir":         t["direction"].upper(),
+                            "Strike":      t["strike"],
+                            "Right":       t["right"],
+                            "Entry Time":  t["entry_time"][11:16],
+                            "Exit Time":   t["exit_time"][11:16],
+                            "Entry $":     t["entry_price"],
+                            "Exit $":      t["exit_price"],
+                            "PnL %":       t["pnl_pct"],
+                            "PnL $":       t["pnl_dollar"],
+                            "Hold (min)":  t["hold_minutes"],
+                            "Exit Reason": t["exit_reason"],
+                        } for t in _opt_trades])
+
+                        def _color_pnl(val):
+                            return "color: #00c853" if val > 0 else ("color: #ff1744" if val < 0 else "")
+
+                        st.dataframe(
+                            _opt_df.style.map(_color_pnl, subset=["PnL %", "PnL $"]),
+                            height=350, use_container_width=True,
+                        )
+
+                        _running, _eq_points = 0.0, []
+                        for t in _opt_trades:
+                            _running += t["pnl_dollar"]
+                            _eq_points.append({"date": t["exit_time"][:10], "pnl": round(_running, 2)})
+                        _eq_df = pd.DataFrame(_eq_points)
+                        _fig_opt = go.Figure()
+                        _fig_opt.add_trace(go.Scatter(
+                            x=_eq_df["date"], y=_eq_df["pnl"],
+                            mode="lines", name="Cumulative PnL",
+                            line=dict(color="#ff9800", width=2),
+                            fill="tozeroy", fillcolor="rgba(255,152,0,0.08)",
+                        ))
+                        _fig_opt.add_hline(y=0, line_color="gray", line_dash="dash", line_width=1)
+                        _fig_opt.update_layout(
+                            height=260,
+                            xaxis=dict(title="Date", type="date"),
+                            yaxis=dict(title="Cumulative PnL $ (1 contract/trade)"),
+                            template="plotly_white",
+                            margin=dict(t=10, b=40),
+                        )
+                        st.plotly_chart(_fig_opt, use_container_width=True)
+
+            # ------------------------------------------------------------
+            # 9) AI CHART ANALYSIS (DAILY ONLY, ≤ 1 YEAR)
             # ------------------------------------------------------------
             st.markdown("---")
 

@@ -201,3 +201,7 @@
 2026-06-11 12:00:11 [INFO] Combined alert sent
 2026-06-11 12:35:11 [INFO] Combined alert sent
 2026-06-11 13:40:10 [INFO] Combined alert sent
+2026-06-11 14:35:11 [INFO] Combined alert sent
+2026-06-11 15:30:23 [ERROR] 
+1 Failed download:
+2026-06-11 15:30:23 [ERROR] ['^VIX']: SSLError('Failed to perform, curl: (35) Recv failure: Connection was reset. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
