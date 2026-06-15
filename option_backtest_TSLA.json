@@ -1,14 +1,14 @@
 {
   "ticker": "TSLA",
-  "generated_at": "2026-06-11T20:05:30.068673",
-  "lookback_days": 57,
+  "generated_at": "2026-06-14T17:12:08.017887",
+  "lookback_days": 59,
   "summary": {
     "total_trades": 19,
     "win_rate": 63.2,
-    "avg_pnl_pct": 111.88,
-    "total_pnl_pct": 2125.71,
-    "avg_pnl_dollar": 325.79,
-    "total_pnl_dollar": 6190.0,
+    "avg_pnl_pct": 88.6,
+    "total_pnl_pct": 1683.44,
+    "avg_pnl_dollar": 262.05,
+    "total_pnl_dollar": 4979.0,
     "best_trade": 767.18,
     "worst_trade": -99.56,
     "exit_reasons": {
@@ -19,25 +19,6 @@
     }
   },
   "trades": [
-    {
-      "ticker": "TSLA",
-      "date": "2026-04-15",
-      "signal_type": "ORB_LONG",
-      "trade_type": "ORB",
-      "strike": 370.0,
-      "expiry": "20260415",
-      "right": "C",
-      "direction": "long",
-      "entry_price": 2.9,
-      "exit_price": 17.5,
-      "high_water_mark": 23.9,
-      "pnl_pct": 503.45,
-      "pnl_dollar": 1460.0,
-      "hold_minutes": 180,
-      "exit_reason": "Trailing Stop",
-      "entry_time": "2026-04-15T08:55:00-05:00",
-      "exit_time": "2026-04-15T11:55:00-05:00"
-    },
     {
       "ticker": "TSLA",
       "date": "2026-04-17",
@@ -379,6 +360,25 @@
       "exit_reason": "Trailing Stop",
       "entry_time": "2026-06-10T09:05:00-05:00",
       "exit_time": "2026-06-10T10:45:00-05:00"
+    },
+    {
+      "ticker": "TSLA",
+      "date": "2026-06-12",
+      "signal_type": "MR_LONG",
+      "trade_type": "MR_UPGRADED_ORB",
+      "strike": 395.0,
+      "expiry": "20260612",
+      "right": "C",
+      "direction": "long",
+      "entry_price": 4.07,
+      "exit_price": 6.56,
+      "high_water_mark": 9.74,
+      "pnl_pct": 61.18,
+      "pnl_dollar": 249.0,
+      "hold_minutes": 30,
+      "exit_reason": "Trailing Stop",
+      "entry_time": "2026-06-12T11:45:00-05:00",
+      "exit_time": "2026-06-12T12:15:00-05:00"
     }
   ]
 }

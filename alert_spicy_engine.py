@@ -42,7 +42,7 @@ start_date = end_date - dt.timedelta(days=31)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 # OLD: TICKERS = ["^GSPC", "TSLA", "AAPL"]
 # ^GSPC swapped for SPY: real volume needed for correct ATR; validated in SIGNAL_LOGIC.md backtest
-TICKERS   = ["TSLA", "SPY", "^GSPC", "QQQ", "TQQQ"]
+TICKERS   = ["TSLA", "SPY", "^GSPC"]
 TIMEFRAME = "5m"
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────

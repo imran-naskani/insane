@@ -52,7 +52,7 @@ log = logging.getLogger(__name__)
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 TICKERS      = ["SPY", "TSLA"]
 TIMEFRAME    = "5m"
-SIGNAL_DAYS  = 57       # within yfinance 60-day 5m limit; 31+ days for TOS_Trail warmup
+SIGNAL_DAYS  = 59       # within yfinance 60-day 5m limit; 31+ days for TOS_Trail warmup
 
 POLYGON_API_KEY = os.getenv("MASSIVE_API_KEY", os.getenv("POLYGON_API_KEY", "")).strip()
 CACHE_DIR       = "polygon_cache"

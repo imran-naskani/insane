@@ -1376,7 +1376,7 @@ if st.session_state.run_model:
                             "Slope_Pos", "Slope_Neg", "Turn_Up", "Turn_Down"] #"Slope",
 
             if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
-                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower', 'VIX']
+                indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Intra_3', 'SMA_Intra_8', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VWAP_Upper', 'VWAP', 'VWAP_Lower', 'VIX']
             else:
                 indicator_cols = ['BB_Upper', 'BB_Lower', 'FRAMA', 'SMA_Short', 'SMA_Medium', 'SMA_Long', 'VIX']
             print(indicator_cols)
@@ -1387,22 +1387,26 @@ if st.session_state.run_model:
                 default=[]
             )
 
+            # For daily charts convert index to strings so Plotly treats
+            # each bar as a category — this eliminates all weekend/holiday gaps
+            _original_index = df.index.copy()
+            if timeframe == "1d":
+                df.index = df.index.strftime("%Y-%m-%d")
+
             fig = make_subplots(
-                rows=4,
+                rows=3,
                 cols=1,
                 shared_xaxes=True,
                 vertical_spacing=0.03,
-                row_heights=[0.52, 0.15, 0.15, 0.18],
+                row_heights=[0.55, 0.22, 0.23],
                 specs=[
-                    [{"secondary_y": True}],   # Row 1 → Candles + VIX
-                    [{"secondary_y": False}],  # Row 2 → Volume
+                    [{"secondary_y": True}],   # Row 1 → Candles + Volume (secondary) + VIX
+                    [{"secondary_y": True}],   # Row 2 → OLS Slope (left) + R² (right)
                     [{"secondary_y": False}],  # Row 3 → RSI
-                    [{"secondary_y": True}],   # Row 4 → OLS Slope (left) + R² (right)
                 ],
             )
 
             fig.update_yaxes(
-                title_text="VIX",
                 fixedrange=True,
                 secondary_y=True,
                 showgrid=False,
@@ -1503,7 +1507,7 @@ if st.session_state.run_model:
             )
 
             # -------------------------------
-            # Row 4 — OLS Slope (left axis) + R² (right axis)
+            # Row 2 — OLS Slope (left axis) + R² (right axis)
             # lr_slope: $/bar oscillating around 0 — left axis
             # lr_r2:    [0,1] trend quality      — right axis (fixed 0-1 range)
             # -------------------------------
@@ -1518,7 +1522,7 @@ if st.session_state.run_model:
                         line=dict(width=1.5, color="aqua"),
                         opacity=0.85
                     ),
-                    row=4, col=1, secondary_y=False
+                    row=2, col=1, secondary_y=False
                 )
                 # Zero reference line for slope (left axis)
                 fig.add_trace(
@@ -1529,7 +1533,7 @@ if st.session_state.run_model:
                         line=dict(width=0.6, dash="dot", color="rgba(255,255,255,0.25)"),
                         showlegend=False
                     ),
-                    row=4, col=1, secondary_y=False
+                    row=2, col=1, secondary_y=False
                 )
                 # R² — right axis
                 fig.add_trace(
@@ -1541,7 +1545,7 @@ if st.session_state.run_model:
                         line=dict(width=1.5, color="gold", dash="dot"),
                         opacity=0.80
                     ),
-                    row=4, col=1, secondary_y=True
+                    row=2, col=1, secondary_y=True
                 )
                 # R² = 0.5 gate threshold (right axis)
                 fig.add_trace(
@@ -1552,14 +1556,14 @@ if st.session_state.run_model:
                         line=dict(width=0.6, dash="dash", color="rgba(255,215,0,0.35)"),
                         showlegend=False
                     ),
-                    row=4, col=1, secondary_y=True
+                    row=2, col=1, secondary_y=True
                 )
                 fig.update_yaxes(
                     title_text="Slope ($/bar)",
                     showgrid=False,
                     zeroline=True,
                     zerolinecolor="rgba(255,255,255,0.15)",
-                    row=4, col=1, secondary_y=False
+                    row=2, col=1, secondary_y=False
                 )
                 fig.update_yaxes(
                     title_text="R²",
@@ -1567,7 +1571,7 @@ if st.session_state.run_model:
                     showgrid=False,
                     zeroline=False,
                     tickvals=[0, 0.25, 0.5, 0.75, 1.0],
-                    row=4, col=1, secondary_y=True
+                    row=2, col=1, secondary_y=True
                 )
 
             # -------------------------------
@@ -1711,18 +1715,27 @@ if st.session_state.run_model:
                     )   
 
             # -------------------------------
-            # 4) VOLUME BARS
+            # 4) VOLUME BARS — secondary y-axis of row 1 (shared with price)
             # -------------------------------
             fig.add_trace(
                 go.Bar(
                     x=df.index,
                     y=df["Volume"],
                     name="Volume",
+                    opacity=0.35,
                     marker=dict(
-                        color=["green" if df["Close"][i] >= df["Open"][i] else "red" for i in df.index]
+                        color=["rgba(0,200,0,0.5)" if df["Close"][i] >= df["Open"][i]
+                               else "rgba(220,0,0,0.5)" for i in df.index]
                     )
                 ),
-                row=2, col=1
+                row=1, col=1, secondary_y=True
+            )
+            fig.update_yaxes(
+                title_text="Volume",
+                showgrid=False,
+                zeroline=False,
+                secondary_y=True,
+                row=1, col=1
             )
 
             # -------------------------------
@@ -1764,6 +1777,7 @@ if st.session_state.run_model:
                 margin=dict(t=120)  # give space above
             )
 
+
             if timeframe in ["1m", "5m", "15m", "30m", "1h", "4h"]:
                 # 🚀 ADD RANGE BREAKS HERE (right after layout)
                 if ticker in ["^GSPC", "^IXIC", "^RUT", "^VIX", "^DJI"]:
@@ -1784,28 +1798,28 @@ if st.session_state.run_model:
                         ]
                     )
 
-                # (Optional) set on the second row as well:
-                fig.update_xaxes(
-                    rangebreaks=[
-                        dict(bounds=["sat", "mon"]),
-                        dict(bounds=[19, 24], pattern="hour"),
-                        dict(bounds=[0, 3], pattern="hour")
-                    ],
+                # Set rangebreaks on rows 2 and 3 as well
+                for _rb_row in [2, 3]:
+                    fig.update_xaxes(
+                        rangebreaks=[
+                            dict(bounds=["sat", "mon"]),
+                            dict(bounds=[19, 24], pattern="hour"),
+                            dict(bounds=[0, 3], pattern="hour")
+                        ],
+                        row=_rb_row, col=1
+                    )
+
+                # Count x-axes in the figure
+                xaxes = [ax for ax in fig.layout if ax.startswith("xaxis")]
+                fig.update_traces(
+                    hoverinfo="text",
+                    hovertemplate="%{y:.4f}",
                     row=2, col=1
                 )
-
-        
-                # Count x-axes in the figure (price, volume, RSI = usually 3)
-                xaxes = [ax for ax in fig.layout if ax.startswith("xaxis")]
                 fig.update_traces(
                     hoverinfo="text",
                     hovertemplate="%{y:.2f}",
                     row=3, col=1
-                )
-                fig.update_traces(
-                    hoverinfo="text",
-                    hovertemplate="%{y:.4f}",
-                    row=4, col=1
                 )
 
                 for ax in xaxes:
@@ -1968,6 +1982,9 @@ if st.session_state.run_model:
                         )
 
             st.plotly_chart(fig, use_container_width=True)
+
+            # Restore original datetime index after chart (string index breaks downstream code)
+            df.index = _original_index
 
             # ------------------------------------------------------------
             # BACKTEST TABLES SIDE BY SIDE

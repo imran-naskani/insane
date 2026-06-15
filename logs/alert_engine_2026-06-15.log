@@ -1,0 +1,65 @@
+2026-06-15 08:28:02 [INFO] Connecting to 127.0.0.1:4002 with clientId 111...
+2026-06-15 08:28:02 [INFO] Connected
+2026-06-15 08:28:02 [INFO] Logged on to server version 176
+2026-06-15 08:28:02 [INFO] API connection ready
+2026-06-15 08:28:02 [INFO] Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-06-15 08:28:02 [INFO] Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2026-06-15 08:28:02 [INFO] Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefil
+2026-06-15 08:28:02 [INFO] Synchronization complete
+2026-06-15 08:28:02 [INFO] [executor] Connected to IB TWS/Gateway
+2026-06-15 08:28:02 [INFO] INSANE Alert Engine started (5m) -- MR + ORB-Slope strategy
+2026-06-15 08:30:03 [INFO] TSLA: 0 session bars — waiting for ORB warmup
+2026-06-15 08:30:05 [INFO] SPY: 0 session bars — waiting for ORB warmup
+2026-06-15 08:30:06 [INFO] ^GSPC: 0 session bars — waiting for ORB warmup
+2026-06-15 08:35:03 [INFO] TSLA: 1 session bars — waiting for ORB warmup
+2026-06-15 08:35:05 [INFO] SPY: 1 session bars — waiting for ORB warmup
+2026-06-15 08:35:06 [INFO] ^GSPC: 1 session bars — waiting for ORB warmup
+2026-06-15 08:40:03 [INFO] TSLA: 2 session bars — waiting for ORB warmup
+2026-06-15 08:40:04 [INFO] SPY: 2 session bars — waiting for ORB warmup
+2026-06-15 08:40:06 [INFO] ^GSPC: 2 session bars — waiting for ORB warmup
+2026-06-15 08:45:03 [INFO] TSLA: 3 session bars — waiting for ORB warmup
+2026-06-15 08:45:04 [INFO] SPY: 3 session bars — waiting for ORB warmup
+2026-06-15 08:45:05 [INFO] ^GSPC: 3 session bars — waiting for ORB warmup
+2026-06-15 08:50:03 [INFO] TSLA: 4 session bars — waiting for ORB warmup
+2026-06-15 08:50:04 [INFO] SPY: 4 session bars — waiting for ORB warmup
+2026-06-15 08:50:05 [INFO] ^GSPC: 4 session bars — waiting for ORB warmup
+2026-06-15 08:55:07 [INFO] Combined alert sent
+2026-06-15 09:50:05 [INFO] Warning 2103, reqId -1: Market data farm connection is broken:usfarm
+2026-06-15 09:50:05 [INFO] Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-06-15 09:50:05 [INFO] Warning 2103, reqId -1: Market data farm connection is broken:usfarm
+2026-06-15 09:50:05 [INFO] Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-06-15 09:50:05 [INFO] [executor] SPY: underlying price $753.68
+2026-06-15 09:50:06 [INFO] [executor] SPY: using chain exchange=SMART, 35 expirations, 519 strikes
+2026-06-15 09:50:06 [INFO] Warning 2104, reqId -1: Market data farm connection is OK:usopt
+2026-06-15 09:50:07 [INFO] placeOrder: New order Trade(contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', exchange='SMART', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), order=LimitOrder(orderId=9, clientId=111, action='BUY', totalQuantity=1, lmtPrice=1.35, tif='DAY'), orderStatus=OrderStatus(orderId=9, status='PendingSubmit', filled=0.0, remaining=0.0, avgFillPrice=0.0, permId=0, parentId=0, lastFillPrice=0.0, clientId=0, whyHeld='', mktCapPrice=0.0), fills=[], log=[TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 7, 157055, tzinfo=datetime.timezone.utc), status='PendingSubmit', message='', errorCode=0)], advancedError='')
+2026-06-15 09:50:07 [INFO] [executor] SPY: limit@mid $1.35  bid=$1.35 ask=$1.36  (attempt 1)
+2026-06-15 09:50:08 [INFO] orderStatus: Trade(contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', exchange='SMART', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), order=LimitOrder(orderId=9, clientId=111, permId=198176481, action='BUY', totalQuantity=1.0, lmtPrice=1.35, auxPrice=0.0, tif='DAY'), orderStatus=OrderStatus(orderId=9, status='Submitted', filled=0.0, remaining=1.0, avgFillPrice=0.0, permId=198176481, parentId=0, lastFillPrice=0.0, clientId=111, whyHeld='', mktCapPrice=0.0), fills=[], log=[TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 7, 157055, tzinfo=datetime.timezone.utc), status='PendingSubmit', message='', errorCode=0), TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 8, 333310, tzinfo=datetime.timezone.utc), status='Submitted', message='', errorCode=0)], advancedError='')
+2026-06-15 09:50:09 [INFO] position: Position(account='DUO335202', contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), position=1.0, avgCost=135.0)
+2026-06-15 09:50:09 [INFO] execDetails Execution(execId='00020057.6a2fc465.01.01', time=datetime.datetime(2026, 6, 15, 19, 50, 9, tzinfo=datetime.timezone.utc), acctNumber='DUO335202', exchange='EDGX', side='BOT', shares=1.0, price=1.35, permId=198176481, clientId=111, orderId=9, liquidation=0, cumQty=1.0, avgPrice=1.35, orderRef='', evRule='', evMultiplier=0.0, modelCode='', lastLiquidity=1)
+2026-06-15 09:50:09 [INFO] execDetails: Fill(contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', exchange='SMART', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), execution=Execution(execId='00020057.6a2fc465.01.01', time=datetime.datetime(2026, 6, 15, 19, 50, 9, tzinfo=datetime.timezone.utc), acctNumber='DUO335202', exchange='EDGX', side='BOT', shares=1.0, price=1.35, permId=198176481, clientId=111, orderId=9, liquidation=0, cumQty=1.0, avgPrice=1.35, orderRef='', evRule='', evMultiplier=0.0, modelCode='', lastLiquidity=1), commissionReport=CommissionReport(execId='', commission=0.0, currency='', realizedPNL=0.0, yield_=0.0, yieldRedemptionDate=0), time=datetime.datetime(2026, 6, 15, 14, 50, 9, 116518, tzinfo=datetime.timezone.utc))
+2026-06-15 09:50:09 [INFO] orderStatus: Trade(contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', exchange='SMART', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), order=LimitOrder(orderId=9, clientId=111, permId=198176481, action='BUY', totalQuantity=1.0, lmtPrice=1.35, auxPrice=0.0, tif='DAY'), orderStatus=OrderStatus(orderId=9, status='Filled', filled=1.0, remaining=0.0, avgFillPrice=1.35, permId=198176481, parentId=0, lastFillPrice=1.35, clientId=111, whyHeld='', mktCapPrice=0.0), fills=[Fill(contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', exchange='SMART', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), execution=Execution(execId='00020057.6a2fc465.01.01', time=datetime.datetime(2026, 6, 15, 19, 50, 9, tzinfo=datetime.timezone.utc), acctNumber='DUO335202', exchange='EDGX', side='BOT', shares=1.0, price=1.35, permId=198176481, clientId=111, orderId=9, liquidation=0, cumQty=1.0, avgPrice=1.35, orderRef='', evRule='', evMultiplier=0.0, modelCode='', lastLiquidity=1), commissionReport=CommissionReport(execId='', commission=0.0, currency='', realizedPNL=0.0, yield_=0.0, yieldRedemptionDate=0), time=datetime.datetime(2026, 6, 15, 14, 50, 9, 116518, tzinfo=datetime.timezone.utc))], log=[TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 7, 157055, tzinfo=datetime.timezone.utc), status='PendingSubmit', message='', errorCode=0), TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 8, 333310, tzinfo=datetime.timezone.utc), status='Submitted', message='', errorCode=0), TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 9, 116518, tzinfo=datetime.timezone.utc), status='Submitted', message='Fill 1.0@1.35', errorCode=0), TradeLogEntry(time=datetime.datetime(2026, 6, 15, 14, 50, 9, 118516, tzinfo=datetime.timezone.utc), status='Filled', message='', errorCode=0)], advancedError='')
+2026-06-15 09:50:09 [INFO] commissionReport: CommissionReport(execId='00020057.6a2fc465.01.01', commission=1.03825, currency='USD', realizedPNL=0.0, yield_=0.0, yieldRedemptionDate=0)
+2026-06-15 09:50:09 [INFO] position: Position(account='DUO335202', contract=Option(conId=888189327, symbol='SPY', lastTradeDateOrContractMonth='20260615', strike=754.0, right='P', multiplier='100', currency='USD', localSymbol='SPY   260615P00754000', tradingClass='SPY'), position=1.0, avgCost=136.03825)
+2026-06-15 09:50:09 [INFO] [executor] SPY: filled at $1.35
+2026-06-15 09:50:11 [INFO] Combined alert sent
+2026-06-15 13:05:06 [INFO] Combined alert sent
+2026-06-15 14:35:06 [INFO] Combined alert sent
+2026-06-15 14:55:04 [ERROR] [executor] exit order error (SPY): There is no current event loop in thread 'Thread-1 (_tracking_loop)'.
+Traceback (most recent call last):
+  File "C:\Users\m_imr\Downloads\INSANE\options_executor.py", line 464, in _exit_position
+    self._ib.cancelMktData(pos["contract"])
+  File "C:\Users\m_imr\anaconda3\Lib\site-packages\ib_insync\ib.py", line 1252, in cancelMktData
+    self.client.cancelMktData(reqId)
+  File "C:\Users\m_imr\anaconda3\Lib\site-packages\ib_insync\client.py", line 408, in cancelMktData
+    self.send(2, 2, reqId)
+  File "C:\Users\m_imr\anaconda3\Lib\site-packages\ib_insync\client.py", line 269, in send
+    self.sendMsg(msg.getvalue())
+  File "C:\Users\m_imr\anaconda3\Lib\site-packages\ib_insync\client.py", line 272, in sendMsg
+    loop = getLoop()
+           ^^^^^^^^^
+  File "C:\Users\m_imr\anaconda3\Lib\site-packages\ib_insync\util.py", line 464, in getLoop
+    return asyncio.get_event_loop_policy().get_event_loop()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\m_imr\anaconda3\Lib\asyncio\events.py", line 677, in get_event_loop
+    raise RuntimeError('There is no current event loop in thread %r.'
+RuntimeError: There is no current event loop in thread 'Thread-1 (_tracking_loop)'.

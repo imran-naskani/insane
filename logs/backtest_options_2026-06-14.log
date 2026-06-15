@@ -1,0 +1,1110 @@
+2026-06-14 17:08:54,533 [INFO] 
+============================================================
+  Options backtest: SPY
+============================================================
+2026-06-14 17:08:54,534 [INFO] [SPY] fetching 60-day 5m data from yfinance...
+2026-06-14 17:08:55,992 [ERROR] 
+1 Failed download:
+2026-06-14 17:08:55,992 [ERROR] ['SPY']: YFPricesMissingError('possibly delisted; no price data found  (5m 2026-04-15 -> 2026-06-15) (Yahoo error = "5m data not available for startTime=1776225600 and endTime=1781474935. The requested range must be within the last 60 days.")')
+2026-06-14 17:09:41,948 [INFO] 
+============================================================
+  Options backtest: SPY
+============================================================
+2026-06-14 17:09:41,948 [INFO] [SPY] fetching 59-day 5m data from yfinance...
+2026-06-14 17:09:53,383 [INFO] [SPY] 62 signals across 41 trading days
+2026-06-14 17:09:53,384 [INFO] [SPY] ORB_SHORT @ 2026-04-16 08:50 | P 699.0 exp 20260416
+2026-06-14 17:09:53,392 [INFO]   [ORB] PnL: -97.0%  $-163.00 | exit: EOD  hold: 360m
+2026-06-14 17:09:53,393 [INFO] [SPY] ORB_LONG @ 2026-04-17 09:00 | C 709.0 exp 20260417
+2026-06-14 17:09:53,399 [INFO]   [ORB] PnL: +53.3%  $+72.00 | exit: Trailing Stop  hold: 75m
+2026-06-14 17:09:53,399 [INFO] [SPY] MR_SHORT @ 2026-04-17 12:15 | P 711.0 exp 20260417
+2026-06-14 17:09:53,407 [INFO]   [MR_UPGRADED_ORB] PnL: +20.8%  $+21.00 | exit: Trailing Stop  hold: 30m
+2026-06-14 17:09:53,408 [INFO] [SPY] MR_SHORT @ 2026-04-20 09:35 | P 708.0 exp 20260420
+2026-06-14 17:09:53,414 [INFO]   [MR_UPGRADED_ORB] PnL: +35.5%  $+38.00 | exit: Trailing Stop  hold: 45m
+2026-06-14 17:09:53,414 [INFO] [SPY] MR_LONG @ 2026-04-20 10:50 | C 707.0 exp 20260420
+2026-06-14 17:09:53,429 [INFO]   [MR_UPGRADED_ORB] PnL: +25.2%  $+36.00 | exit: EOD  hold: 240m
+2026-06-14 17:09:53,431 [INFO] [SPY] ORB_LONG @ 2026-04-21 08:50 | C 711.0 exp 20260421
+2026-06-14 17:09:53,438 [INFO]   [ORB] PnL: -99.2%  $-118.00 | exit: EOD  hold: 360m
+2026-06-14 17:09:53,439 [INFO] [SPY] MR_SHORT @ 2026-04-22 10:05 | P 710.0 exp 20260422
+2026-06-14 17:09:53,449 [INFO]   [MR_ONLY] PnL: -51.9%  $-68.00 | exit: Stop Loss (50%)  hold: 215m
+2026-06-14 17:09:53,451 [INFO] [SPY] ORB_LONG @ 2026-04-23 08:50 | C 711.0 exp 20260423
+2026-06-14 17:09:53,456 [INFO]   [ORB] PnL: +0.0%  $+0.00 | exit: Trailing Stop  hold: 115m
+2026-06-14 17:09:53,457 [INFO] [SPY] MR_SHORT @ 2026-04-23 12:00 | P 709.0 exp 20260423
+2026-06-14 17:09:53,466 [INFO]   [MR_UPGRADED_ORB] PnL: +123.2%  $+133.00 | exit: Trailing Stop  hold: 30m
+2026-06-14 17:09:53,466 [INFO] [SPY] MR_LONG @ 2026-04-23 13:15 | C 708.0 exp 20260423
+2026-06-14 17:09:53,473 [INFO]   [MR_ONLY] PnL: -55.6%  $-70.00 | exit: Stop Loss (50%)  hold: 80m
+2026-06-14 17:09:53,474 [INFO] [SPY] MR_SHORT @ 2026-04-24 11:45 | P 713.0 exp 20260424
+2026-06-14 17:09:53,483 [INFO]   [MR_ONLY] PnL: -50.6%  $-45.00 | exit: Stop Loss (50%)  hold: 110m
+2026-06-14 17:09:53,484 [INFO] [SPY] MR_LONG @ 2026-04-27 11:00 | C 713.0 exp 20260427
+2026-06-14 17:09:53,494 [INFO]   [MR_UPGRADED_ORB] PnL: +92.2%  $+106.00 | exit: EOD  hold: 230m
+2026-06-14 17:09:53,495 [INFO] [SPY] ORB_LONG @ 2026-04-29 09:30 | C 712.0 exp 20260429
+2026-06-14 17:09:53,501 [INFO]   [ORB] PnL: -29.9%  $-64.00 | exit: EOD  hold: 320m
+2026-06-14 17:09:53,502 [INFO] [SPY] MR_LONG @ 2026-04-30 09:45 | C 713.0 exp 20260430
+2026-06-14 17:09:53,509 [INFO]   [MR_UPGRADED_ORB] PnL: +34.9%  $+53.00 | exit: Trailing Stop  hold: 125m
+2026-06-14 17:09:53,509 [INFO]   SKIP ORB_LONG LONG — already long open until 11:55
+2026-06-14 17:09:53,510 [INFO] [SPY] ORB_LONG @ 2026-05-01 09:00 | C 724.0 exp 20260501
+2026-06-14 17:09:53,516 [INFO]   [ORB] PnL: -99.2%  $-129.00 | exit: EOD  hold: 350m
+2026-06-14 17:09:53,517 [INFO] [SPY] ORB_LONG @ 2026-05-04 09:25 | C 721.0 exp 20260504
+2026-06-14 17:09:53,524 [INFO]   [ORB] PnL: -96.6%  $-113.00 | exit: Signal Reversal  hold: 235m
+2026-06-14 17:09:53,524 [INFO] [SPY] MR_SHORT @ 2026-05-04 13:20 | P 718.0 exp 20260504
+2026-06-14 17:09:53,535 [INFO]   [MR_ONLY] PnL: -54.0%  $-47.00 | exit: Stop Loss (50%)  hold: 75m
+2026-06-14 17:09:53,536 [INFO] [SPY] ORB_LONG @ 2026-05-05 09:05 | C 723.0 exp 20260505
+2026-06-14 17:09:53,562 [INFO]   [ORB] PnL: -33.3%  $-41.00 | exit: Trailing Stop  hold: 345m
+2026-06-14 17:09:53,563 [INFO] [SPY] ORB_LONG @ 2026-05-06 09:40 | C 732.0 exp 20260506
+2026-06-14 17:09:53,569 [INFO]   [ORB] PnL: +105.3%  $+99.00 | exit: EOD  hold: 310m
+2026-06-14 17:09:53,571 [INFO] [SPY] ORB_SHORT @ 2026-05-07 08:50 | P 734.0 exp 20260507
+2026-06-14 17:09:53,576 [INFO]   [ORB] PnL: +8.4%  $+11.00 | exit: Trailing Stop  hold: 155m
+2026-06-14 17:09:53,578 [INFO] [SPY] ORB_LONG @ 2026-05-08 08:50 | C 736.0 exp 20260508
+2026-06-14 17:09:53,583 [INFO]   [ORB] PnL: +17.5%  $+22.00 | exit: Trailing Stop  hold: 80m
+2026-06-14 17:09:53,584 [INFO] [SPY] ORB_LONG @ 2026-05-11 08:50 | C 739.0 exp 20260511
+2026-06-14 17:09:53,590 [INFO]   [ORB] PnL: +22.6%  $+21.00 | exit: Trailing Stop  hold: 170m
+2026-06-14 17:09:53,591 [INFO] [SPY] MR_LONG @ 2026-05-12 11:15 | C 733.0 exp 20260512
+2026-06-14 17:09:53,600 [INFO]   [MR_UPGRADED_ORB] PnL: +387.6%  $+407.00 | exit: EOD  hold: 215m
+2026-06-14 17:09:53,601 [INFO] [SPY] ORB_LONG @ 2026-05-13 09:25 | C 738.0 exp 20260513
+2026-06-14 17:09:53,610 [INFO]   [ORB] PnL: +207.7%  $+297.00 | exit: EOD  hold: 325m
+2026-06-14 17:09:53,611 [INFO] [SPY] ORB_LONG @ 2026-05-14 09:15 | C 746.0 exp 20260514
+2026-06-14 17:09:53,623 [INFO]   [ORB] PnL: +73.4%  $+102.00 | exit: Trailing Stop  hold: 130m
+2026-06-14 17:09:53,623 [INFO] [SPY] MR_SHORT @ 2026-05-14 11:30 | P 748.0 exp 20260514
+2026-06-14 17:09:53,631 [INFO]   [MR_UPGRADED_ORB] PnL: +18.0%  $+22.00 | exit: Trailing Stop  hold: 60m
+2026-06-14 17:09:53,631 [INFO] [SPY] MR_LONG @ 2026-05-14 12:55 | C 748.0 exp 20260514
+2026-06-14 17:09:53,638 [INFO]   [MR_ONLY] PnL: -29.2%  $-19.00 | exit: EOD  hold: 115m
+2026-06-14 17:09:53,639 [INFO] [SPY] ORB_LONG @ 2026-05-15 09:20 | C 742.0 exp 20260515
+2026-06-14 17:09:53,645 [INFO]   [ORB] PnL: -60.6%  $-109.00 | exit: Signal Reversal  hold: 245m
+2026-06-14 17:09:53,645 [INFO] [SPY] MR_SHORT @ 2026-05-15 13:25 | P 742.0 exp 20260515
+2026-06-14 17:09:53,653 [INFO]   [MR_UPGRADED_ORB] PnL: +17.4%  $+17.00 | exit: Trailing Stop  hold: 10m
+2026-06-14 17:09:53,654 [INFO] [SPY] ORB_LONG @ 2026-05-18 08:55 | C 741.0 exp 20260518
+2026-06-14 17:09:53,664 [INFO]   [ORB] PnL: -98.4%  $-126.00 | exit: EOD  hold: 355m
+2026-06-14 17:09:53,665 [INFO] [SPY] ORB_SHORT @ 2026-05-19 09:15 | P 733.0 exp 20260519
+2026-06-14 17:09:53,671 [INFO]   [ORB] PnL: -95.8%  $-208.00 | exit: EOD  hold: 335m
+2026-06-14 17:09:53,672 [INFO] [SPY] ORB_LONG @ 2026-05-20 09:25 | C 738.0 exp 20260520
+2026-06-14 17:09:53,677 [INFO]   [ORB] PnL: +24.2%  $+47.00 | exit: Trailing Stop  hold: 115m
+2026-06-14 17:09:53,678 [INFO] [SPY] ORB_LONG @ 2026-05-21 09:00 | C 740.0 exp 20260521
+2026-06-14 17:09:53,684 [INFO]   [ORB] PnL: +52.5%  $+105.00 | exit: Trailing Stop  hold: 240m
+2026-06-14 17:09:53,685 [INFO] [SPY] ORB_SHORT @ 2026-05-22 09:10 | P 746.0 exp 20260522
+2026-06-14 17:09:53,691 [INFO]   [ORB] PnL: -70.0%  $-140.00 | exit: EOD  hold: 340m
+2026-06-14 17:09:53,692 [INFO] [SPY] ORB_LONG @ 2026-05-26 09:15 | C 752.0 exp 20260526
+2026-06-14 17:09:53,698 [INFO]   [ORB] PnL: -34.0%  $-34.00 | exit: Signal Reversal  hold: 50m
+2026-06-14 17:09:53,698 [INFO] [SPY] MR_SHORT @ 2026-05-26 10:05 | P 751.0 exp 20260526
+2026-06-14 17:09:53,704 [INFO]   [MR_UPGRADED_ORB] PnL: +47.9%  $+57.00 | exit: Trailing Stop  hold: 80m
+2026-06-14 17:09:53,704 [INFO] [SPY] MR_LONG @ 2026-05-26 11:35 | C 750.0 exp 20260526
+2026-06-14 17:09:53,711 [INFO]   [MR_UPGRADED_ORB] PnL: -52.5%  $-42.00 | exit: Stop Loss (50%)  hold: 40m
+2026-06-14 17:09:53,713 [INFO] [SPY] ORB_LONG @ 2026-05-27 09:05 | C 751.0 exp 20260527
+2026-06-14 17:09:53,718 [INFO]   [ORB] PnL: -83.2%  $-99.00 | exit: EOD  hold: 345m
+2026-06-14 17:09:53,719 [INFO] [SPY] ORB_LONG @ 2026-05-29 08:50 | C 758.0 exp 20260529
+2026-06-14 17:09:53,725 [INFO]   [ORB] PnL: -62.1%  $-77.00 | exit: Signal Reversal  hold: 45m
+2026-06-14 17:09:53,725 [INFO] [SPY] MR_SHORT @ 2026-05-29 09:35 | P 756.0 exp 20260529
+2026-06-14 17:09:53,734 [INFO]   [MR_UPGRADED_ORB] PnL: -56.0%  $-88.00 | exit: Stop Loss (50%)  hold: 35m
+2026-06-14 17:09:53,734 [INFO] [SPY] MR_LONG @ 2026-05-29 10:20 | C 757.0 exp 20260529
+2026-06-14 17:09:53,743 [INFO]   [MR_UPGRADED_ORB] PnL: -14.8%  $-16.00 | exit: Signal Reversal  hold: 55m
+2026-06-14 17:09:53,743 [INFO] [SPY] MR_SHORT @ 2026-05-29 11:15 | P 757.0 exp 20260529
+2026-06-14 17:09:53,751 [INFO]   [MR_UPGRADED_ORB] PnL: +36.8%  $+39.00 | exit: Trailing Stop  hold: 110m
+2026-06-14 17:09:53,752 [INFO] [SPY] MR_SHORT @ 2026-06-01 11:25 | P 757.0 exp 20260601
+2026-06-14 17:09:53,760 [INFO]   [MR_UPGRADED_ORB] PnL: -53.4%  $-47.00 | exit: Stop Loss (50%)  hold: 25m
+2026-06-14 17:09:53,761 [INFO] [SPY] ORB_LONG @ 2026-06-02 09:45 | C 759.0 exp 20260602
+2026-06-14 17:09:53,767 [INFO]   [ORB] PnL: +13.8%  $+15.00 | exit: Trailing Stop  hold: 55m
+2026-06-14 17:09:53,768 [INFO] [SPY] ORB_SHORT @ 2026-06-03 08:50 | P 756.0 exp 20260603
+2026-06-14 17:09:53,774 [INFO]   [ORB] PnL: +11.9%  $+21.00 | exit: EOD  hold: 360m
+2026-06-14 17:09:53,775 [INFO] [SPY] ORB_LONG @ 2026-06-04 09:25 | C 754.0 exp 20260604
+2026-06-14 17:09:53,781 [INFO]   [ORB] PnL: +27.1%  $+33.00 | exit: Trailing Stop  hold: 80m
+2026-06-14 17:09:53,782 [INFO] [SPY] ORB_SHORT @ 2026-06-05 08:50 | P 750.0 exp 20260605
+2026-06-14 17:09:53,788 [INFO]   [ORB] PnL: +659.4%  $+1121.00 | exit: EOD  hold: 360m
+2026-06-14 17:09:53,789 [INFO] [SPY] MR_LONG @ 2026-06-08 09:35 | C 743.0 exp 20260608
+2026-06-14 17:09:53,799 [INFO]   [MR_UPGRADED_ORB] PnL: -6.4%  $-12.00 | exit: Trailing Stop  hold: 50m
+2026-06-14 17:09:53,799 [INFO] [SPY] MR_SHORT @ 2026-06-08 10:40 | P 744.0 exp 20260608
+2026-06-14 17:09:53,809 [INFO]   [MR_UPGRADED_ORB] PnL: +45.7%  $+75.00 | exit: Trailing Stop  hold: 105m
+2026-06-14 17:09:53,809 [INFO] [SPY] MR_LONG @ 2026-06-08 13:00 | C 742.0 exp 20260608
+2026-06-14 17:09:53,816 [INFO]   [MR_ONLY] PnL: -50.6%  $-40.00 | exit: Stop Loss (50%)  hold: 45m
+2026-06-14 17:09:53,817 [INFO] [SPY] ORB_SHORT @ 2026-06-09 09:05 | P 744.0 exp 20260609
+2026-06-14 17:09:53,822 [INFO]   [ORB] PnL: +82.2%  $+139.00 | exit: Trailing Stop  hold: 15m
+2026-06-14 17:09:53,822 [INFO] [SPY] MR_LONG @ 2026-06-09 12:15 | C 730.0 exp 20260609
+2026-06-14 17:09:53,831 [INFO]   [MR_UPGRADED_ORB] PnL: +34.8%  $+70.00 | exit: Trailing Stop  hold: 30m
+2026-06-14 17:09:53,832 [INFO] [SPY] ORB_LONG @ 2026-06-10 08:50 | C 736.0 exp 20260610
+2026-06-14 17:09:53,837 [INFO]   [ORB] PnL: -30.2%  $-84.00 | exit: Signal Reversal  hold: 60m
+2026-06-14 17:09:53,837 [INFO] [SPY] MR_SHORT @ 2026-06-10 09:50 | P 735.0 exp 20260610
+2026-06-14 17:09:53,844 [INFO]   [MR_UPGRADED_ORB] PnL: +40.3%  $+114.00 | exit: Trailing Stop  hold: 50m
+2026-06-14 17:09:53,844 [INFO] [SPY] MR_LONG @ 2026-06-10 13:00 | C 732.0 exp 20260610
+2026-06-14 17:09:53,851 [INFO]   [MR_ONLY] PnL: -50.7%  $-72.00 | exit: Stop Loss (50%)  hold: 15m
+2026-06-14 17:09:53,852 [INFO] [SPY] ORB_LONG @ 2026-06-11 08:50 | C 731.0 exp 20260611
+2026-06-14 17:09:53,852 [INFO]   [polygon] fetching O:SPY260611C00731000 ...
+2026-06-14 17:10:06,065 [INFO]   [ORB] PnL: +33.7%  $+96.00 | exit: Trailing Stop  hold: 240m
+2026-06-14 17:10:06,066 [INFO] [SPY] ORB_SHORT @ 2026-06-12 08:50 | P 736.0 exp 20260612
+2026-06-14 17:10:06,067 [INFO]   [polygon] fetching O:SPY260612P00736000 ...
+2026-06-14 17:10:18,251 [INFO]   [ORB] PnL: -82.3%  $-252.00 | exit: Signal Reversal  hold: 170m
+2026-06-14 17:10:18,251 [INFO] [SPY] MR_LONG @ 2026-06-12 11:40 | C 741.0 exp 20260612
+2026-06-14 17:10:18,251 [INFO]   [polygon] fetching O:SPY260612C00741000 ...
+2026-06-14 17:10:30,435 [INFO]   [MR_UPGRADED_ORB] PnL: -10.9%  $-18.00 | exit: Signal Reversal  hold: 75m
+2026-06-14 17:10:30,435 [INFO] [SPY] MR_SHORT @ 2026-06-12 12:55 | P 741.0 exp 20260612
+2026-06-14 17:10:30,435 [INFO]   [polygon] fetching O:SPY260612P00741000 ...
+2026-06-14 17:10:42,601 [INFO]   [MR_ONLY] PnL: -53.5%  $-62.00 | exit: Stop Loss (50%)  hold: 45m
+2026-06-14 17:10:42,605 [INFO] Saved option_backtest_SPY.json: +59 new / 59 total
+2026-06-14 17:10:42,605 [INFO]   Trades:     59
+2026-06-14 17:10:42,605 [INFO]   Win rate:   49.2%
+2026-06-14 17:10:42,605 [INFO]   Avg PnL:    +11.71%  $+16.71
+2026-06-14 17:10:42,605 [INFO]   Total PnL:  +690.99%  $+986.00
+2026-06-14 17:10:42,605 [INFO]   Best/Worst: +659.4% / -99.2%
+2026-06-14 17:10:42,605 [INFO] 
+============================================================
+  Options backtest: TSLA
+============================================================
+2026-06-14 17:10:42,605 [INFO] [TSLA] fetching 59-day 5m data from yfinance...
+2026-06-14 17:10:54,508 [INFO] [TSLA] 37 signals across 41 trading days
+2026-06-14 17:10:54,509 [INFO] [TSLA] ORB_SHORT @ 2026-04-16 08:55 | P 382.5 exp 20260416
+2026-06-14 17:10:54,513 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,514 [INFO] [TSLA] ORB_LONG @ 2026-04-17 09:40 | C 402.5 exp 20260417
+2026-06-14 17:10:54,520 [INFO]   [ORB] PnL: +117.5%  $+262.00 | exit: Trailing Stop  hold: 65m
+2026-06-14 17:10:54,521 [INFO] [TSLA] ORB_SHORT @ 2026-04-23 09:00 | P 375.0 exp 20260423
+2026-06-14 17:10:54,524 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,524 [INFO] [TSLA] MR_LONG @ 2026-04-23 13:10 | C 375.0 exp 20260423
+2026-06-14 17:10:54,529 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,530 [INFO] [TSLA] MR_LONG @ 2026-04-24 10:00 | C 377.5 exp 20260424
+2026-06-14 17:10:54,539 [INFO]   [MR_ONLY] PnL: -52.2%  $-94.00 | exit: Stop Loss (50%)  hold: 15m
+2026-06-14 17:10:54,541 [INFO] [TSLA] ORB_SHORT @ 2026-04-27 08:55 | P 365.0 exp 20260427
+2026-06-14 17:10:54,546 [INFO]   [ORB] PnL: -99.6%  $-228.00 | exit: EOD  hold: 355m
+2026-06-14 17:10:54,548 [INFO] [TSLA] ORB_LONG @ 2026-04-28 09:05 | C 382.5 exp 20260428
+2026-06-14 17:10:54,551 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,551 [INFO] [TSLA] MR_SHORT @ 2026-04-28 09:35 | P 375.0 exp 20260428
+2026-06-14 17:10:54,554 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,555 [INFO] [TSLA] ORB_SHORT @ 2026-04-29 09:10 | P 372.5 exp 20260429
+2026-06-14 17:10:54,561 [INFO]   [ORB] PnL: -85.9%  $-232.00 | exit: EOD  hold: 340m
+2026-06-14 17:10:54,563 [INFO] [TSLA] ORB_LONG @ 2026-04-30 09:45 | C 375.0 exp 20260430
+2026-06-14 17:10:54,566 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,568 [INFO] [TSLA] MR_LONG @ 2026-05-04 11:25 | C 387.5 exp 20260504
+2026-06-14 17:10:54,576 [INFO]   [MR_UPGRADED_ORB] PnL: +167.9%  $+282.00 | exit: Trailing Stop  hold: 100m
+2026-06-14 17:10:54,577 [INFO] [TSLA] ORB_SHORT @ 2026-05-05 09:25 | P 395.0 exp 20260505
+2026-06-14 17:10:54,582 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,583 [INFO] [TSLA] ORB_LONG @ 2026-05-06 08:50 | C 392.5 exp 20260506
+2026-06-14 17:10:54,589 [INFO]   [ORB] PnL: +81.8%  $+198.00 | exit: Trailing Stop  hold: 240m
+2026-06-14 17:10:54,590 [INFO] [TSLA] MR_SHORT @ 2026-05-07 09:35 | P 412.5 exp 20260507
+2026-06-14 17:10:54,594 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,594 [INFO] [TSLA] ORB_LONG @ 2026-05-07 09:40 | C 415.0 exp 20260507
+2026-06-14 17:10:54,597 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,598 [INFO] [TSLA] ORB_LONG @ 2026-05-08 09:00 | C 430.0 exp 20260508
+2026-06-14 17:10:54,604 [INFO]   [ORB] PnL: -98.6%  $-275.00 | exit: EOD  hold: 350m
+2026-06-14 17:10:54,605 [INFO] [TSLA] ORB_LONG @ 2026-05-11 09:55 | C 422.5 exp 20260511
+2026-06-14 17:10:54,612 [INFO]   [ORB] PnL: +767.2%  $+1987.00 | exit: EOD  hold: 295m
+2026-06-14 17:10:54,614 [INFO] [TSLA] ORB_LONG @ 2026-05-13 09:10 | C 440.0 exp 20260513
+2026-06-14 17:10:54,620 [INFO]   [ORB] PnL: +69.1%  $+266.00 | exit: Trailing Stop  hold: 35m
+2026-06-14 17:10:54,621 [INFO] [TSLA] MR_SHORT @ 2026-05-13 11:05 | P 447.5 exp 20260513
+2026-06-14 17:10:54,630 [INFO]   [MR_UPGRADED_ORB] PnL: -54.1%  $-133.00 | exit: Stop Loss (50%)  hold: 20m
+2026-06-14 17:10:54,631 [INFO] [TSLA] MR_LONG @ 2026-05-14 09:45 | C 445.0 exp 20260514
+2026-06-14 17:10:54,634 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,636 [INFO] [TSLA] MR_LONG @ 2026-05-15 09:40 | C 427.5 exp 20260515
+2026-06-14 17:10:54,646 [INFO]   [MR_UPGRADED_ORB] PnL: -51.6%  $-160.00 | exit: Stop Loss (50%)  hold: 60m
+2026-06-14 17:10:54,647 [INFO] [TSLA] ORB_SHORT @ 2026-05-18 09:35 | P 412.5 exp 20260518
+2026-06-14 17:10:54,653 [INFO]   [ORB] PnL: +12.2%  $+36.00 | exit: Trailing Stop  hold: 60m
+2026-06-14 17:10:54,654 [INFO] [TSLA] MR_LONG @ 2026-05-19 10:20 | C 397.5 exp 20260519
+2026-06-14 17:10:54,657 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,659 [INFO] [TSLA] ORB_SHORT @ 2026-05-21 08:50 | P 420.0 exp 20260521
+2026-06-14 17:10:54,662 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,663 [INFO] [TSLA] ORB_LONG @ 2026-05-26 09:45 | C 432.5 exp 20260526
+2026-06-14 17:10:54,670 [INFO]   [ORB] PnL: -52.6%  $-121.00 | exit: EOD  hold: 305m
+2026-06-14 17:10:54,671 [INFO] [TSLA] MR_LONG @ 2026-05-27 09:45 | C 442.5 exp 20260527
+2026-06-14 17:10:54,681 [INFO]   [MR_ONLY] PnL: +5.2%  $+13.00 | exit: Trailing Stop  hold: 10m
+2026-06-14 17:10:54,681 [INFO]   SKIP ORB_LONG LONG — already long open until 10:00
+2026-06-14 17:10:54,682 [INFO] [TSLA] ORB_SHORT @ 2026-05-29 09:15 | P 432.5 exp 20260529
+2026-06-14 17:10:54,692 [INFO]   [ORB] PnL: -51.1%  $-189.00 | exit: Signal Reversal  hold: 55m
+2026-06-14 17:10:54,692 [INFO] [TSLA] MR_LONG @ 2026-05-29 10:10 | C 432.5 exp 20260529
+2026-06-14 17:10:54,701 [INFO]   [MR_UPGRADED_ORB] PnL: +54.9%  $+162.00 | exit: Trailing Stop  hold: 95m
+2026-06-14 17:10:54,702 [INFO] [TSLA] ORB_LONG @ 2026-06-03 08:50 | C 422.5 exp 20260603
+2026-06-14 17:10:54,723 [INFO]   [ORB] PnL: +117.1%  $+445.00 | exit: Trailing Stop  hold: 85m
+2026-06-14 17:10:54,725 [INFO] [TSLA] ORB_SHORT @ 2026-06-05 08:50 | P 412.5 exp 20260605
+2026-06-14 17:10:54,734 [INFO]   [ORB] PnL: +512.4%  $+1819.00 | exit: EOD  hold: 360m
+2026-06-14 17:10:54,735 [INFO] [TSLA] ORB_LONG @ 2026-06-08 08:50 | C 402.5 exp 20260608
+2026-06-14 17:10:54,743 [INFO]   [ORB] PnL: +169.8%  $+428.00 | exit: Trailing Stop  hold: 320m
+2026-06-14 17:10:54,744 [INFO] [TSLA] ORB_SHORT @ 2026-06-09 09:10 | P 410.0 exp 20260609
+2026-06-14 17:10:54,748 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:10:54,749 [INFO] [TSLA] ORB_SHORT @ 2026-06-10 09:00 | P 392.5 exp 20260610
+2026-06-14 17:10:54,755 [INFO]   [ORB] PnL: +45.8%  $+183.00 | exit: Trailing Stop  hold: 100m
+2026-06-14 17:10:54,757 [INFO] [TSLA] ORB_LONG @ 2026-06-11 08:50 | C 387.5 exp 20260611
+2026-06-14 17:10:54,757 [INFO]   [polygon] fetching O:TSLA260611C00387500 ...
+2026-06-14 17:11:06,919 [WARNING]   No data from Polygon for O:TSLA260611C00387500
+2026-06-14 17:11:06,920 [WARNING]   Skipped - no Polygon data
+2026-06-14 17:11:06,921 [INFO] [TSLA] MR_SHORT @ 2026-06-12 10:50 | P 390.0 exp 20260612
+2026-06-14 17:11:06,921 [INFO]   [polygon] fetching O:TSLA260612P00390000 ...
+2026-06-14 17:11:19,127 [INFO]   [MR_ONLY] PnL: -58.6%  $-249.00 | exit: Stop Loss (50%)  hold: 35m
+2026-06-14 17:11:19,127 [INFO] [TSLA] MR_LONG @ 2026-06-12 11:40 | C 395.0 exp 20260612
+2026-06-14 17:11:19,127 [INFO]   [polygon] fetching O:TSLA260612C00395000 ...
+2026-06-14 17:11:31,306 [INFO]   [MR_UPGRADED_ORB] PnL: +61.2%  $+249.00 | exit: Trailing Stop  hold: 30m
+2026-06-14 17:11:31,313 [INFO] Saved option_backtest_TSLA.json: +22 new / 22 total
+2026-06-14 17:11:31,313 [INFO]   Trades:     22
+2026-06-14 17:11:31,313 [INFO]   Win rate:   59.1%
+2026-06-14 17:11:31,313 [INFO]   Avg PnL:    +71.72%  $+211.32
+2026-06-14 17:11:31,313 [INFO]   Total PnL:  +1577.85%  $+4649.00
+2026-06-14 17:11:31,313 [INFO]   Best/Worst: +767.2% / -99.6%
+2026-06-14 20:32:20,742 [INFO] [TSLA] fetching 59-day 5m data from yfinance...
+2026-06-14 20:32:32,830 [INFO] [TSLA] 37 signals across 41 trading days
+2026-06-14 20:33:35,379 [INFO] [TSLA] fetching 59-day 5m data from yfinance...
+2026-06-14 20:33:47,213 [INFO] [TSLA] 37 signals across 41 trading days
+2026-06-14 21:25:42,643 [INFO] 
+=======================================================
+  SQ+R² Backtest: SPY
+=======================================================
+2026-06-14 21:25:42,643 [INFO] [SPY] loading 59-day 5m data...
+2026-06-14 21:25:44,946 [INFO]   SQ_LONG  @ 09:45 | sq_trough=-0.92 rise=0.47 r2_peak=0.77 r2_now=0.15
+2026-06-14 21:25:44,946 [INFO]   SQ_SHORT @ 11:35 | sq_peak=0.92 fall=0.64 r2_peak=0.84 r2_now=0.09
+2026-06-14 21:25:44,949 [INFO]   SQ_SHORT @ 09:05 | sq_peak=0.93 fall=0.49 r2_peak=0.80 r2_now=0.24
+2026-06-14 21:25:44,949 [INFO]   SQ_SHORT @ 10:25 | sq_peak=0.94 fall=0.55 r2_peak=0.92 r2_now=0.21
+2026-06-14 21:25:44,949 [INFO]   SQ_SHORT @ 12:10 | sq_peak=0.80 fall=0.50 r2_peak=0.93 r2_now=0.14
+2026-06-14 21:25:44,949 [INFO]   SQ_LONG  @ 13:20 | sq_trough=-0.85 rise=0.55 r2_peak=0.57 r2_now=0.15
+2026-06-14 21:25:44,951 [INFO]   SQ_SHORT @ 09:30 | sq_peak=0.86 fall=0.58 r2_peak=0.86 r2_now=0.14
+2026-06-14 21:25:44,951 [INFO]   SQ_LONG  @ 10:35 | sq_trough=-0.90 rise=0.48 r2_peak=0.88 r2_now=0.18
+2026-06-14 21:25:44,953 [INFO]   SQ_LONG  @ 08:55 | sq_trough=-0.85 rise=0.66 r2_peak=0.81 r2_now=0.04
+2026-06-14 21:25:44,953 [INFO]   SQ_LONG  @ 11:00 | sq_trough=-0.96 rise=0.60 r2_peak=0.86 r2_now=0.30
+2026-06-14 21:25:44,953 [INFO]   SQ_LONG  @ 12:40 | sq_trough=-0.84 rise=0.50 r2_peak=0.80 r2_now=0.10
+2026-06-14 21:25:44,954 [INFO]   SQ_SHORT @ 09:55 | sq_peak=0.87 fall=0.49 r2_peak=0.94 r2_now=0.31
+2026-06-14 21:25:44,955 [INFO]   SQ_SHORT @ 13:05 | sq_peak=0.72 fall=0.44 r2_peak=0.79 r2_now=0.35
+2026-06-14 21:25:44,957 [INFO]   SQ_SHORT @ 09:15 | sq_peak=0.58 fall=0.13 r2_peak=0.53 r2_now=0.32
+2026-06-14 21:25:44,957 [INFO]   SQ_SHORT @ 10:45 | sq_peak=0.83 fall=0.49 r2_peak=0.93 r2_now=0.20
+2026-06-14 21:25:44,957 [INFO]   SQ_LONG  @ 13:10 | sq_trough=-0.99 rise=0.89 r2_peak=0.91 r2_now=0.01
+2026-06-14 21:25:44,959 [INFO]   SQ_SHORT @ 11:35 | sq_peak=0.76 fall=0.30 r2_peak=0.80 r2_now=0.28
+2026-06-14 21:25:44,961 [INFO]   SQ_LONG  @ 10:50 | sq_trough=-0.65 rise=0.36 r2_peak=0.60 r2_now=0.14
+2026-06-14 21:25:44,961 [INFO]   SQ_SHORT @ 12:10 | sq_peak=0.85 fall=0.36 r2_peak=0.92 r2_now=0.62
+2026-06-14 21:25:44,963 [INFO]   SQ_SHORT @ 09:05 | sq_peak=0.82 fall=0.40 r2_peak=0.88 r2_now=0.39
+2026-06-14 21:25:44,963 [INFO]   SQ_LONG  @ 10:15 | sq_trough=-0.78 rise=0.28 r2_peak=0.82 r2_now=0.40
+2026-06-14 21:25:44,965 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.80 rise=0.59 r2_peak=0.51 r2_now=0.02
+2026-06-14 21:25:44,965 [INFO]   SQ_LONG  @ 11:05 | sq_trough=-0.81 rise=0.42 r2_peak=0.71 r2_now=0.24
+2026-06-14 21:25:44,967 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.96 rise=0.62 r2_peak=0.81 r2_now=0.28
+2026-06-14 21:25:44,967 [INFO]   SQ_SHORT @ 10:50 | sq_peak=0.91 fall=0.48 r2_peak=0.85 r2_now=0.38
+2026-06-14 21:25:44,969 [INFO]   SQ_SHORT @ 09:45 | sq_peak=0.99 fall=0.76 r2_peak=0.92 r2_now=0.02
+2026-06-14 21:25:44,969 [INFO]   SQ_SHORT @ 11:05 | sq_peak=0.71 fall=0.30 r2_peak=0.64 r2_now=0.18
+2026-06-14 21:25:44,969 [INFO]   SQ_LONG  @ 12:10 | sq_trough=-0.86 rise=0.54 r2_peak=0.82 r2_now=0.19
+2026-06-14 21:25:44,970 [INFO]   SQ_SHORT @ 10:05 | sq_peak=0.85 fall=0.49 r2_peak=0.85 r2_now=0.13
+2026-06-14 21:25:44,970 [INFO]   SQ_LONG  @ 11:25 | sq_trough=-0.95 rise=0.46 r2_peak=0.84 r2_now=0.45
+2026-06-14 21:25:44,971 [INFO]   SQ_SHORT @ 13:10 | sq_peak=0.78 fall=0.28 r2_peak=0.75 r2_now=0.50
+2026-06-14 21:25:44,972 [INFO]   SQ_SHORT @ 09:35 | sq_peak=0.87 fall=0.38 r2_peak=0.94 r2_now=0.43
+2026-06-14 21:25:44,975 [INFO]   SQ_SHORT @ 10:35 | sq_peak=0.93 fall=0.61 r2_peak=0.92 r2_now=0.21
+2026-06-14 21:25:44,977 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.92 rise=0.68 r2_peak=0.90 r2_now=0.06
+2026-06-14 21:25:44,977 [INFO]   SQ_SHORT @ 10:25 | sq_peak=0.85 fall=0.43 r2_peak=0.82 r2_now=0.18
+2026-06-14 21:25:44,977 [INFO]   SQ_LONG  @ 13:00 | sq_trough=-0.97 rise=0.49 r2_peak=0.84 r2_now=0.36
+2026-06-14 21:25:44,979 [INFO]   SQ_SHORT @ 09:55 | sq_peak=0.92 fall=0.43 r2_peak=0.89 r2_now=0.55
+2026-06-14 21:25:44,981 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.99 fall=0.55 r2_peak=0.89 r2_now=0.20
+2026-06-14 21:25:44,981 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.79 fall=0.32 r2_peak=0.72 r2_now=0.47
+2026-06-14 21:25:44,981 [INFO]   SQ_LONG  @ 12:30 | sq_trough=-0.85 rise=0.40 r2_peak=0.82 r2_now=0.16
+2026-06-14 21:25:44,983 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.63 rise=0.16 r2_peak=0.84 r2_now=0.51
+2026-06-14 21:25:44,983 [INFO]   SQ_LONG  @ 10:50 | sq_trough=-0.83 rise=0.42 r2_peak=0.87 r2_now=0.27
+2026-06-14 21:25:44,985 [INFO]   SQ_SHORT @ 12:55 | sq_peak=0.95 fall=0.73 r2_peak=0.90 r2_now=0.10
+2026-06-14 21:25:44,987 [INFO]   SQ_SHORT @ 11:20 | sq_peak=0.97 fall=0.48 r2_peak=0.96 r2_now=0.44
+2026-06-14 21:25:44,987 [INFO]   SQ_LONG  @ 12:45 | sq_trough=-0.82 rise=0.56 r2_peak=0.73 r2_now=0.06
+2026-06-14 21:25:44,989 [INFO]   SQ_SHORT @ 10:00 | sq_peak=0.82 fall=0.33 r2_peak=0.78 r2_now=0.26
+2026-06-14 21:25:44,989 [INFO]   SQ_SHORT @ 12:00 | sq_peak=0.74 fall=0.28 r2_peak=0.83 r2_now=0.37
+2026-06-14 21:25:44,989 [INFO]   SQ_SHORT @ 13:15 | sq_peak=0.87 fall=0.47 r2_peak=0.81 r2_now=0.22
+2026-06-14 21:25:44,991 [INFO]   SQ_LONG  @ 10:50 | sq_trough=-0.80 rise=0.33 r2_peak=0.77 r2_now=0.44
+2026-06-14 21:25:44,991 [INFO]   SQ_SHORT @ 12:45 | sq_peak=0.73 fall=0.31 r2_peak=0.76 r2_now=0.29
+2026-06-14 21:25:44,993 [INFO]   SQ_LONG  @ 10:05 | sq_trough=-0.83 rise=0.57 r2_peak=0.73 r2_now=0.10
+2026-06-14 21:25:44,994 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.97 fall=0.49 r2_peak=0.99 r2_now=0.34
+2026-06-14 21:25:44,995 [INFO]   SQ_LONG  @ 09:15 | sq_trough=-0.77 rise=0.60 r2_peak=0.77 r2_now=0.05
+2026-06-14 21:25:44,996 [INFO]   SQ_SHORT @ 11:10 | sq_peak=0.92 fall=0.42 r2_peak=0.83 r2_now=0.39
+2026-06-14 21:25:44,997 [INFO]   SQ_SHORT @ 13:25 | sq_peak=0.99 fall=0.53 r2_peak=0.96 r2_now=0.24
+2026-06-14 21:25:44,999 [INFO]   SQ_SHORT @ 09:00 | sq_peak=0.72 fall=0.33 r2_peak=0.91 r2_now=0.32
+2026-06-14 21:25:44,999 [INFO]   SQ_SHORT @ 11:05 | sq_peak=0.87 fall=0.50 r2_peak=0.94 r2_now=0.34
+2026-06-14 21:25:44,999 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.62 fall=0.27 r2_peak=0.50 r2_now=0.14
+2026-06-14 21:25:45,001 [INFO]   SQ_SHORT @ 10:00 | sq_peak=0.84 fall=0.67 r2_peak=0.77 r2_now=0.06
+2026-06-14 21:25:45,001 [INFO]   SQ_LONG  @ 11:25 | sq_trough=-0.95 rise=0.53 r2_peak=0.98 r2_now=0.20
+2026-06-14 21:25:45,002 [INFO]   SQ_LONG  @ 12:40 | sq_trough=-0.67 rise=0.23 r2_peak=0.65 r2_now=0.44
+2026-06-14 21:25:45,003 [INFO]   SQ_LONG  @ 09:15 | sq_trough=-0.97 rise=0.52 r2_peak=0.93 r2_now=0.15
+2026-06-14 21:25:45,003 [INFO]   SQ_LONG  @ 11:05 | sq_trough=-0.69 rise=0.23 r2_peak=0.73 r2_now=0.42
+2026-06-14 21:25:45,005 [INFO]   SQ_SHORT @ 10:05 | sq_peak=0.64 fall=0.16 r2_peak=0.71 r2_now=0.47
+2026-06-14 21:25:45,007 [INFO]   SQ_SHORT @ 09:25 | sq_peak=0.97 fall=0.49 r2_peak=0.81 r2_now=0.10
+2026-06-14 21:25:45,007 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.79 fall=0.51 r2_peak=0.70 r2_now=0.15
+2026-06-14 21:25:45,008 [INFO]   SQ_LONG  @ 13:25 | sq_trough=-0.79 rise=0.32 r2_peak=0.86 r2_now=0.26
+2026-06-14 21:25:45,009 [INFO]   SQ_LONG  @ 09:25 | sq_trough=-0.94 rise=0.55 r2_peak=0.80 r2_now=0.19
+2026-06-14 21:25:45,010 [INFO]   SQ_SHORT @ 11:15 | sq_peak=0.85 fall=0.48 r2_peak=0.81 r2_now=0.13
+2026-06-14 21:25:45,012 [INFO]   SQ_SHORT @ 10:50 | sq_peak=0.97 fall=0.75 r2_peak=0.90 r2_now=0.08
+2026-06-14 21:25:45,012 [INFO]   SQ_LONG  @ 13:20 | sq_trough=-0.85 rise=0.62 r2_peak=0.72 r2_now=0.17
+2026-06-14 21:25:45,013 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.93 rise=0.65 r2_peak=0.63 r2_now=0.03
+2026-06-14 21:25:45,014 [INFO]   SQ_LONG  @ 12:00 | sq_trough=-0.77 rise=0.34 r2_peak=0.83 r2_now=0.20
+2026-06-14 21:25:45,016 [INFO]   SQ_SHORT @ 11:00 | sq_peak=0.93 fall=0.60 r2_peak=0.84 r2_now=0.12
+2026-06-14 21:25:45,016 [INFO]   SQ_SHORT @ 12:20 | sq_peak=0.91 fall=0.50 r2_peak=0.86 r2_now=0.64
+2026-06-14 21:25:45,017 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.96 rise=0.52 r2_peak=0.88 r2_now=0.15
+2026-06-14 21:25:45,018 [INFO]   SQ_LONG  @ 12:20 | sq_trough=-0.94 rise=0.46 r2_peak=0.93 r2_now=0.43
+2026-06-14 21:25:45,019 [INFO]   SQ_LONG  @ 09:25 | sq_trough=-0.67 rise=0.23 r2_peak=0.61 r2_now=0.27
+2026-06-14 21:25:45,020 [INFO]   SQ_SHORT @ 10:30 | sq_peak=0.87 fall=0.52 r2_peak=0.91 r2_now=0.12
+2026-06-14 21:25:45,020 [INFO]   SQ_LONG  @ 12:30 | sq_trough=-0.79 rise=0.36 r2_peak=0.78 r2_now=0.30
+2026-06-14 21:25:45,021 [INFO]   SQ_SHORT @ 09:10 | sq_peak=0.89 fall=0.58 r2_peak=0.71 r2_now=0.05
+2026-06-14 21:25:45,022 [INFO]   SQ_LONG  @ 12:05 | sq_trough=-0.97 rise=0.59 r2_peak=0.87 r2_now=0.12
+2026-06-14 21:25:45,023 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.83 fall=0.52 r2_peak=0.77 r2_now=0.25
+2026-06-14 21:25:45,023 [INFO]   SQ_LONG  @ 10:55 | sq_trough=-0.95 rise=0.54 r2_peak=0.91 r2_now=0.33
+2026-06-14 21:25:45,025 [INFO]   SQ_LONG  @ 10:15 | sq_trough=-0.68 rise=0.27 r2_peak=0.57 r2_now=0.29
+2026-06-14 21:25:45,026 [INFO]   SQ_LONG  @ 12:25 | sq_trough=-0.82 rise=0.60 r2_peak=0.83 r2_now=0.03
+2026-06-14 21:25:45,027 [INFO]   SQ_LONG  @ 09:10 | sq_trough=-0.87 rise=0.60 r2_peak=0.80 r2_now=0.04
+2026-06-14 21:25:45,027 [INFO]   SQ_SHORT @ 10:45 | sq_peak=0.91 fall=0.41 r2_peak=0.72 r2_now=0.12
+2026-06-14 21:25:45,028 [INFO] [SPY] 88 SQ signals across 41 days
+2026-06-14 21:25:45,028 [INFO] [SPY] SQ_LONG @ 2026-04-16 09:45 | C700.0 exp 20260416 sq=-0.45 r2=0.15
+2026-06-14 21:25:45,028 [INFO]   [polygon] fetching O:SPY260416C00700000 ...
+2026-06-14 21:25:57,221 [INFO]   PnL: +49.1%  $+58.00 | Trailing Stop  105m
+2026-06-14 21:25:57,221 [INFO] [SPY] SQ_SHORT @ 2026-04-16 11:35 | P702.0 exp 20260416 sq=0.28 r2=0.09
+2026-06-14 21:25:57,221 [INFO]   [polygon] fetching O:SPY260416P00702000 ...
+2026-06-14 21:26:09,393 [INFO]   PnL: +39.8%  $+47.00 | Trailing Stop  55m
+2026-06-14 21:26:09,393 [INFO] [SPY] SQ_SHORT @ 2026-04-17 09:05 | P709.0 exp 20260417 sq=0.45 r2=0.24
+2026-06-14 21:26:09,393 [INFO]   [polygon] fetching O:SPY260417P00709000 ...
+2026-06-14 21:26:21,543 [INFO]   PnL: -50.0%  $-67.00 | Stop Loss (50%)  40m
+2026-06-14 21:26:21,543 [INFO] [SPY] SQ_SHORT @ 2026-04-17 10:25 | P711.0 exp 20260417 sq=0.40 r2=0.21
+2026-06-14 21:26:21,545 [INFO]   PnL: -55.9%  $-81.00 | Stop Loss (50%)  65m
+2026-06-14 21:26:21,545 [INFO] [SPY] SQ_SHORT @ 2026-04-17 12:10 | P711.0 exp 20260417 sq=0.30 r2=0.14
+2026-06-14 21:26:21,547 [INFO]   PnL: +52.5%  $+42.00 | Trailing Stop  35m
+2026-06-14 21:26:21,548 [INFO] [SPY] SQ_LONG @ 2026-04-17 13:20 | C710.0 exp 20260417 sq=-0.30 r2=0.15
+2026-06-14 21:26:21,548 [INFO]   [polygon] fetching O:SPY260417C00710000 ...
+2026-06-14 21:26:33,737 [INFO]   PnL: -59.4%  $-38.00 | Stop Loss (50%)  50m
+2026-06-14 21:26:33,737 [INFO] [SPY] SQ_SHORT @ 2026-04-20 09:30 | P709.0 exp 20260420 sq=0.28 r2=0.14
+2026-06-14 21:26:33,737 [INFO]   [polygon] fetching O:SPY260420P00709000 ...
+2026-06-14 21:26:45,905 [INFO]   PnL: +36.9%  $+55.00 | Trailing Stop  50m
+2026-06-14 21:26:45,905 [INFO] [SPY] SQ_LONG @ 2026-04-20 10:35 | C708.0 exp 20260420 sq=-0.42 r2=0.18
+2026-06-14 21:26:45,905 [INFO]   [polygon] fetching O:SPY260420C00708000 ...
+2026-06-14 21:26:58,081 [INFO]   PnL: -53.9%  $-55.00 | Stop Loss (50%)  140m
+2026-06-14 21:26:58,081 [INFO] [SPY] SQ_LONG @ 2026-04-21 08:55 | C711.0 exp 20260421 sq=-0.18 r2=0.04
+2026-06-14 21:26:58,083 [INFO]   PnL: -60.5%  $-75.00 | Stop Loss (50%)  50m
+2026-06-14 21:26:58,083 [INFO] [SPY] SQ_LONG @ 2026-04-21 11:00 | C707.0 exp 20260421 sq=-0.36 r2=0.30
+2026-06-14 21:26:58,083 [INFO]   [polygon] fetching O:SPY260421C00707000 ...
+2026-06-14 21:27:10,224 [INFO]   PnL: -53.8%  $-64.00 | Stop Loss (50%)  40m
+2026-06-14 21:27:10,224 [INFO] [SPY] SQ_LONG @ 2026-04-21 12:40 | C706.0 exp 20260421 sq=-0.35 r2=0.10
+2026-06-14 21:27:10,224 [INFO]   [polygon] fetching O:SPY260421C00706000 ...
+2026-06-14 21:27:22,386 [INFO]   PnL: -62.4%  $-78.00 | Stop Loss (50%)  35m
+2026-06-14 21:27:22,386 [INFO] [SPY] SQ_SHORT @ 2026-04-22 09:55 | P710.0 exp 20260422 sq=0.37 r2=0.31
+2026-06-14 21:27:22,388 [INFO]   PnL: -50.4%  $-64.00 | Stop Loss (50%)  225m
+2026-06-14 21:27:22,388 [INFO]   SKIP SQ_SHORT short — position open
+2026-06-14 21:27:22,388 [INFO] [SPY] SQ_SHORT @ 2026-04-23 09:15 | P710.0 exp 20260423 sq=0.45 r2=0.32
+2026-06-14 21:27:22,389 [INFO]   [polygon] fetching O:SPY260423P00710000 ...
+2026-06-14 21:27:34,551 [INFO]   PnL: -51.3%  $-60.00 | Stop Loss (50%)  35m
+2026-06-14 21:27:34,552 [INFO] [SPY] SQ_SHORT @ 2026-04-23 10:45 | P711.0 exp 20260423 sq=0.34 r2=0.20
+2026-06-14 21:27:34,552 [INFO]   [polygon] fetching O:SPY260423P00711000 ...
+2026-06-14 21:27:46,722 [INFO]   PnL: +12.6%  $+11.00 | Trailing Stop  25m
+2026-06-14 21:27:46,722 [INFO] [SPY] SQ_LONG @ 2026-04-23 13:10 | C708.0 exp 20260423 sq=-0.10 r2=0.01
+2026-06-14 21:27:46,724 [INFO]   PnL: -52.1%  $-61.00 | Stop Loss (50%)  85m
+2026-06-14 21:27:46,724 [INFO] [SPY] SQ_SHORT @ 2026-04-24 11:35 | P713.0 exp 20260424 sq=0.46 r2=0.28
+2026-06-14 21:27:46,726 [INFO]   PnL: -52.5%  $-42.00 | Stop Loss (50%)  140m
+2026-06-14 21:27:46,726 [INFO] [SPY] SQ_LONG @ 2026-04-27 10:50 | C713.0 exp 20260427 sq=-0.29 r2=0.14
+2026-06-14 21:27:46,728 [INFO]   PnL: +65.4%  $+68.00 | Signal Reversal  80m
+2026-06-14 21:27:46,728 [INFO] [SPY] SQ_SHORT @ 2026-04-27 12:10 | P714.0 exp 20260427 sq=0.49 r2=0.62
+2026-06-14 21:27:46,728 [INFO]   [polygon] fetching O:SPY260427P00714000 ...
+2026-06-14 21:27:58,906 [INFO]   PnL: -54.4%  $-37.00 | Stop Loss (50%)  60m
+2026-06-14 21:27:58,906 [INFO] [SPY] SQ_SHORT @ 2026-04-28 09:05 | P712.0 exp 20260428 sq=0.43 r2=0.39
+2026-06-14 21:27:58,906 [INFO]   [polygon] fetching O:SPY260428P00712000 ...
+2026-06-14 21:28:11,060 [INFO]   PnL: +55.6%  $+70.00 | Trailing Stop  65m
+2026-06-14 21:28:11,060 [INFO] [SPY] SQ_LONG @ 2026-04-28 10:15 | C711.0 exp 20260428 sq=-0.50 r2=0.40
+2026-06-14 21:28:11,060 [INFO]   [polygon] fetching O:SPY260428C00711000 ...
+2026-06-14 21:28:23,238 [INFO]   PnL: -56.7%  $-59.00 | Stop Loss (50%)  75m
+2026-06-14 21:28:23,238 [INFO] [SPY] SQ_LONG @ 2026-04-29 09:20 | C711.0 exp 20260429 sq=-0.21 r2=0.02
+2026-06-14 21:28:23,238 [INFO]   [polygon] fetching O:SPY260429C00711000 ...
+2026-06-14 21:28:35,416 [INFO]   PnL: -51.2%  $-124.00 | Stop Loss (50%)  225m
+2026-06-14 21:28:35,416 [INFO]   SKIP SQ_LONG long — position open
+2026-06-14 21:28:35,416 [INFO] [SPY] SQ_LONG @ 2026-04-30 09:35 | C711.0 exp 20260430 sq=-0.35 r2=0.28
+2026-06-14 21:28:35,416 [INFO]   [polygon] fetching O:SPY260430C00711000 ...
+2026-06-14 21:28:47,580 [INFO]   PnL: +105.0%  $+208.00 | Signal Reversal  75m
+2026-06-14 21:28:47,580 [INFO] [SPY] SQ_SHORT @ 2026-04-30 10:50 | P715.0 exp 20260430 sq=0.43 r2=0.38
+2026-06-14 21:28:47,580 [INFO]   [polygon] fetching O:SPY260430P00715000 ...
+2026-06-14 21:28:59,737 [INFO]   PnL: -50.0%  $-71.00 | Stop Loss (50%)  95m
+2026-06-14 21:28:59,737 [INFO] [SPY] SQ_SHORT @ 2026-05-01 09:45 | P723.0 exp 20260501 sq=0.23 r2=0.02
+2026-06-14 21:28:59,737 [INFO]   [polygon] fetching O:SPY260501P00723000 ...
+2026-06-14 21:29:11,909 [INFO]   PnL: -50.9%  $-55.00 | Stop Loss (50%)  55m
+2026-06-14 21:29:11,909 [INFO] [SPY] SQ_SHORT @ 2026-05-01 11:05 | P723.0 exp 20260501 sq=0.41 r2=0.18
+2026-06-14 21:29:11,915 [INFO]   PnL: +7.8%  $+9.00 | Trailing Stop  55m
+2026-06-14 21:29:11,915 [INFO] [SPY] SQ_LONG @ 2026-05-01 12:10 | C723.0 exp 20260501 sq=-0.32 r2=0.19
+2026-06-14 21:29:11,915 [INFO]   [polygon] fetching O:SPY260501C00723000 ...
+2026-06-14 21:29:24,193 [INFO]   PnL: -63.5%  $-33.00 | Stop Loss (50%)  60m
+2026-06-14 21:29:24,194 [INFO] [SPY] SQ_SHORT @ 2026-05-04 10:05 | P721.0 exp 20260504 sq=0.35 r2=0.13
+2026-06-14 21:29:24,194 [INFO]   [polygon] fetching O:SPY260504P00721000 ...
+2026-06-14 21:29:36,344 [INFO]   PnL: +226.4%  $+274.00 | Trailing Stop  70m
+2026-06-14 21:29:36,344 [INFO] [SPY] SQ_LONG @ 2026-05-04 11:25 | C717.0 exp 20260504 sq=-0.49 r2=0.45
+2026-06-14 21:29:36,344 [INFO]   [polygon] fetching O:SPY260504C00717000 ...
+2026-06-14 21:29:48,571 [INFO]   PnL: +24.8%  $+33.00 | Signal Reversal  105m
+2026-06-14 21:29:48,571 [INFO] [SPY] SQ_SHORT @ 2026-05-04 13:10 | P718.0 exp 20260504 sq=0.50 r2=0.50
+2026-06-14 21:29:48,573 [INFO]   PnL: +83.0%  $+39.00 | Trailing Stop  35m
+2026-06-14 21:29:48,573 [INFO] [SPY] SQ_SHORT @ 2026-05-05 09:35 | P723.0 exp 20260505 sq=0.49 r2=0.43
+2026-06-14 21:29:48,573 [INFO]   [polygon] fetching O:SPY260505P00723000 ...
+2026-06-14 21:30:00,731 [INFO]   PnL: -50.8%  $-63.00 | Stop Loss (50%)  90m
+2026-06-14 21:30:00,731 [INFO] [SPY] SQ_SHORT @ 2026-05-06 10:35 | P731.0 exp 20260506 sq=0.32 r2=0.21
+2026-06-14 21:30:00,732 [INFO]   [polygon] fetching O:SPY260506P00731000 ...
+2026-06-14 21:30:12,895 [INFO]   PnL: -53.4%  $-39.00 | Stop Loss (50%)  115m
+2026-06-14 21:30:12,895 [INFO] [SPY] SQ_LONG @ 2026-05-07 09:20 | C735.0 exp 20260507 sq=-0.25 r2=0.06
+2026-06-14 21:30:12,895 [INFO]   [polygon] fetching O:SPY260507C00735000 ...
+2026-06-14 21:30:25,042 [INFO]   PnL: +30.5%  $+29.00 | Trailing Stop  50m
+2026-06-14 21:30:25,042 [INFO] [SPY] SQ_SHORT @ 2026-05-07 10:25 | P735.0 exp 20260507 sq=0.43 r2=0.18
+2026-06-14 21:30:25,042 [INFO]   [polygon] fetching O:SPY260507P00735000 ...
+2026-06-14 21:30:37,221 [INFO]   PnL: +92.7%  $+101.00 | Trailing Stop  60m
+2026-06-14 21:30:37,222 [INFO] [SPY] SQ_LONG @ 2026-05-07 13:00 | C731.0 exp 20260507 sq=-0.48 r2=0.36
+2026-06-14 21:30:37,222 [INFO]   [polygon] fetching O:SPY260507C00731000 ...
+2026-06-14 21:30:49,388 [INFO]   PnL: -54.3%  $-63.00 | Stop Loss (50%)  40m
+2026-06-14 21:30:49,388 [INFO] [SPY] SQ_SHORT @ 2026-05-08 09:55 | P737.0 exp 20260508 sq=0.49 r2=0.55
+2026-06-14 21:30:49,388 [INFO]   [polygon] fetching O:SPY260508P00737000 ...
+2026-06-14 21:31:01,551 [INFO]   PnL: -51.3%  $-58.00 | Stop Loss (50%)  140m
+2026-06-14 21:31:01,551 [INFO] [SPY] SQ_SHORT @ 2026-05-11 09:40 | P739.0 exp 20260511 sq=0.43 r2=0.20
+2026-06-14 21:31:01,551 [INFO]   [polygon] fetching O:SPY260511P00739000 ...
+2026-06-14 21:31:13,719 [INFO]   PnL: -58.2%  $-57.00 | Stop Loss (50%)  45m
+2026-06-14 21:31:13,719 [INFO] [SPY] SQ_SHORT @ 2026-05-11 10:55 | P740.0 exp 20260511 sq=0.47 r2=0.47
+2026-06-14 21:31:13,720 [INFO]   [polygon] fetching O:SPY260511P00740000 ...
+2026-06-14 21:31:25,918 [INFO]   PnL: +30.2%  $+19.00 | Trailing Stop  85m
+2026-06-14 21:31:25,919 [INFO] [SPY] SQ_LONG @ 2026-05-11 12:30 | C740.0 exp 20260511 sq=-0.45 r2=0.16
+2026-06-14 21:31:25,919 [INFO]   [polygon] fetching O:SPY260511C00740000 ...
+2026-06-14 21:31:38,083 [INFO]   PnL: -52.4%  $-33.00 | Stop Loss (50%)  75m
+2026-06-14 21:31:38,083 [INFO] [SPY] SQ_LONG @ 2026-05-12 09:35 | C735.0 exp 20260512 sq=-0.47 r2=0.51
+2026-06-14 21:31:38,083 [INFO]   [polygon] fetching O:SPY260512C00735000 ...
+2026-06-14 21:31:50,263 [INFO]   PnL: -56.2%  $-63.00 | Stop Loss (50%)  35m
+2026-06-14 21:31:50,263 [INFO] [SPY] SQ_LONG @ 2026-05-12 10:50 | C733.0 exp 20260512 sq=-0.41 r2=0.27
+2026-06-14 21:31:50,264 [INFO]   PnL: -50.9%  $-59.00 | Stop Loss (50%)  55m
+2026-06-14 21:31:50,265 [INFO] [SPY] SQ_SHORT @ 2026-05-13 12:55 | P742.0 exp 20260513 sq=0.22 r2=0.10
+2026-06-14 21:31:50,265 [INFO]   [polygon] fetching O:SPY260513P00742000 ...
+2026-06-14 21:32:02,439 [INFO]   PnL: -67.2%  $-43.00 | Stop Loss (50%)  15m
+2026-06-14 21:32:02,439 [INFO] [SPY] SQ_SHORT @ 2026-05-14 11:20 | P749.0 exp 20260514 sq=0.49 r2=0.44
+2026-06-14 21:32:02,439 [INFO]   [polygon] fetching O:SPY260514P00749000 ...
+2026-06-14 21:32:14,604 [INFO]   PnL: +42.5%  $+48.00 | Trailing Stop  75m
+2026-06-14 21:32:14,604 [INFO] [SPY] SQ_LONG @ 2026-05-14 12:45 | C748.0 exp 20260514 sq=-0.26 r2=0.06
+2026-06-14 21:32:14,607 [INFO]   PnL: -55.6%  $-50.00 | Stop Loss (50%)  15m
+2026-06-14 21:32:14,607 [INFO] [SPY] SQ_SHORT @ 2026-05-15 10:00 | P741.0 exp 20260515 sq=0.48 r2=0.26
+2026-06-14 21:32:14,607 [INFO]   [polygon] fetching O:SPY260515P00741000 ...
+2026-06-14 21:32:26,772 [INFO]   PnL: -54.0%  $-94.00 | Stop Loss (50%)  125m
+2026-06-14 21:32:26,772 [INFO]   SKIP SQ_SHORT short — position open
+2026-06-14 21:32:26,772 [INFO] [SPY] SQ_SHORT @ 2026-05-15 13:15 | P742.0 exp 20260515 sq=0.40 r2=0.22
+2026-06-14 21:32:26,774 [INFO]   PnL: +10.6%  $+11.00 | Trailing Stop  20m
+2026-06-14 21:32:26,774 [INFO] [SPY] SQ_LONG @ 2026-05-18 10:50 | C737.0 exp 20260518 sq=-0.47 r2=0.44
+2026-06-14 21:32:26,774 [INFO]   [polygon] fetching O:SPY260518C00737000 ...
+2026-06-14 21:32:38,925 [INFO]   PnL: -58.0%  $-80.00 | Stop Loss (50%)  35m
+2026-06-14 21:32:38,925 [INFO] [SPY] SQ_SHORT @ 2026-05-18 12:45 | P737.0 exp 20260518 sq=0.42 r2=0.29
+2026-06-14 21:32:38,925 [INFO]   [polygon] fetching O:SPY260518P00737000 ...
+2026-06-14 21:32:51,094 [INFO]   PnL: +11.7%  $+13.00 | Trailing Stop  75m
+2026-06-14 21:32:51,094 [INFO] [SPY] SQ_LONG @ 2026-05-19 10:05 | C733.0 exp 20260519 sq=-0.26 r2=0.10
+2026-06-14 21:32:51,094 [INFO]   [polygon] fetching O:SPY260519C00733000 ...
+2026-06-14 21:33:03,254 [INFO]   PnL: +112.6%  $+197.00 | Signal Reversal  165m
+2026-06-14 21:33:03,254 [INFO] [SPY] SQ_SHORT @ 2026-05-19 12:50 | P736.0 exp 20260519 sq=0.48 r2=0.34
+2026-06-14 21:33:03,254 [INFO]   [polygon] fetching O:SPY260519P00736000 ...
+2026-06-14 21:33:15,401 [INFO]   PnL: +50.6%  $+39.00 | Trailing Stop  75m
+2026-06-14 21:33:15,401 [INFO] [SPY] SQ_LONG @ 2026-05-20 09:15 | C737.0 exp 20260520 sq=-0.16 r2=0.05
+2026-06-14 21:33:15,401 [INFO]   [polygon] fetching O:SPY260520C00737000 ...
+2026-06-14 21:33:27,556 [INFO]   PnL: +70.5%  $+158.00 | Signal Reversal  115m
+2026-06-14 21:33:27,556 [INFO] [SPY] SQ_SHORT @ 2026-05-20 11:10 | P740.0 exp 20260520 sq=0.50 r2=0.39
+2026-06-14 21:33:27,556 [INFO]   [polygon] fetching O:SPY260520P00740000 ...
+2026-06-14 21:33:39,710 [INFO]   PnL: -49.4%  $-83.00 | EOD  220m
+2026-06-14 21:33:39,710 [INFO] [SPY] SQ_SHORT @ 2026-05-21 13:25 | P743.0 exp 20260521 sq=0.46 r2=0.24
+2026-06-14 21:33:39,711 [INFO]   [polygon] fetching O:SPY260521P00743000 ...
+2026-06-14 21:33:51,893 [INFO]   PnL: +116.2%  $+79.00 | Trailing Stop  35m
+2026-06-14 21:33:51,894 [INFO] [SPY] SQ_SHORT @ 2026-05-22 09:00 | P746.0 exp 20260522 sq=0.39 r2=0.32
+2026-06-14 21:33:51,900 [INFO]   PnL: -54.6%  $-94.00 | Stop Loss (50%)  75m
+2026-06-14 21:33:51,900 [INFO] [SPY] SQ_SHORT @ 2026-05-22 11:05 | P747.0 exp 20260522 sq=0.37 r2=0.34
+2026-06-14 21:33:51,900 [INFO]   [polygon] fetching O:SPY260522P00747000 ...
+2026-06-14 21:34:04,084 [INFO]   PnL: -56.0%  $-56.00 | Stop Loss (50%)  90m
+2026-06-14 21:34:04,085 [INFO] [SPY] SQ_SHORT @ 2026-05-22 12:50 | P747.0 exp 20260522 sq=0.35 r2=0.14
+2026-06-14 21:34:04,096 [INFO]   PnL: +92.1%  $+70.00 | EOD  120m
+2026-06-14 21:34:04,096 [INFO] [SPY] SQ_SHORT @ 2026-05-26 10:00 | P751.0 exp 20260526 sq=0.17 r2=0.06
+2026-06-14 21:34:04,099 [INFO]   PnL: +37.5%  $+48.00 | Signal Reversal  85m
+2026-06-14 21:34:04,099 [INFO] [SPY] SQ_LONG @ 2026-05-26 11:25 | C750.0 exp 20260526 sq=-0.42 r2=0.20
+2026-06-14 21:34:04,101 [INFO]   PnL: -56.8%  $-50.00 | Stop Loss (50%)  50m
+2026-06-14 21:34:04,102 [INFO] [SPY] SQ_LONG @ 2026-05-26 12:40 | C749.0 exp 20260526 sq=-0.45 r2=0.44
+2026-06-14 21:34:04,102 [INFO]   [polygon] fetching O:SPY260526C00749000 ...
+2026-06-14 21:34:16,269 [INFO]   PnL: +17.4%  $+12.00 | Trailing Stop  60m
+2026-06-14 21:34:16,269 [INFO] [SPY] SQ_LONG @ 2026-05-27 09:15 | C751.0 exp 20260527 sq=-0.46 r2=0.15
+2026-06-14 21:34:16,271 [INFO]   PnL: -51.4%  $-74.00 | Stop Loss (50%)  40m
+2026-06-14 21:34:16,271 [INFO] [SPY] SQ_LONG @ 2026-05-27 11:05 | C749.0 exp 20260527 sq=-0.46 r2=0.42
+2026-06-14 21:34:16,271 [INFO]   [polygon] fetching O:SPY260527C00749000 ...
+2026-06-14 21:34:28,450 [INFO]   PnL: -52.2%  $-70.00 | Stop Loss (50%)  60m
+2026-06-14 21:34:28,451 [INFO] [SPY] SQ_SHORT @ 2026-05-28 10:05 | P754.0 exp 20260528 sq=0.48 r2=0.47
+2026-06-14 21:34:28,451 [INFO]   [polygon] fetching O:SPY260528P00754000 ...
+2026-06-14 21:34:40,605 [INFO]   PnL: -50.4%  $-64.00 | Stop Loss (50%)  70m
+2026-06-14 21:34:40,605 [INFO] [SPY] SQ_SHORT @ 2026-05-29 09:25 | P757.0 exp 20260529 sq=0.48 r2=0.10
+2026-06-14 21:34:40,607 [INFO]   PnL: +24.7%  $+36.00 | Trailing Stop  30m
+2026-06-14 21:34:40,607 [INFO] [SPY] SQ_SHORT @ 2026-05-29 10:55 | P756.0 exp 20260529 sq=0.28 r2=0.15
+2026-06-14 21:34:40,609 [INFO]   PnL: -57.3%  $-51.00 | Stop Loss (50%)  40m
+2026-06-14 21:34:40,609 [INFO] [SPY] SQ_LONG @ 2026-05-29 13:25 | C756.0 exp 20260529 sq=-0.47 r2=0.26
+2026-06-14 21:34:40,610 [INFO]   [polygon] fetching O:SPY260529C00756000 ...
+2026-06-14 21:34:52,763 [INFO]   PnL: -30.5%  $-29.00 | Trailing Stop  85m
+2026-06-14 21:34:52,763 [INFO] [SPY] SQ_LONG @ 2026-06-01 09:25 | C756.0 exp 20260601 sq=-0.39 r2=0.19
+2026-06-14 21:34:52,763 [INFO]   [polygon] fetching O:SPY260601C00756000 ...
+2026-06-14 21:35:04,928 [INFO]   PnL: +11.1%  $+13.00 | Trailing Stop  90m
+2026-06-14 21:35:04,928 [INFO] [SPY] SQ_SHORT @ 2026-06-01 11:15 | P756.0 exp 20260601 sq=0.37 r2=0.13
+2026-06-14 21:35:04,928 [INFO]   [polygon] fetching O:SPY260601P00756000 ...
+2026-06-14 21:35:17,110 [INFO]   PnL: -52.1%  $-37.00 | Stop Loss (50%)  30m
+2026-06-14 21:35:17,110 [INFO] [SPY] SQ_SHORT @ 2026-06-02 10:50 | P760.0 exp 20260602 sq=0.22 r2=0.08
+2026-06-14 21:35:17,110 [INFO]   [polygon] fetching O:SPY260602P00760000 ...
+2026-06-14 21:35:29,264 [INFO]   PnL: +21.1%  $+20.00 | Signal Reversal  150m
+2026-06-14 21:35:29,264 [INFO] [SPY] SQ_LONG @ 2026-06-02 13:20 | C759.0 exp 20260602 sq=-0.23 r2=0.17
+2026-06-14 21:35:29,266 [INFO]   PnL: +13.6%  $+6.00 | EOD  90m
+2026-06-14 21:35:29,266 [INFO] [SPY] SQ_LONG @ 2026-06-03 09:35 | C757.0 exp 20260603 sq=-0.27 r2=0.03
+2026-06-14 21:35:29,266 [INFO]   [polygon] fetching O:SPY260603C00757000 ...
+2026-06-14 21:35:41,423 [INFO]   PnL: -52.3%  $-68.00 | Stop Loss (50%)  45m
+2026-06-14 21:35:41,423 [INFO] [SPY] SQ_LONG @ 2026-06-03 12:00 | C755.0 exp 20260603 sq=-0.43 r2=0.20
+2026-06-14 21:35:41,424 [INFO]   [polygon] fetching O:SPY260603C00755000 ...
+2026-06-14 21:35:53,587 [INFO]   PnL: -7.4%  $-7.00 | Trailing Stop  120m
+2026-06-14 21:35:53,587 [INFO] [SPY] SQ_SHORT @ 2026-06-04 11:00 | P755.0 exp 20260604 sq=0.33 r2=0.12
+2026-06-14 21:35:53,587 [INFO]   [polygon] fetching O:SPY260604P00755000 ...
+2026-06-14 21:36:05,767 [INFO]   PnL: -56.7%  $-38.00 | Stop Loss (50%)  20m
+2026-06-14 21:36:05,767 [INFO] [SPY] SQ_SHORT @ 2026-06-04 12:20 | P757.0 exp 20260604 sq=0.41 r2=0.64
+2026-06-14 21:36:05,767 [INFO]   [polygon] fetching O:SPY260604P00757000 ...
+2026-06-14 21:36:17,930 [INFO]   PnL: -58.1%  $-43.00 | Stop Loss (50%)  35m
+2026-06-14 21:36:17,930 [INFO] [SPY] SQ_LONG @ 2026-06-05 09:35 | C750.0 exp 20260605 sq=-0.44 r2=0.15
+2026-06-14 21:36:17,930 [INFO]   [polygon] fetching O:SPY260605C00750000 ...
+2026-06-14 21:36:30,103 [INFO]   PnL: -56.9%  $-91.00 | Stop Loss (50%)  35m
+2026-06-14 21:36:30,104 [INFO] [SPY] SQ_LONG @ 2026-06-05 12:20 | C744.0 exp 20260605 sq=-0.48 r2=0.43
+2026-06-14 21:36:30,104 [INFO]   [polygon] fetching O:SPY260605C00744000 ...
+2026-06-14 21:36:42,258 [INFO]   PnL: -65.7%  $-88.00 | Stop Loss (50%)  50m
+2026-06-14 21:36:42,258 [INFO] [SPY] SQ_LONG @ 2026-06-08 09:25 | C742.0 exp 20260608 sq=-0.44 r2=0.27
+2026-06-14 21:36:42,259 [INFO]   PnL: +9.2%  $+20.00 | Trailing Stop  60m
+2026-06-14 21:36:42,259 [INFO] [SPY] SQ_SHORT @ 2026-06-08 10:30 | P742.0 exp 20260608 sq=0.36 r2=0.12
+2026-06-14 21:36:42,259 [INFO]   [polygon] fetching O:SPY260608P00742000 ...
+2026-06-14 21:36:54,423 [INFO]   PnL: -58.2%  $-96.00 | Stop Loss (50%)  45m
+2026-06-14 21:36:54,423 [INFO] [SPY] SQ_LONG @ 2026-06-08 12:30 | C742.0 exp 20260608 sq=-0.43 r2=0.30
+2026-06-14 21:36:54,425 [INFO]   PnL: -55.7%  $-54.00 | Stop Loss (50%)  65m
+2026-06-14 21:36:54,425 [INFO] [SPY] SQ_SHORT @ 2026-06-09 09:10 | P742.0 exp 20260609 sq=0.31 r2=0.05
+2026-06-14 21:36:54,425 [INFO]   [polygon] fetching O:SPY260609P00742000 ...
+2026-06-14 21:37:06,782 [INFO]   PnL: +118.3%  $+258.00 | Trailing Stop  45m
+2026-06-14 21:37:06,782 [INFO] [SPY] SQ_LONG @ 2026-06-09 12:05 | C728.0 exp 20260609 sq=-0.38 r2=0.12
+2026-06-14 21:37:06,782 [INFO]   [polygon] fetching O:SPY260609C00728000 ...
+2026-06-14 21:37:18,961 [INFO]   PnL: +149.2%  $+355.00 | Trailing Stop  130m
+2026-06-14 21:37:18,961 [INFO] [SPY] SQ_SHORT @ 2026-06-10 09:40 | P736.0 exp 20260610 sq=0.31 r2=0.25
+2026-06-14 21:37:18,961 [INFO]   [polygon] fetching O:SPY260610P00736000 ...
+2026-06-14 21:37:31,130 [INFO]   PnL: +84.2%  $+239.00 | Trailing Stop  40m
+2026-06-14 21:37:31,130 [INFO] [SPY] SQ_LONG @ 2026-06-10 10:55 | C732.0 exp 20260610 sq=-0.41 r2=0.33
+2026-06-14 21:37:31,131 [INFO]   PnL: -52.6%  $-133.00 | Stop Loss (50%)  60m
+2026-06-14 21:37:31,132 [INFO] [SPY] SQ_LONG @ 2026-06-11 10:15 | C727.0 exp 20260611 sq=-0.41 r2=0.29
+2026-06-14 21:37:31,132 [INFO]   [polygon] fetching O:SPY260611C00727000 ...
+2026-06-14 21:37:43,316 [INFO]   PnL: -54.1%  $-151.00 | Stop Loss (50%)  120m
+2026-06-14 21:37:43,316 [INFO] [SPY] SQ_LONG @ 2026-06-11 12:25 | C733.0 exp 20260611 sq=-0.23 r2=0.03
+2026-06-14 21:37:43,316 [INFO]   [polygon] fetching O:SPY260611C00733000 ...
+2026-06-14 21:37:55,467 [INFO]   PnL: +53.9%  $+97.00 | Trailing Stop  20m
+2026-06-14 21:37:55,467 [INFO] [SPY] SQ_LONG @ 2026-06-12 09:10 | C739.0 exp 20260612 sq=-0.27 r2=0.04
+2026-06-14 21:37:55,467 [INFO]   [polygon] fetching O:SPY260612C00739000 ...
+2026-06-14 21:38:07,657 [INFO]   PnL: +37.3%  $+112.00 | Trailing Stop  85m
+2026-06-14 21:38:07,657 [INFO] [SPY] SQ_SHORT @ 2026-06-12 10:45 | P740.0 exp 20260612 sq=0.50 r2=0.12
+2026-06-14 21:38:07,657 [INFO]   [polygon] fetching O:SPY260612P00740000 ...
+2026-06-14 21:38:19,823 [INFO]   PnL: -56.6%  $-159.00 | Stop Loss (50%)  60m
+2026-06-14 21:38:19,823 [INFO] 
+=======================================================
+  SQ+R² Backtest: TSLA
+=======================================================
+2026-06-14 21:38:19,823 [INFO] [TSLA] loading 59-day 5m data...
+2026-06-14 21:38:21,835 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.99 rise=0.74 r2_peak=0.86 r2_now=0.06
+2026-06-14 21:38:21,836 [INFO]   SQ_SHORT @ 11:25 | sq_peak=0.79 fall=0.30 r2_peak=0.84 r2_now=0.63
+2026-06-14 21:38:21,838 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.70 rise=0.43 r2_peak=0.53 r2_now=0.09
+2026-06-14 21:38:21,838 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.98 fall=0.67 r2_peak=0.93 r2_now=0.19
+2026-06-14 21:38:21,838 [INFO]   SQ_LONG  @ 13:25 | sq_trough=-0.93 rise=0.49 r2_peak=0.87 r2_now=0.49
+2026-06-14 21:38:21,840 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.94 rise=0.51 r2_peak=0.79 r2_now=0.26
+2026-06-14 21:38:21,842 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.91 rise=0.43 r2_peak=0.67 r2_now=0.17
+2026-06-14 21:38:21,842 [INFO]   SQ_LONG  @ 11:45 | sq_trough=-0.64 rise=0.17 r2_peak=0.73 r2_now=0.54
+2026-06-14 21:38:21,844 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.86 fall=0.38 r2_peak=0.75 r2_now=0.28
+2026-06-14 21:38:21,844 [INFO]   SQ_LONG  @ 12:10 | sq_trough=-0.61 rise=0.26 r2_peak=0.79 r2_now=0.31
+2026-06-14 21:38:21,845 [INFO]   SQ_SHORT @ 08:55 | sq_peak=0.66 fall=0.33 r2_peak=0.55 r2_now=0.11
+2026-06-14 21:38:21,845 [INFO]   SQ_SHORT @ 11:10 | sq_peak=0.89 fall=0.42 r2_peak=0.93 r2_now=0.46
+2026-06-14 21:38:21,847 [INFO]   SQ_LONG  @ 13:00 | sq_trough=-0.95 rise=0.50 r2_peak=0.88 r2_now=0.27
+2026-06-14 21:38:21,848 [INFO]   SQ_SHORT @ 09:00 | sq_peak=0.82 fall=0.50 r2_peak=0.57 r2_now=0.05
+2026-06-14 21:38:21,849 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.70 fall=0.23 r2_peak=0.62 r2_now=0.41
+2026-06-14 21:38:21,850 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.99 rise=0.57 r2_peak=0.93 r2_now=0.17
+2026-06-14 21:38:21,850 [INFO]   SQ_LONG  @ 10:40 | sq_trough=-0.66 rise=0.19 r2_peak=0.45 r2_now=0.18
+2026-06-14 21:38:21,851 [INFO]   SQ_SHORT @ 13:25 | sq_peak=0.98 fall=0.48 r2_peak=0.95 r2_now=0.42
+2026-06-14 21:38:21,852 [INFO]   SQ_SHORT @ 09:30 | sq_peak=0.93 fall=0.50 r2_peak=0.90 r2_now=0.15
+2026-06-14 21:38:21,854 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.78 rise=0.28 r2_peak=0.65 r2_now=0.28
+2026-06-14 21:38:21,855 [INFO]   SQ_LONG  @ 11:40 | sq_trough=-0.72 rise=0.41 r2_peak=0.60 r2_now=0.15
+2026-06-14 21:38:21,856 [INFO]   SQ_LONG  @ 09:30 | sq_trough=-0.94 rise=0.79 r2_peak=0.80 r2_now=0.03
+2026-06-14 21:38:21,857 [INFO]   SQ_SHORT @ 11:00 | sq_peak=0.97 fall=0.52 r2_peak=0.92 r2_now=0.54
+2026-06-14 21:38:21,859 [INFO]   SQ_SHORT @ 11:25 | sq_peak=0.86 fall=0.42 r2_peak=0.92 r2_now=0.40
+2026-06-14 21:38:21,859 [INFO]   SQ_SHORT @ 13:25 | sq_peak=0.76 fall=0.35 r2_peak=0.85 r2_now=0.29
+2026-06-14 21:38:21,861 [INFO]   SQ_LONG  @ 11:15 | sq_trough=-0.81 rise=0.54 r2_peak=0.80 r2_now=0.17
+2026-06-14 21:38:21,861 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.96 fall=0.46 r2_peak=0.94 r2_now=0.22
+2026-06-14 21:38:21,863 [INFO]   SQ_SHORT @ 09:10 | sq_peak=0.81 fall=0.33 r2_peak=0.47 r2_now=0.19
+2026-06-14 21:38:21,863 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.90 rise=0.47 r2_peak=0.81 r2_now=0.38
+2026-06-14 21:38:21,863 [INFO]   SQ_LONG  @ 12:00 | sq_trough=-0.78 rise=0.37 r2_peak=0.75 r2_now=0.23
+2026-06-14 21:38:21,865 [INFO]   SQ_SHORT @ 09:55 | sq_peak=0.93 fall=0.52 r2_peak=0.87 r2_now=0.21
+2026-06-14 21:38:21,865 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.90 fall=0.57 r2_peak=0.82 r2_now=0.11
+2026-06-14 21:38:21,867 [INFO]   SQ_SHORT @ 09:25 | sq_peak=0.96 fall=0.54 r2_peak=0.80 r2_now=0.13
+2026-06-14 21:38:21,867 [INFO]   SQ_LONG  @ 11:45 | sq_trough=-0.84 rise=0.48 r2_peak=0.70 r2_now=0.08
+2026-06-14 21:38:21,867 [INFO]   SQ_LONG  @ 12:55 | sq_trough=-0.68 rise=0.18 r2_peak=0.67 r2_now=0.35
+2026-06-14 21:38:21,868 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.99 fall=0.58 r2_peak=0.88 r2_now=0.12
+2026-06-14 21:38:21,868 [INFO]   SQ_SHORT @ 10:50 | sq_peak=0.73 fall=0.32 r2_peak=0.73 r2_now=0.43
+2026-06-14 21:38:21,870 [INFO]   SQ_LONG  @ 09:50 | sq_trough=-0.75 rise=0.28 r2_peak=0.69 r2_now=0.19
+2026-06-14 21:38:21,870 [INFO]   SQ_SHORT @ 11:35 | sq_peak=1.00 fall=0.55 r2_peak=0.99 r2_now=0.41
+2026-06-14 21:38:21,872 [INFO]   SQ_LONG  @ 11:10 | sq_trough=-0.94 rise=0.47 r2_peak=0.90 r2_now=0.32
+2026-06-14 21:38:21,872 [INFO]   SQ_LONG  @ 12:15 | sq_trough=-0.82 rise=0.38 r2_peak=0.76 r2_now=0.14
+2026-06-14 21:38:21,875 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.98 fall=0.63 r2_peak=0.92 r2_now=0.14
+2026-06-14 21:38:21,875 [INFO]   SQ_LONG  @ 12:55 | sq_trough=-0.60 rise=0.11 r2_peak=0.78 r2_now=0.68
+2026-06-14 21:38:21,877 [INFO]   SQ_LONG  @ 09:30 | sq_trough=-0.93 rise=0.59 r2_peak=0.79 r2_now=0.24
+2026-06-14 21:38:21,877 [INFO]   SQ_SHORT @ 11:30 | sq_peak=0.85 fall=0.48 r2_peak=0.86 r2_now=0.18
+2026-06-14 21:38:21,877 [INFO]   SQ_LONG  @ 12:50 | sq_trough=-0.92 rise=0.62 r2_peak=0.89 r2_now=0.08
+2026-06-14 21:38:21,879 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.87 rise=0.78 r2_peak=0.61 r2_now=0.01
+2026-06-14 21:38:21,879 [INFO]   SQ_SHORT @ 13:10 | sq_peak=0.95 fall=0.51 r2_peak=0.89 r2_now=0.31
+2026-06-14 21:38:21,881 [INFO]   SQ_LONG  @ 09:15 | sq_trough=-0.75 rise=0.35 r2_peak=0.58 r2_now=0.13
+2026-06-14 21:38:21,881 [INFO]   SQ_LONG  @ 10:35 | sq_trough=-0.85 rise=0.48 r2_peak=0.76 r2_now=0.44
+2026-06-14 21:38:21,883 [INFO]   SQ_LONG  @ 10:00 | sq_trough=-0.94 rise=0.47 r2_peak=0.90 r2_now=0.46
+2026-06-14 21:38:21,883 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.98 fall=0.54 r2_peak=0.93 r2_now=0.49
+2026-06-14 21:38:21,885 [INFO]   SQ_SHORT @ 10:45 | sq_peak=0.71 fall=0.27 r2_peak=0.65 r2_now=0.40
+2026-06-14 21:38:21,887 [INFO]   SQ_LONG  @ 10:10 | sq_trough=-0.97 rise=0.60 r2_peak=0.88 r2_now=0.14
+2026-06-14 21:38:21,887 [INFO]   SQ_SHORT @ 13:15 | sq_peak=0.94 fall=0.47 r2_peak=0.90 r2_now=0.43
+2026-06-14 21:38:21,888 [INFO]   SQ_SHORT @ 08:50 | sq_peak=0.83 fall=0.40 r2_peak=0.43 r2_now=0.11
+2026-06-14 21:38:21,889 [INFO]   SQ_SHORT @ 10:30 | sq_peak=0.95 fall=0.58 r2_peak=0.94 r2_now=0.12
+2026-06-14 21:38:21,889 [INFO]   SQ_LONG  @ 12:15 | sq_trough=-0.70 rise=0.29 r2_peak=0.66 r2_now=0.35
+2026-06-14 21:38:21,892 [INFO]   SQ_SHORT @ 10:40 | sq_peak=0.94 fall=0.52 r2_peak=0.86 r2_now=0.20
+2026-06-14 21:38:21,892 [INFO]   SQ_SHORT @ 12:30 | sq_peak=0.91 fall=0.46 r2_peak=0.81 r2_now=0.42
+2026-06-14 21:38:21,893 [INFO]   SQ_SHORT @ 10:25 | sq_peak=0.70 fall=0.28 r2_peak=0.44 r2_now=0.11
+2026-06-14 21:38:21,896 [INFO]   SQ_SHORT @ 10:15 | sq_peak=0.67 fall=0.30 r2_peak=0.58 r2_now=0.30
+2026-06-14 21:38:21,897 [INFO]   SQ_LONG  @ 10:05 | sq_trough=-0.95 rise=0.52 r2_peak=0.93 r2_now=0.13
+2026-06-14 21:38:21,898 [INFO]   SQ_SHORT @ 12:00 | sq_peak=0.92 fall=0.75 r2_peak=0.85 r2_now=0.03
+2026-06-14 21:38:21,899 [INFO]   SQ_LONG  @ 10:15 | sq_trough=-0.94 rise=0.45 r2_peak=0.86 r2_now=0.44
+2026-06-14 21:38:21,900 [INFO]   SQ_LONG  @ 11:50 | sq_trough=-0.83 rise=0.41 r2_peak=0.76 r2_now=0.26
+2026-06-14 21:38:21,901 [INFO]   SQ_LONG  @ 09:10 | sq_trough=-0.76 rise=0.39 r2_peak=0.47 r2_now=0.10
+2026-06-14 21:38:21,901 [INFO]   SQ_SHORT @ 10:30 | sq_peak=0.93 fall=0.66 r2_peak=0.88 r2_now=0.16
+2026-06-14 21:38:21,903 [INFO]   SQ_SHORT @ 10:20 | sq_peak=0.98 fall=0.52 r2_peak=0.94 r2_now=0.30
+2026-06-14 21:38:21,904 [INFO]   SQ_LONG  @ 12:40 | sq_trough=-0.98 rise=0.62 r2_peak=0.95 r2_now=0.18
+2026-06-14 21:38:21,906 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.80 rise=0.49 r2_peak=0.56 r2_now=0.14
+2026-06-14 21:38:21,912 [INFO]   SQ_LONG  @ 12:55 | sq_trough=-0.99 rise=0.52 r2_peak=0.92 r2_now=0.41
+2026-06-14 21:38:21,913 [INFO]   SQ_LONG  @ 08:50 | sq_trough=-0.66 rise=0.38 r2_peak=0.44 r2_now=0.07
+2026-06-14 21:38:21,914 [INFO]   SQ_SHORT @ 10:10 | sq_peak=0.87 fall=0.41 r2_peak=0.89 r2_now=0.72
+2026-06-14 21:38:21,916 [INFO]   SQ_LONG  @ 12:05 | sq_trough=-0.99 rise=0.57 r2_peak=0.94 r2_now=0.17
+2026-06-14 21:38:21,918 [INFO]   SQ_LONG  @ 10:40 | sq_trough=-0.91 rise=0.52 r2_peak=0.86 r2_now=0.17
+2026-06-14 21:38:21,919 [INFO]   SQ_SHORT @ 09:45 | sq_peak=0.77 fall=0.43 r2_peak=0.58 r2_now=0.14
+2026-06-14 21:38:21,921 [INFO]   SQ_LONG  @ 09:40 | sq_trough=-0.70 rise=0.20 r2_peak=0.47 r2_now=0.26
+2026-06-14 21:38:21,922 [INFO]   SQ_LONG  @ 11:35 | sq_trough=-0.93 rise=0.85 r2_peak=0.81 r2_now=0.00
+2026-06-14 21:38:21,922 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.88 fall=0.40 r2_peak=0.80 r2_now=0.41
+2026-06-14 21:38:21,922 [INFO] [TSLA] 80 SQ signals across 41 days
+2026-06-14 21:38:21,922 [INFO] [TSLA] SQ_LONG @ 2026-04-16 09:35 | C385.0 exp 20260416 sq=-0.25 r2=0.06
+2026-06-14 21:38:21,922 [INFO]   [polygon] fetching O:TSLA260416C00385000 ...
+2026-06-14 21:38:34,054 [WARNING]   No data from Polygon for O:TSLA260416C00385000
+2026-06-14 21:38:34,056 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:38:34,057 [INFO] [TSLA] SQ_SHORT @ 2026-04-16 11:25 | P390.0 exp 20260416 sq=0.49 r2=0.63
+2026-06-14 21:38:34,057 [INFO]   [polygon] fetching O:TSLA260416P00390000 ...
+2026-06-14 21:38:46,190 [WARNING]   No data from Polygon for O:TSLA260416P00390000
+2026-06-14 21:38:46,190 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:38:46,190 [INFO] [TSLA] SQ_LONG @ 2026-04-17 09:20 | C395.0 exp 20260417 sq=-0.28 r2=0.09
+2026-06-14 21:38:46,190 [INFO]   [polygon] fetching O:TSLA260417C00395000 ...
+2026-06-14 21:38:58,395 [INFO]   PnL: +253.1%  $+810.00 | Signal Reversal  95m
+2026-06-14 21:38:58,395 [INFO] [TSLA] SQ_SHORT @ 2026-04-17 10:55 | P405.0 exp 20260417 sq=0.31 r2=0.19
+2026-06-14 21:38:58,395 [INFO]   [polygon] fetching O:TSLA260417P00405000 ...
+2026-06-14 21:39:10,555 [INFO]   PnL: +128.6%  $+252.00 | Signal Reversal  150m
+2026-06-14 21:39:10,555 [INFO] [TSLA] SQ_LONG @ 2026-04-17 13:25 | C400.0 exp 20260417 sq=-0.45 r2=0.49
+2026-06-14 21:39:10,555 [INFO]   [polygon] fetching O:TSLA260417C00400000 ...
+2026-06-14 21:39:22,742 [INFO]   PnL: +16.7%  $+28.00 | Trailing Stop  30m
+2026-06-14 21:39:22,742 [INFO] [TSLA] SQ_LONG @ 2026-04-20 10:25 | C392.5 exp 20260420 sq=-0.43 r2=0.26
+2026-06-14 21:39:22,742 [INFO]   [polygon] fetching O:TSLA260420C00392500 ...
+2026-06-14 21:39:34,913 [INFO]   PnL: -54.6%  $-141.00 | Stop Loss (50%)  20m
+2026-06-14 21:39:34,914 [INFO] [TSLA] SQ_LONG @ 2026-04-21 09:20 | C392.5 exp 20260421 sq=-0.48 r2=0.17
+2026-06-14 21:39:34,914 [INFO]   [polygon] fetching O:TSLA260421C00392500 ...
+2026-06-14 21:39:47,062 [WARNING]   No data from Polygon for O:TSLA260421C00392500
+2026-06-14 21:39:47,062 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:39:47,062 [INFO] [TSLA] SQ_LONG @ 2026-04-21 11:45 | C390.0 exp 20260421 sq=-0.46 r2=0.54
+2026-06-14 21:39:47,062 [INFO]   [polygon] fetching O:TSLA260421C00390000 ...
+2026-06-14 21:39:59,207 [WARNING]   No data from Polygon for O:TSLA260421C00390000
+2026-06-14 21:39:59,208 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:39:59,208 [INFO] [TSLA] SQ_SHORT @ 2026-04-22 09:40 | P390.0 exp 20260422 sq=0.48 r2=0.28
+2026-06-14 21:39:59,208 [INFO]   [polygon] fetching O:TSLA260422P00390000 ...
+2026-06-14 21:40:11,365 [WARNING]   No data from Polygon for O:TSLA260422P00390000
+2026-06-14 21:40:11,366 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:40:11,366 [INFO] [TSLA] SQ_LONG @ 2026-04-22 12:10 | C390.0 exp 20260422 sq=-0.35 r2=0.31
+2026-06-14 21:40:11,366 [INFO]   [polygon] fetching O:TSLA260422C00390000 ...
+2026-06-14 21:40:23,505 [WARNING]   No data from Polygon for O:TSLA260422C00390000
+2026-06-14 21:40:23,506 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:40:23,508 [INFO] [TSLA] SQ_SHORT @ 2026-04-23 08:55 | P372.5 exp 20260423 sq=0.33 r2=0.11
+2026-06-14 21:40:23,508 [INFO]   [polygon] fetching O:TSLA260423P00372500 ...
+2026-06-14 21:40:35,664 [WARNING]   No data from Polygon for O:TSLA260423P00372500
+2026-06-14 21:40:35,666 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:40:35,666 [INFO] [TSLA] SQ_SHORT @ 2026-04-23 11:10 | P380.0 exp 20260423 sq=0.47 r2=0.46
+2026-06-14 21:40:35,666 [INFO]   [polygon] fetching O:TSLA260423P00380000 ...
+2026-06-14 21:40:47,833 [WARNING]   No data from Polygon for O:TSLA260423P00380000
+2026-06-14 21:40:47,836 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:40:47,836 [INFO] [TSLA] SQ_LONG @ 2026-04-23 13:00 | C375.0 exp 20260423 sq=-0.45 r2=0.27
+2026-06-14 21:40:47,837 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:40:47,837 [INFO] [TSLA] SQ_SHORT @ 2026-04-24 09:00 | P372.5 exp 20260424 sq=0.32 r2=0.05
+2026-06-14 21:40:47,838 [INFO]   [polygon] fetching O:TSLA260424P00372500 ...
+2026-06-14 21:41:00,013 [INFO]   PnL: -51.5%  $-137.00 | Stop Loss (50%)  15m
+2026-06-14 21:41:00,013 [INFO] [TSLA] SQ_SHORT @ 2026-04-24 13:00 | P375.0 exp 20260424 sq=0.47 r2=0.41
+2026-06-14 21:41:00,013 [INFO]   [polygon] fetching O:TSLA260424P00375000 ...
+2026-06-14 21:41:12,170 [INFO]   PnL: -48.6%  $-35.00 | Stop Loss (50%)  60m
+2026-06-14 21:41:12,170 [INFO] [TSLA] SQ_LONG @ 2026-04-27 09:35 | C367.5 exp 20260427 sq=-0.41 r2=0.17
+2026-06-14 21:41:12,170 [INFO]   [polygon] fetching O:TSLA260427C00367500 ...
+2026-06-14 21:41:24,349 [INFO]   PnL: -60.9%  $-154.00 | Stop Loss (50%)  25m
+2026-06-14 21:41:24,349 [INFO] [TSLA] SQ_LONG @ 2026-04-27 10:40 | C367.5 exp 20260427 sq=-0.47 r2=0.18
+2026-06-14 21:41:24,369 [INFO]   PnL: +725.0%  $+1015.00 | Signal Reversal  165m
+2026-06-14 21:41:24,369 [INFO] [TSLA] SQ_SHORT @ 2026-04-27 13:25 | P380.0 exp 20260427 sq=0.50 r2=0.42
+2026-06-14 21:41:24,369 [INFO]   [polygon] fetching O:TSLA260427P00380000 ...
+2026-06-14 21:41:36,545 [INFO]   PnL: -46.3%  $-88.00 | Stop Loss (50%)  50m
+2026-06-14 21:41:36,545 [INFO] [TSLA] SQ_SHORT @ 2026-04-28 09:30 | P377.5 exp 20260428 sq=0.42 r2=0.15
+2026-06-14 21:41:36,545 [INFO]   [polygon] fetching O:TSLA260428P00377500 ...
+2026-06-14 21:41:48,727 [WARNING]   No data from Polygon for O:TSLA260428P00377500
+2026-06-14 21:41:48,729 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:41:48,730 [INFO] [TSLA] SQ_LONG @ 2026-04-29 09:35 | C372.5 exp 20260429 sq=-0.49 r2=0.28
+2026-06-14 21:41:48,730 [INFO]   [polygon] fetching O:TSLA260429C00372500 ...
+2026-06-14 21:42:00,905 [INFO]   PnL: -56.5%  $-151.00 | Stop Loss (50%)  205m
+2026-06-14 21:42:00,905 [INFO]   SKIP SQ_LONG long — position open
+2026-06-14 21:42:00,905 [INFO] [TSLA] SQ_LONG @ 2026-04-30 09:30 | C372.5 exp 20260430 sq=-0.15 r2=0.03
+2026-06-14 21:42:00,905 [INFO]   [polygon] fetching O:TSLA260430C00372500 ...
+2026-06-14 21:42:13,067 [WARNING]   No data from Polygon for O:TSLA260430C00372500
+2026-06-14 21:42:13,072 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:42:13,072 [INFO] [TSLA] SQ_SHORT @ 2026-04-30 11:00 | P377.5 exp 20260430 sq=0.45 r2=0.54
+2026-06-14 21:42:13,072 [INFO]   [polygon] fetching O:TSLA260430P00377500 ...
+2026-06-14 21:42:25,234 [WARNING]   No data from Polygon for O:TSLA260430P00377500
+2026-06-14 21:42:25,238 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:42:25,238 [INFO] [TSLA] SQ_SHORT @ 2026-05-01 11:25 | P395.0 exp 20260501 sq=0.45 r2=0.40
+2026-06-14 21:42:25,239 [INFO]   [polygon] fetching O:TSLA260501P00395000 ...
+2026-06-14 21:42:37,422 [INFO]   PnL: +7.0%  $+12.00 | Trailing Stop  25m
+2026-06-14 21:42:37,422 [INFO] [TSLA] SQ_SHORT @ 2026-05-01 13:25 | P397.5 exp 20260501 sq=0.41 r2=0.29
+2026-06-14 21:42:37,423 [INFO]   [polygon] fetching O:TSLA260501P00397500 ...
+2026-06-14 21:42:49,614 [INFO]   PnL: +17.4%  $+32.00 | Trailing Stop  40m
+2026-06-14 21:42:49,615 [INFO] [TSLA] SQ_LONG @ 2026-05-04 11:15 | C387.5 exp 20260504 sq=-0.27 r2=0.17
+2026-06-14 21:42:49,619 [INFO]   PnL: +122.9%  $+295.00 | Signal Reversal  105m
+2026-06-14 21:42:49,620 [INFO] [TSLA] SQ_SHORT @ 2026-05-04 13:00 | P392.5 exp 20260504 sq=0.50 r2=0.22
+2026-06-14 21:42:49,620 [INFO]   [polygon] fetching O:TSLA260504P00392500 ...
+2026-06-14 21:43:01,806 [INFO]   PnL: -5.0%  $-6.00 | Trailing Stop  25m
+2026-06-14 21:43:01,807 [INFO] [TSLA] SQ_SHORT @ 2026-05-05 09:10 | P395.0 exp 20260505 sq=0.48 r2=0.18
+2026-06-14 21:43:01,807 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:43:01,807 [INFO] [TSLA] SQ_LONG @ 2026-05-05 10:25 | C395.0 exp 20260505 sq=-0.43 r2=0.38
+2026-06-14 21:43:01,808 [INFO]   [polygon] fetching O:TSLA260505C00395000 ...
+2026-06-14 21:43:13,977 [WARNING]   No data from Polygon for O:TSLA260505C00395000
+2026-06-14 21:43:13,979 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:43:13,979 [INFO] [TSLA] SQ_LONG @ 2026-05-05 12:00 | C392.5 exp 20260505 sq=-0.41 r2=0.23
+2026-06-14 21:43:13,979 [INFO]   [polygon] fetching O:TSLA260505C00392500 ...
+2026-06-14 21:43:26,130 [WARNING]   No data from Polygon for O:TSLA260505C00392500
+2026-06-14 21:43:26,133 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:43:26,134 [INFO] [TSLA] SQ_SHORT @ 2026-05-06 09:55 | P392.5 exp 20260506 sq=0.41 r2=0.21
+2026-06-14 21:43:26,135 [INFO]   [polygon] fetching O:TSLA260506P00392500 ...
+2026-06-14 21:43:38,312 [INFO]   PnL: -52.8%  $-149.00 | Stop Loss (50%)  35m
+2026-06-14 21:43:38,312 [INFO] [TSLA] SQ_SHORT @ 2026-05-06 12:50 | P397.5 exp 20260506 sq=0.34 r2=0.11
+2026-06-14 21:43:38,312 [INFO]   [polygon] fetching O:TSLA260506P00397500 ...
+2026-06-14 21:43:50,514 [INFO]   PnL: -67.7%  $-105.00 | Stop Loss (50%)  15m
+2026-06-14 21:43:50,515 [INFO] [TSLA] SQ_SHORT @ 2026-05-07 09:25 | P410.0 exp 20260507 sq=0.43 r2=0.13
+2026-06-14 21:43:50,515 [INFO]   [polygon] fetching O:TSLA260507P00410000 ...
+2026-06-14 21:44:02,663 [WARNING]   No data from Polygon for O:TSLA260507P00410000
+2026-06-14 21:44:02,665 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:44:02,666 [INFO] [TSLA] SQ_LONG @ 2026-05-07 11:45 | C410.0 exp 20260507 sq=-0.36 r2=0.08
+2026-06-14 21:44:02,666 [INFO]   [polygon] fetching O:TSLA260507C00410000 ...
+2026-06-14 21:44:14,828 [WARNING]   No data from Polygon for O:TSLA260507C00410000
+2026-06-14 21:44:14,831 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:44:14,832 [INFO] [TSLA] SQ_LONG @ 2026-05-07 12:55 | C407.5 exp 20260507 sq=-0.50 r2=0.35
+2026-06-14 21:44:14,832 [INFO]   [polygon] fetching O:TSLA260507C00407500 ...
+2026-06-14 21:44:26,979 [WARNING]   No data from Polygon for O:TSLA260507C00407500
+2026-06-14 21:44:26,982 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:44:26,983 [INFO] [TSLA] SQ_SHORT @ 2026-05-08 09:40 | P425.0 exp 20260508 sq=0.41 r2=0.12
+2026-06-14 21:44:26,983 [INFO]   [polygon] fetching O:TSLA260508P00425000 ...
+2026-06-14 21:44:39,146 [INFO]   PnL: -51.7%  $-134.00 | Stop Loss (50%)  45m
+2026-06-14 21:44:39,146 [INFO] [TSLA] SQ_SHORT @ 2026-05-08 10:50 | P427.5 exp 20260508 sq=0.40 r2=0.43
+2026-06-14 21:44:39,146 [INFO]   [polygon] fetching O:TSLA260508P00427500 ...
+2026-06-14 21:44:51,305 [INFO]   PnL: -58.6%  $-116.00 | Stop Loss (50%)  160m
+2026-06-14 21:44:51,305 [INFO] [TSLA] SQ_LONG @ 2026-05-11 09:50 | C422.5 exp 20260511 sq=-0.47 r2=0.19
+2026-06-14 21:44:51,307 [INFO]   PnL: +604.7%  $+1536.00 | Signal Reversal  105m
+2026-06-14 21:44:51,307 [INFO] [TSLA] SQ_SHORT @ 2026-05-11 11:35 | P440.0 exp 20260511 sq=0.45 r2=0.41
+2026-06-14 21:44:51,307 [INFO]   [polygon] fetching O:TSLA260511P00440000 ...
+2026-06-14 21:45:03,464 [INFO]   PnL: -60.7%  $-162.00 | Stop Loss (50%)  70m
+2026-06-14 21:45:03,464 [INFO] [TSLA] SQ_LONG @ 2026-05-12 11:10 | C427.5 exp 20260512 sq=-0.47 r2=0.32
+2026-06-14 21:45:03,464 [INFO]   [polygon] fetching O:TSLA260512C00427500 ...
+2026-06-14 21:45:15,618 [WARNING]   No data from Polygon for O:TSLA260512C00427500
+2026-06-14 21:45:15,619 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:45:15,619 [INFO] [TSLA] SQ_LONG @ 2026-05-12 12:15 | C427.5 exp 20260512 sq=-0.44 r2=0.14
+2026-06-14 21:45:15,624 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:45:15,624 [INFO] [TSLA] SQ_SHORT @ 2026-05-13 10:55 | P447.5 exp 20260513 sq=0.36 r2=0.14
+2026-06-14 21:45:15,626 [INFO]   PnL: -58.0%  $-177.00 | Stop Loss (50%)  25m
+2026-06-14 21:45:15,626 [INFO] [TSLA] SQ_LONG @ 2026-05-13 12:55 | C447.5 exp 20260513 sq=-0.49 r2=0.68
+2026-06-14 21:45:15,626 [INFO]   [polygon] fetching O:TSLA260513C00447500 ...
+2026-06-14 21:45:27,812 [INFO]   PnL: +33.1%  $+52.00 | Trailing Stop  25m
+2026-06-14 21:45:27,812 [INFO] [TSLA] SQ_LONG @ 2026-05-14 09:30 | C442.5 exp 20260514 sq=-0.34 r2=0.24
+2026-06-14 21:45:27,812 [INFO]   [polygon] fetching O:TSLA260514C00442500 ...
+2026-06-14 21:45:39,953 [WARNING]   No data from Polygon for O:TSLA260514C00442500
+2026-06-14 21:45:39,956 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:45:39,957 [INFO] [TSLA] SQ_SHORT @ 2026-05-14 11:30 | P447.5 exp 20260514 sq=0.37 r2=0.18
+2026-06-14 21:45:39,957 [INFO]   [polygon] fetching O:TSLA260514P00447500 ...
+2026-06-14 21:45:52,087 [WARNING]   No data from Polygon for O:TSLA260514P00447500
+2026-06-14 21:45:52,087 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:45:52,087 [INFO] [TSLA] SQ_LONG @ 2026-05-14 12:50 | C447.5 exp 20260514 sq=-0.30 r2=0.08
+2026-06-14 21:45:52,087 [INFO]   [polygon] fetching O:TSLA260514C00447500 ...
+2026-06-14 21:46:04,252 [WARNING]   No data from Polygon for O:TSLA260514C00447500
+2026-06-14 21:46:04,254 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:46:04,255 [INFO] [TSLA] SQ_LONG @ 2026-05-15 09:35 | C427.5 exp 20260515 sq=-0.09 r2=0.01
+2026-06-14 21:46:04,260 [INFO]   PnL: -51.6%  $-160.00 | Stop Loss (50%)  65m
+2026-06-14 21:46:04,260 [INFO] [TSLA] SQ_SHORT @ 2026-05-15 13:10 | P427.5 exp 20260515 sq=0.44 r2=0.31
+2026-06-14 21:46:04,260 [INFO]   [polygon] fetching O:TSLA260515P00427500 ...
+2026-06-14 21:46:16,507 [INFO]   PnL: +129.2%  $+137.00 | Trailing Stop  25m
+2026-06-14 21:46:16,507 [INFO] [TSLA] SQ_LONG @ 2026-05-18 09:15 | C417.5 exp 20260518 sq=-0.40 r2=0.13
+2026-06-14 21:46:16,507 [INFO]   [polygon] fetching O:TSLA260518C00417500 ...
+2026-06-14 21:46:28,692 [INFO]   PnL: -56.9%  $-185.00 | Stop Loss (50%)  10m
+2026-06-14 21:46:28,692 [INFO] [TSLA] SQ_LONG @ 2026-05-18 10:35 | C410.0 exp 20260518 sq=-0.37 r2=0.44
+2026-06-14 21:46:28,692 [INFO]   [polygon] fetching O:TSLA260518C00410000 ...
+2026-06-14 21:46:40,857 [INFO]   PnL: -31.1%  $-77.00 | Trailing Stop  50m
+2026-06-14 21:46:40,857 [INFO] [TSLA] SQ_LONG @ 2026-05-19 10:00 | C397.5 exp 20260519 sq=-0.48 r2=0.46
+2026-06-14 21:46:40,857 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:46:40,857 [INFO] [TSLA] SQ_SHORT @ 2026-05-19 13:00 | P405.0 exp 20260519 sq=0.44 r2=0.49
+2026-06-14 21:46:40,857 [INFO]   [polygon] fetching O:TSLA260519P00405000 ...
+2026-06-14 21:46:53,026 [WARNING]   No data from Polygon for O:TSLA260519P00405000
+2026-06-14 21:46:53,028 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:46:53,029 [INFO] [TSLA] SQ_SHORT @ 2026-05-20 10:45 | P412.5 exp 20260520 sq=0.44 r2=0.40
+2026-06-14 21:46:53,029 [INFO]   [polygon] fetching O:TSLA260520P00412500 ...
+2026-06-14 21:47:05,212 [INFO]   PnL: -57.7%  $-124.00 | Stop Loss (50%)  110m
+2026-06-14 21:47:05,212 [INFO] [TSLA] SQ_LONG @ 2026-05-21 10:10 | C417.5 exp 20260521 sq=-0.38 r2=0.14
+2026-06-14 21:47:05,213 [INFO]   [polygon] fetching O:TSLA260521C00417500 ...
+2026-06-14 21:47:17,370 [WARNING]   No data from Polygon for O:TSLA260521C00417500
+2026-06-14 21:47:17,373 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:47:17,373 [INFO] [TSLA] SQ_SHORT @ 2026-05-21 13:15 | P422.5 exp 20260521 sq=0.47 r2=0.43
+2026-06-14 21:47:17,373 [INFO]   [polygon] fetching O:TSLA260521P00422500 ...
+2026-06-14 21:47:29,532 [WARNING]   No data from Polygon for O:TSLA260521P00422500
+2026-06-14 21:47:29,536 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:47:29,536 [INFO] [TSLA] SQ_SHORT @ 2026-05-22 08:50 | P422.5 exp 20260522 sq=0.43 r2=0.11
+2026-06-14 21:47:29,536 [INFO]   [polygon] fetching O:TSLA260522P00422500 ...
+2026-06-14 21:47:41,709 [INFO]   PnL: -53.2%  $-205.00 | Stop Loss (50%)  25m
+2026-06-14 21:47:41,709 [INFO] [TSLA] SQ_SHORT @ 2026-05-22 10:30 | P427.5 exp 20260522 sq=0.37 r2=0.12
+2026-06-14 21:47:41,709 [INFO]   [polygon] fetching O:TSLA260522P00427500 ...
+2026-06-14 21:47:53,966 [INFO]   PnL: -58.4%  $-146.00 | Stop Loss (50%)  30m
+2026-06-14 21:47:53,966 [INFO] [TSLA] SQ_LONG @ 2026-05-22 12:15 | C427.5 exp 20260522 sq=-0.42 r2=0.35
+2026-06-14 21:47:53,966 [INFO]   [polygon] fetching O:TSLA260522C00427500 ...
+2026-06-14 21:48:06,136 [INFO]   PnL: +119.4%  $+166.00 | Trailing Stop  30m
+2026-06-14 21:48:06,136 [INFO] [TSLA] SQ_SHORT @ 2026-05-26 10:40 | P432.5 exp 20260526 sq=0.42 r2=0.20
+2026-06-14 21:48:06,136 [INFO]   [polygon] fetching O:TSLA260526P00432500 ...
+2026-06-14 21:48:18,296 [INFO]   PnL: +19.3%  $+55.00 | Trailing Stop  45m
+2026-06-14 21:48:18,296 [INFO] [TSLA] SQ_SHORT @ 2026-05-26 12:30 | P432.5 exp 20260526 sq=0.46 r2=0.42
+2026-06-14 21:48:18,303 [INFO]   PnL: -52.4%  $-98.00 | Stop Loss (50%)  55m
+2026-06-14 21:48:18,303 [INFO] [TSLA] SQ_SHORT @ 2026-05-27 10:25 | P440.0 exp 20260527 sq=0.42 r2=0.11
+2026-06-14 21:48:18,303 [INFO]   [polygon] fetching O:TSLA260527P00440000 ...
+2026-06-14 21:48:30,480 [INFO]   PnL: -54.1%  $-111.00 | Stop Loss (50%)  85m
+2026-06-14 21:48:30,480 [INFO] [TSLA] SQ_SHORT @ 2026-05-28 10:15 | P442.5 exp 20260528 sq=0.37 r2=0.30
+2026-06-14 21:48:30,480 [INFO]   [polygon] fetching O:TSLA260528P00442500 ...
+2026-06-14 21:48:42,608 [WARNING]   No data from Polygon for O:TSLA260528P00442500
+2026-06-14 21:48:42,610 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:48:42,610 [INFO] [TSLA] SQ_LONG @ 2026-05-29 10:05 | C432.5 exp 20260529 sq=-0.42 r2=0.13
+2026-06-14 21:48:42,612 [INFO]   PnL: +71.2%  $+190.00 | Trailing Stop  100m
+2026-06-14 21:48:42,612 [INFO] [TSLA] SQ_SHORT @ 2026-05-29 12:00 | P437.5 exp 20260529 sq=0.18 r2=0.03
+2026-06-14 21:48:42,612 [INFO]   [polygon] fetching O:TSLA260529P00437500 ...
+2026-06-14 21:48:54,763 [INFO]   PnL: +23.2%  $+44.00 | Trailing Stop  150m
+2026-06-14 21:48:54,763 [INFO] [TSLA] SQ_LONG @ 2026-06-01 10:15 | C420.0 exp 20260601 sq=-0.49 r2=0.44
+2026-06-14 21:48:54,764 [INFO]   [polygon] fetching O:TSLA260601C00420000 ...
+2026-06-14 21:49:06,933 [INFO]   PnL: +13.4%  $+35.00 | Trailing Stop  30m
+2026-06-14 21:49:06,933 [INFO] [TSLA] SQ_LONG @ 2026-06-01 11:50 | C420.0 exp 20260601 sq=-0.41 r2=0.26
+2026-06-14 21:49:06,940 [INFO]   PnL: -59.5%  $-125.00 | Stop Loss (50%)  105m
+2026-06-14 21:49:06,940 [INFO] [TSLA] SQ_LONG @ 2026-06-02 09:10 | C417.5 exp 20260602 sq=-0.37 r2=0.10
+2026-06-14 21:49:06,940 [INFO]   [polygon] fetching O:TSLA260602C00417500 ...
+2026-06-14 21:49:19,100 [WARNING]   No data from Polygon for O:TSLA260602C00417500
+2026-06-14 21:49:19,101 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:49:19,101 [INFO] [TSLA] SQ_SHORT @ 2026-06-02 10:30 | P422.5 exp 20260602 sq=0.27 r2=0.16
+2026-06-14 21:49:19,101 [INFO]   [polygon] fetching O:TSLA260602P00422500 ...
+2026-06-14 21:49:31,268 [WARNING]   No data from Polygon for O:TSLA260602P00422500
+2026-06-14 21:49:31,269 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:49:31,269 [INFO] [TSLA] SQ_SHORT @ 2026-06-03 10:20 | P430.0 exp 20260603 sq=0.46 r2=0.30
+2026-06-14 21:49:31,269 [INFO]   [polygon] fetching O:TSLA260603P00430000 ...
+2026-06-14 21:49:43,476 [INFO]   PnL: +315.9%  $+657.00 | Signal Reversal  140m
+2026-06-14 21:49:43,476 [INFO] [TSLA] SQ_LONG @ 2026-06-03 12:40 | C422.5 exp 20260603 sq=-0.36 r2=0.18
+2026-06-14 21:49:43,478 [INFO]   PnL: +53.3%  $+65.00 | Trailing Stop  55m
+2026-06-14 21:49:43,478 [INFO] [TSLA] SQ_LONG @ 2026-06-04 10:25 | C420.0 exp 20260604 sq=-0.31 r2=0.14
+2026-06-14 21:49:43,478 [INFO]   [polygon] fetching O:TSLA260604C00420000 ...
+2026-06-14 21:49:55,625 [WARNING]   No data from Polygon for O:TSLA260604C00420000
+2026-06-14 21:49:55,629 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:49:55,629 [INFO] [TSLA] SQ_LONG @ 2026-06-05 12:55 | C395.0 exp 20260605 sq=-0.47 r2=0.41
+2026-06-14 21:49:55,629 [INFO]   [polygon] fetching O:TSLA260605C00395000 ...
+2026-06-14 21:50:07,792 [INFO]   PnL: -53.2%  $-117.00 | Stop Loss (50%)  10m
+2026-06-14 21:50:07,792 [INFO] [TSLA] SQ_LONG @ 2026-06-08 08:50 | C402.5 exp 20260608 sq=-0.28 r2=0.07
+2026-06-14 21:50:07,795 [INFO]   PnL: +3.6%  $+9.00 | Signal Reversal  80m
+2026-06-14 21:50:07,795 [INFO] [TSLA] SQ_SHORT @ 2026-06-08 10:10 | P402.5 exp 20260608 sq=0.46 r2=0.72
+2026-06-14 21:50:07,795 [INFO]   [polygon] fetching O:TSLA260608P00402500 ...
+2026-06-14 21:50:19,942 [INFO]   PnL: +36.5%  $+70.00 | Trailing Stop  25m
+2026-06-14 21:50:19,942 [INFO] [TSLA] SQ_LONG @ 2026-06-09 12:05 | C390.0 exp 20260609 sq=-0.42 r2=0.17
+2026-06-14 21:50:19,943 [INFO]   [polygon] fetching O:TSLA260609C00390000 ...
+2026-06-14 21:50:32,090 [WARNING]   No data from Polygon for O:TSLA260609C00390000
+2026-06-14 21:50:32,093 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:50:32,093 [INFO] [TSLA] SQ_LONG @ 2026-06-10 10:40 | C387.5 exp 20260610 sq=-0.39 r2=0.17
+2026-06-14 21:50:32,093 [INFO]   [polygon] fetching O:TSLA260610C00387500 ...
+2026-06-14 21:50:44,246 [INFO]   PnL: -54.0%  $-120.00 | Stop Loss (50%)  5m
+2026-06-14 21:50:44,247 [INFO] [TSLA] SQ_SHORT @ 2026-06-11 09:45 | P385.0 exp 20260611 sq=0.35 r2=0.14
+2026-06-14 21:50:44,247 [INFO]   [polygon] fetching O:TSLA260611P00385000 ...
+2026-06-14 21:50:56,395 [WARNING]   No data from Polygon for O:TSLA260611P00385000
+2026-06-14 21:50:56,395 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:50:56,396 [INFO] [TSLA] SQ_LONG @ 2026-06-12 09:40 | C395.0 exp 20260612 sq=-0.49 r2=0.26
+2026-06-14 21:50:56,398 [INFO]   PnL: +7.0%  $+32.00 | Trailing Stop  60m
+2026-06-14 21:50:56,398 [INFO] [TSLA] SQ_LONG @ 2026-06-12 11:35 | C395.0 exp 20260612 sq=-0.07 r2=0.00
+2026-06-14 21:50:56,399 [INFO]   PnL: +60.0%  $+246.00 | Trailing Stop  35m
+2026-06-14 21:50:56,399 [INFO] [TSLA] SQ_SHORT @ 2026-06-12 12:50 | P402.5 exp 20260612 sq=0.48 r2=0.41
+2026-06-14 21:50:56,399 [INFO]   [polygon] fetching O:TSLA260612P00402500 ...
+2026-06-14 21:51:08,564 [INFO]   PnL: -52.0%  $-130.00 | Stop Loss (50%)  75m
+2026-06-14 21:51:08,569 [INFO] Saved to option_backtest_sq_r2.json
+2026-06-14 21:54:35,999 [INFO] 
+=======================================================
+  SQ+R² Backtest: TSLA
+=======================================================
+2026-06-14 21:54:35,999 [INFO] [TSLA] loading 59-day 5m data...
+2026-06-14 21:54:38,480 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.99 rise=0.74 r2_peak=0.86 r2_now=0.06
+2026-06-14 21:54:38,481 [INFO]   SQ_SHORT @ 11:25 | sq_peak=0.79 fall=0.30 r2_peak=0.84 r2_now=0.63
+2026-06-14 21:54:38,483 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.70 rise=0.43 r2_peak=0.53 r2_now=0.09
+2026-06-14 21:54:38,483 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.98 fall=0.67 r2_peak=0.93 r2_now=0.19
+2026-06-14 21:54:38,483 [INFO]   SQ_LONG  @ 13:25 | sq_trough=-0.93 rise=0.49 r2_peak=0.87 r2_now=0.49
+2026-06-14 21:54:38,485 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.94 rise=0.51 r2_peak=0.79 r2_now=0.26
+2026-06-14 21:54:38,487 [INFO]   SQ_LONG  @ 09:20 | sq_trough=-0.91 rise=0.43 r2_peak=0.67 r2_now=0.17
+2026-06-14 21:54:38,487 [INFO]   SQ_LONG  @ 12:45 | sq_trough=-0.77 rise=0.38 r2_peak=0.67 r2_now=0.14
+2026-06-14 21:54:38,489 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.86 fall=0.38 r2_peak=0.75 r2_now=0.28
+2026-06-14 21:54:38,491 [INFO]   SQ_LONG  @ 09:50 | sq_trough=-0.91 rise=0.48 r2_peak=0.71 r2_now=0.13
+2026-06-14 21:54:38,492 [INFO]   SQ_SHORT @ 11:10 | sq_peak=0.79 fall=0.33 r2_peak=0.92 r2_now=0.46
+2026-06-14 21:54:38,492 [INFO]   SQ_LONG  @ 13:00 | sq_trough=-0.95 rise=0.50 r2_peak=0.88 r2_now=0.27
+2026-06-14 21:54:38,494 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.70 fall=0.23 r2_peak=0.62 r2_now=0.41
+2026-06-14 21:54:38,496 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.99 rise=0.57 r2_peak=0.93 r2_now=0.17
+2026-06-14 21:54:38,496 [INFO]   SQ_SHORT @ 13:25 | sq_peak=0.98 fall=0.48 r2_peak=0.95 r2_now=0.42
+2026-06-14 21:54:38,498 [INFO]   SQ_SHORT @ 09:30 | sq_peak=0.93 fall=0.50 r2_peak=0.90 r2_now=0.15
+2026-06-14 21:54:38,500 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.78 rise=0.28 r2_peak=0.65 r2_now=0.28
+2026-06-14 21:54:38,500 [INFO]   SQ_SHORT @ 12:40 | sq_peak=0.73 fall=0.31 r2_peak=0.80 r2_now=0.37
+2026-06-14 21:54:38,502 [INFO]   SQ_LONG  @ 09:30 | sq_trough=-0.94 rise=0.79 r2_peak=0.80 r2_now=0.03
+2026-06-14 21:54:38,502 [INFO]   SQ_SHORT @ 11:00 | sq_peak=0.97 fall=0.52 r2_peak=0.92 r2_now=0.54
+2026-06-14 21:54:38,504 [INFO]   SQ_SHORT @ 11:25 | sq_peak=0.86 fall=0.42 r2_peak=0.92 r2_now=0.40
+2026-06-14 21:54:38,504 [INFO]   SQ_SHORT @ 13:25 | sq_peak=0.76 fall=0.35 r2_peak=0.85 r2_now=0.29
+2026-06-14 21:54:38,506 [INFO]   SQ_LONG  @ 11:15 | sq_trough=-0.81 rise=0.54 r2_peak=0.80 r2_now=0.17
+2026-06-14 21:54:38,506 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.96 fall=0.46 r2_peak=0.94 r2_now=0.22
+2026-06-14 21:54:38,509 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.90 rise=0.47 r2_peak=0.81 r2_now=0.38
+2026-06-14 21:54:38,509 [INFO]   SQ_LONG  @ 12:00 | sq_trough=-0.78 rise=0.37 r2_peak=0.75 r2_now=0.23
+2026-06-14 21:54:38,511 [INFO]   SQ_SHORT @ 09:55 | sq_peak=0.93 fall=0.52 r2_peak=0.87 r2_now=0.21
+2026-06-14 21:54:38,511 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.90 fall=0.57 r2_peak=0.82 r2_now=0.11
+2026-06-14 21:54:38,513 [INFO]   SQ_SHORT @ 09:25 | sq_peak=0.96 fall=0.54 r2_peak=0.80 r2_now=0.13
+2026-06-14 21:54:38,513 [INFO]   SQ_LONG  @ 11:45 | sq_trough=-0.84 rise=0.48 r2_peak=0.70 r2_now=0.08
+2026-06-14 21:54:38,514 [INFO]   SQ_SHORT @ 09:40 | sq_peak=0.99 fall=0.58 r2_peak=0.88 r2_now=0.12
+2026-06-14 21:54:38,516 [INFO]   SQ_LONG  @ 09:50 | sq_trough=-0.75 rise=0.28 r2_peak=0.69 r2_now=0.19
+2026-06-14 21:54:38,517 [INFO]   SQ_SHORT @ 11:35 | sq_peak=1.00 fall=0.55 r2_peak=0.99 r2_now=0.41
+2026-06-14 21:54:38,518 [INFO]   SQ_LONG  @ 11:10 | sq_trough=-0.94 rise=0.47 r2_peak=0.90 r2_now=0.32
+2026-06-14 21:54:38,520 [INFO]   SQ_SHORT @ 10:55 | sq_peak=0.98 fall=0.63 r2_peak=0.92 r2_now=0.14
+2026-06-14 21:54:38,523 [INFO]   SQ_LONG  @ 09:30 | sq_trough=-0.93 rise=0.59 r2_peak=0.79 r2_now=0.24
+2026-06-14 21:54:38,523 [INFO]   SQ_SHORT @ 11:30 | sq_peak=0.85 fall=0.48 r2_peak=0.86 r2_now=0.18
+2026-06-14 21:54:38,524 [INFO]   SQ_LONG  @ 12:50 | sq_trough=-0.92 rise=0.62 r2_peak=0.89 r2_now=0.08
+2026-06-14 21:54:38,525 [INFO]   SQ_LONG  @ 09:35 | sq_trough=-0.87 rise=0.78 r2_peak=0.61 r2_now=0.01
+2026-06-14 21:54:38,526 [INFO]   SQ_SHORT @ 13:10 | sq_peak=0.95 fall=0.51 r2_peak=0.89 r2_now=0.31
+2026-06-14 21:54:38,527 [INFO]   SQ_LONG  @ 09:15 | sq_trough=-0.75 rise=0.35 r2_peak=0.58 r2_now=0.13
+2026-06-14 21:54:38,527 [INFO]   SQ_LONG  @ 10:35 | sq_trough=-0.85 rise=0.48 r2_peak=0.76 r2_now=0.44
+2026-06-14 21:54:38,529 [INFO]   SQ_LONG  @ 10:00 | sq_trough=-0.94 rise=0.47 r2_peak=0.90 r2_now=0.46
+2026-06-14 21:54:38,530 [INFO]   SQ_SHORT @ 13:00 | sq_peak=0.98 fall=0.54 r2_peak=0.93 r2_now=0.49
+2026-06-14 21:54:38,532 [INFO]   SQ_SHORT @ 10:45 | sq_peak=0.71 fall=0.27 r2_peak=0.65 r2_now=0.40
+2026-06-14 21:54:38,535 [INFO]   SQ_LONG  @ 10:10 | sq_trough=-0.97 rise=0.60 r2_peak=0.88 r2_now=0.14
+2026-06-14 21:54:38,535 [INFO]   SQ_SHORT @ 13:15 | sq_peak=0.94 fall=0.47 r2_peak=0.90 r2_now=0.43
+2026-06-14 21:54:38,537 [INFO]   SQ_SHORT @ 10:30 | sq_peak=0.95 fall=0.58 r2_peak=0.94 r2_now=0.12
+2026-06-14 21:54:38,537 [INFO]   SQ_SHORT @ 13:05 | sq_peak=0.84 fall=0.45 r2_peak=0.72 r2_now=0.10
+2026-06-14 21:54:38,539 [INFO]   SQ_SHORT @ 10:40 | sq_peak=0.94 fall=0.52 r2_peak=0.86 r2_now=0.20
+2026-06-14 21:54:38,539 [INFO]   SQ_SHORT @ 12:30 | sq_peak=0.91 fall=0.46 r2_peak=0.81 r2_now=0.42
+2026-06-14 21:54:38,543 [INFO]   SQ_SHORT @ 10:15 | sq_peak=0.67 fall=0.30 r2_peak=0.58 r2_now=0.30
+2026-06-14 21:54:38,546 [INFO]   SQ_LONG  @ 10:05 | sq_trough=-0.95 rise=0.52 r2_peak=0.93 r2_now=0.13
+2026-06-14 21:54:38,546 [INFO]   SQ_SHORT @ 12:00 | sq_peak=0.92 fall=0.75 r2_peak=0.85 r2_now=0.03
+2026-06-14 21:54:38,548 [INFO]   SQ_LONG  @ 10:15 | sq_trough=-0.94 rise=0.45 r2_peak=0.86 r2_now=0.44
+2026-06-14 21:54:38,548 [INFO]   SQ_LONG  @ 11:50 | sq_trough=-0.83 rise=0.41 r2_peak=0.76 r2_now=0.26
+2026-06-14 21:54:38,550 [INFO]   SQ_SHORT @ 10:30 | sq_peak=0.93 fall=0.66 r2_peak=0.89 r2_now=0.16
+2026-06-14 21:54:38,552 [INFO]   SQ_SHORT @ 10:20 | sq_peak=0.98 fall=0.52 r2_peak=0.94 r2_now=0.30
+2026-06-14 21:54:38,552 [INFO]   SQ_LONG  @ 12:40 | sq_trough=-0.98 rise=0.62 r2_peak=0.95 r2_now=0.18
+2026-06-14 21:54:38,554 [INFO]   SQ_LONG  @ 10:25 | sq_trough=-0.80 rise=0.49 r2_peak=0.56 r2_now=0.14
+2026-06-14 21:54:38,557 [INFO]   SQ_LONG  @ 12:55 | sq_trough=-0.99 rise=0.52 r2_peak=0.92 r2_now=0.41
+2026-06-14 21:54:38,558 [INFO]   SQ_SHORT @ 10:10 | sq_peak=0.89 fall=0.43 r2_peak=0.89 r2_now=0.72
+2026-06-14 21:54:38,561 [INFO]   SQ_LONG  @ 12:05 | sq_trough=-0.99 rise=0.57 r2_peak=0.94 r2_now=0.17
+2026-06-14 21:54:38,562 [INFO]   SQ_LONG  @ 10:40 | sq_trough=-0.91 rise=0.52 r2_peak=0.86 r2_now=0.17
+2026-06-14 21:54:38,566 [INFO]   SQ_LONG  @ 11:35 | sq_trough=-0.93 rise=0.85 r2_peak=0.81 r2_now=0.00
+2026-06-14 21:54:38,567 [INFO]   SQ_SHORT @ 12:50 | sq_peak=0.88 fall=0.40 r2_peak=0.80 r2_now=0.41
+2026-06-14 21:54:38,567 [INFO] [TSLA] 66 SQ signals across 41 days
+2026-06-14 21:54:38,567 [INFO] [TSLA] SQ_LONG @ 2026-04-16 09:35 | C385.0 exp 20260416 sq=-0.25 r2=0.06
+2026-06-14 21:54:38,573 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:38,573 [INFO] [TSLA] SQ_SHORT @ 2026-04-16 11:25 | P390.0 exp 20260416 sq=0.49 r2=0.63
+2026-06-14 21:54:38,577 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:38,577 [INFO] [TSLA] SQ_LONG @ 2026-04-17 09:20 | C395.0 exp 20260417 sq=-0.28 r2=0.09
+2026-06-14 21:54:38,586 [INFO]   PnL: +253.1%  $+810.00 | Signal Reversal  95m
+2026-06-14 21:54:38,586 [INFO] [TSLA] SQ_SHORT @ 2026-04-17 10:55 | P405.0 exp 20260417 sq=0.31 r2=0.19
+2026-06-14 21:54:38,592 [INFO]   PnL: +128.6%  $+252.00 | Signal Reversal  150m
+2026-06-14 21:54:38,592 [INFO] [TSLA] SQ_LONG @ 2026-04-17 13:25 | C400.0 exp 20260417 sq=-0.45 r2=0.49
+2026-06-14 21:54:38,598 [INFO]   PnL: +16.7%  $+28.00 | Trailing Stop  30m
+2026-06-14 21:54:38,598 [INFO] [TSLA] SQ_LONG @ 2026-04-20 10:25 | C392.5 exp 20260420 sq=-0.43 r2=0.26
+2026-06-14 21:54:38,606 [INFO]   PnL: -54.6%  $-141.00 | Stop Loss (50%)  20m
+2026-06-14 21:54:38,606 [INFO] [TSLA] SQ_LONG @ 2026-04-21 09:20 | C392.5 exp 20260421 sq=-0.48 r2=0.17
+2026-06-14 21:54:38,610 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:38,610 [INFO] [TSLA] SQ_LONG @ 2026-04-21 12:45 | C387.5 exp 20260421 sq=-0.39 r2=0.14
+2026-06-14 21:54:38,610 [INFO]   [polygon] fetching O:TSLA260421C00387500 ...
+2026-06-14 21:54:50,790 [WARNING]   No data from Polygon for O:TSLA260421C00387500
+2026-06-14 21:54:50,793 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,794 [INFO] [TSLA] SQ_SHORT @ 2026-04-22 09:40 | P390.0 exp 20260422 sq=0.48 r2=0.28
+2026-06-14 21:54:50,803 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,803 [INFO] [TSLA] SQ_LONG @ 2026-04-23 09:50 | C375.0 exp 20260423 sq=-0.43 r2=0.13
+2026-06-14 21:54:50,803 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,803 [INFO] [TSLA] SQ_SHORT @ 2026-04-23 11:10 | P380.0 exp 20260423 sq=0.47 r2=0.46
+2026-06-14 21:54:50,806 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,806 [INFO] [TSLA] SQ_LONG @ 2026-04-23 13:00 | C375.0 exp 20260423 sq=-0.45 r2=0.27
+2026-06-14 21:54:50,807 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,807 [INFO] [TSLA] SQ_SHORT @ 2026-04-24 13:00 | P375.0 exp 20260424 sq=0.47 r2=0.41
+2026-06-14 21:54:50,812 [INFO]   PnL: -48.6%  $-35.00 | Stop Loss (50%)  60m
+2026-06-14 21:54:50,812 [INFO] [TSLA] SQ_LONG @ 2026-04-27 09:35 | C367.5 exp 20260427 sq=-0.41 r2=0.17
+2026-06-14 21:54:50,814 [INFO]   PnL: -60.9%  $-154.00 | Stop Loss (50%)  25m
+2026-06-14 21:54:50,814 [INFO] [TSLA] SQ_SHORT @ 2026-04-27 13:25 | P380.0 exp 20260427 sq=0.50 r2=0.42
+2026-06-14 21:54:50,819 [INFO]   PnL: -46.3%  $-88.00 | Stop Loss (50%)  50m
+2026-06-14 21:54:50,819 [INFO] [TSLA] SQ_SHORT @ 2026-04-28 09:30 | P377.5 exp 20260428 sq=0.42 r2=0.15
+2026-06-14 21:54:50,822 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,822 [INFO] [TSLA] SQ_LONG @ 2026-04-29 09:35 | C372.5 exp 20260429 sq=-0.49 r2=0.28
+2026-06-14 21:54:50,827 [INFO]   PnL: -34.1%  $-91.00 | Signal Reversal  185m
+2026-06-14 21:54:50,827 [INFO] [TSLA] SQ_SHORT @ 2026-04-29 12:40 | P372.5 exp 20260429 sq=0.42 r2=0.37
+2026-06-14 21:54:50,828 [INFO]   PnL: +20.3%  $+30.00 | Trailing Stop  55m
+2026-06-14 21:54:50,829 [INFO] [TSLA] SQ_LONG @ 2026-04-30 09:30 | C372.5 exp 20260430 sq=-0.15 r2=0.03
+2026-06-14 21:54:50,832 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,832 [INFO] [TSLA] SQ_SHORT @ 2026-04-30 11:00 | P377.5 exp 20260430 sq=0.45 r2=0.54
+2026-06-14 21:54:50,835 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,835 [INFO] [TSLA] SQ_SHORT @ 2026-05-01 11:25 | P395.0 exp 20260501 sq=0.45 r2=0.40
+2026-06-14 21:54:50,841 [INFO]   PnL: +7.0%  $+12.00 | Trailing Stop  25m
+2026-06-14 21:54:50,841 [INFO] [TSLA] SQ_SHORT @ 2026-05-01 13:25 | P397.5 exp 20260501 sq=0.41 r2=0.29
+2026-06-14 21:54:50,846 [INFO]   PnL: +17.4%  $+32.00 | Trailing Stop  40m
+2026-06-14 21:54:50,846 [INFO] [TSLA] SQ_LONG @ 2026-05-04 11:15 | C387.5 exp 20260504 sq=-0.27 r2=0.17
+2026-06-14 21:54:50,848 [INFO]   PnL: +122.9%  $+295.00 | Signal Reversal  105m
+2026-06-14 21:54:50,848 [INFO] [TSLA] SQ_SHORT @ 2026-05-04 13:00 | P392.5 exp 20260504 sq=0.50 r2=0.22
+2026-06-14 21:54:50,853 [INFO]   PnL: -5.0%  $-6.00 | Trailing Stop  25m
+2026-06-14 21:54:50,853 [INFO] [TSLA] SQ_LONG @ 2026-05-05 10:25 | C395.0 exp 20260505 sq=-0.43 r2=0.38
+2026-06-14 21:54:50,856 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,857 [INFO] [TSLA] SQ_LONG @ 2026-05-05 12:00 | C392.5 exp 20260505 sq=-0.41 r2=0.23
+2026-06-14 21:54:50,860 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,860 [INFO] [TSLA] SQ_SHORT @ 2026-05-06 09:55 | P392.5 exp 20260506 sq=0.41 r2=0.21
+2026-06-14 21:54:50,865 [INFO]   PnL: -52.8%  $-149.00 | Stop Loss (50%)  35m
+2026-06-14 21:54:50,865 [INFO] [TSLA] SQ_SHORT @ 2026-05-06 12:50 | P397.5 exp 20260506 sq=0.34 r2=0.11
+2026-06-14 21:54:50,871 [INFO]   PnL: -67.7%  $-105.00 | Stop Loss (50%)  15m
+2026-06-14 21:54:50,871 [INFO] [TSLA] SQ_SHORT @ 2026-05-07 09:25 | P410.0 exp 20260507 sq=0.43 r2=0.13
+2026-06-14 21:54:50,875 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,875 [INFO] [TSLA] SQ_LONG @ 2026-05-07 11:45 | C410.0 exp 20260507 sq=-0.36 r2=0.08
+2026-06-14 21:54:50,878 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,879 [INFO] [TSLA] SQ_SHORT @ 2026-05-08 09:40 | P425.0 exp 20260508 sq=0.41 r2=0.12
+2026-06-14 21:54:50,885 [INFO]   PnL: -51.7%  $-134.00 | Stop Loss (50%)  45m
+2026-06-14 21:54:50,885 [INFO] [TSLA] SQ_LONG @ 2026-05-11 09:50 | C422.5 exp 20260511 sq=-0.47 r2=0.19
+2026-06-14 21:54:50,887 [INFO]   PnL: +604.7%  $+1536.00 | Signal Reversal  105m
+2026-06-14 21:54:50,887 [INFO] [TSLA] SQ_SHORT @ 2026-05-11 11:35 | P440.0 exp 20260511 sq=0.45 r2=0.41
+2026-06-14 21:54:50,892 [INFO]   PnL: -60.7%  $-162.00 | Stop Loss (50%)  70m
+2026-06-14 21:54:50,892 [INFO] [TSLA] SQ_LONG @ 2026-05-12 11:10 | C427.5 exp 20260512 sq=-0.47 r2=0.32
+2026-06-14 21:54:50,892 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,892 [INFO] [TSLA] SQ_SHORT @ 2026-05-13 10:55 | P447.5 exp 20260513 sq=0.36 r2=0.14
+2026-06-14 21:54:50,895 [INFO]   PnL: -58.0%  $-177.00 | Stop Loss (50%)  25m
+2026-06-14 21:54:50,895 [INFO] [TSLA] SQ_LONG @ 2026-05-14 09:30 | C442.5 exp 20260514 sq=-0.34 r2=0.24
+2026-06-14 21:54:50,898 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,899 [INFO] [TSLA] SQ_SHORT @ 2026-05-14 11:30 | P447.5 exp 20260514 sq=0.37 r2=0.18
+2026-06-14 21:54:50,902 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,902 [INFO] [TSLA] SQ_LONG @ 2026-05-14 12:50 | C447.5 exp 20260514 sq=-0.30 r2=0.08
+2026-06-14 21:54:50,905 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,906 [INFO] [TSLA] SQ_LONG @ 2026-05-15 09:35 | C427.5 exp 20260515 sq=-0.09 r2=0.01
+2026-06-14 21:54:50,907 [INFO]   PnL: -51.6%  $-160.00 | Stop Loss (50%)  65m
+2026-06-14 21:54:50,908 [INFO] [TSLA] SQ_SHORT @ 2026-05-15 13:10 | P427.5 exp 20260515 sq=0.44 r2=0.31
+2026-06-14 21:54:50,916 [INFO]   PnL: +129.2%  $+137.00 | Trailing Stop  25m
+2026-06-14 21:54:50,916 [INFO] [TSLA] SQ_LONG @ 2026-05-18 09:15 | C417.5 exp 20260518 sq=-0.40 r2=0.13
+2026-06-14 21:54:50,921 [INFO]   PnL: -56.9%  $-185.00 | Stop Loss (50%)  10m
+2026-06-14 21:54:50,922 [INFO] [TSLA] SQ_LONG @ 2026-05-18 10:35 | C410.0 exp 20260518 sq=-0.37 r2=0.44
+2026-06-14 21:54:50,927 [INFO]   PnL: -31.1%  $-77.00 | Trailing Stop  50m
+2026-06-14 21:54:50,927 [INFO] [TSLA] SQ_LONG @ 2026-05-19 10:00 | C397.5 exp 20260519 sq=-0.48 r2=0.46
+2026-06-14 21:54:50,927 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,927 [INFO] [TSLA] SQ_SHORT @ 2026-05-19 13:00 | P405.0 exp 20260519 sq=0.44 r2=0.49
+2026-06-14 21:54:50,930 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,930 [INFO] [TSLA] SQ_SHORT @ 2026-05-20 10:45 | P412.5 exp 20260520 sq=0.44 r2=0.40
+2026-06-14 21:54:50,936 [INFO]   PnL: -57.7%  $-124.00 | Stop Loss (50%)  110m
+2026-06-14 21:54:50,936 [INFO] [TSLA] SQ_LONG @ 2026-05-21 10:10 | C417.5 exp 20260521 sq=-0.38 r2=0.14
+2026-06-14 21:54:50,939 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,939 [INFO] [TSLA] SQ_SHORT @ 2026-05-21 13:15 | P422.5 exp 20260521 sq=0.47 r2=0.43
+2026-06-14 21:54:50,952 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,952 [INFO] [TSLA] SQ_SHORT @ 2026-05-22 10:30 | P427.5 exp 20260522 sq=0.37 r2=0.12
+2026-06-14 21:54:50,959 [INFO]   PnL: -58.4%  $-146.00 | Stop Loss (50%)  30m
+2026-06-14 21:54:50,959 [INFO] [TSLA] SQ_SHORT @ 2026-05-22 13:05 | P427.5 exp 20260522 sq=0.38 r2=0.10
+2026-06-14 21:54:50,961 [INFO]   PnL: -53.6%  $-60.00 | Stop Loss (50%)  45m
+2026-06-14 21:54:50,961 [INFO] [TSLA] SQ_SHORT @ 2026-05-26 10:40 | P432.5 exp 20260526 sq=0.42 r2=0.20
+2026-06-14 21:54:50,962 [INFO]   PnL: +19.3%  $+55.00 | Trailing Stop  45m
+2026-06-14 21:54:50,962 [INFO] [TSLA] SQ_SHORT @ 2026-05-26 12:30 | P432.5 exp 20260526 sq=0.46 r2=0.42
+2026-06-14 21:54:50,964 [INFO]   PnL: -52.4%  $-98.00 | Stop Loss (50%)  55m
+2026-06-14 21:54:50,964 [INFO] [TSLA] SQ_SHORT @ 2026-05-28 10:15 | P442.5 exp 20260528 sq=0.37 r2=0.30
+2026-06-14 21:54:50,967 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,967 [INFO] [TSLA] SQ_LONG @ 2026-05-29 10:05 | C432.5 exp 20260529 sq=-0.42 r2=0.13
+2026-06-14 21:54:50,969 [INFO]   PnL: +71.2%  $+190.00 | Trailing Stop  100m
+2026-06-14 21:54:50,969 [INFO] [TSLA] SQ_SHORT @ 2026-05-29 12:00 | P437.5 exp 20260529 sq=0.18 r2=0.03
+2026-06-14 21:54:50,974 [INFO]   PnL: +23.2%  $+44.00 | Trailing Stop  150m
+2026-06-14 21:54:50,974 [INFO] [TSLA] SQ_LONG @ 2026-06-01 10:15 | C420.0 exp 20260601 sq=-0.49 r2=0.44
+2026-06-14 21:54:50,976 [INFO]   PnL: +13.4%  $+35.00 | Trailing Stop  30m
+2026-06-14 21:54:50,976 [INFO] [TSLA] SQ_LONG @ 2026-06-01 11:50 | C420.0 exp 20260601 sq=-0.41 r2=0.26
+2026-06-14 21:54:50,977 [INFO]   PnL: -59.5%  $-125.00 | Stop Loss (50%)  105m
+2026-06-14 21:54:50,978 [INFO] [TSLA] SQ_SHORT @ 2026-06-02 10:30 | P422.5 exp 20260602 sq=0.27 r2=0.16
+2026-06-14 21:54:50,987 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,987 [INFO] [TSLA] SQ_SHORT @ 2026-06-03 10:20 | P430.0 exp 20260603 sq=0.46 r2=0.30
+2026-06-14 21:54:50,992 [INFO]   PnL: +315.9%  $+657.00 | Signal Reversal  140m
+2026-06-14 21:54:50,993 [INFO] [TSLA] SQ_LONG @ 2026-06-03 12:40 | C422.5 exp 20260603 sq=-0.36 r2=0.18
+2026-06-14 21:54:50,994 [INFO]   PnL: +53.3%  $+65.00 | Trailing Stop  55m
+2026-06-14 21:54:50,994 [INFO] [TSLA] SQ_LONG @ 2026-06-04 10:25 | C420.0 exp 20260604 sq=-0.31 r2=0.14
+2026-06-14 21:54:50,998 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:50,998 [INFO] [TSLA] SQ_LONG @ 2026-06-05 12:55 | C395.0 exp 20260605 sq=-0.47 r2=0.41
+2026-06-14 21:54:51,003 [INFO]   PnL: -53.2%  $-117.00 | Stop Loss (50%)  10m
+2026-06-14 21:54:51,003 [INFO] [TSLA] SQ_SHORT @ 2026-06-08 10:10 | P402.5 exp 20260608 sq=0.46 r2=0.72
+2026-06-14 21:54:51,009 [INFO]   PnL: +36.5%  $+70.00 | Trailing Stop  25m
+2026-06-14 21:54:51,009 [INFO] [TSLA] SQ_LONG @ 2026-06-09 12:05 | C390.0 exp 20260609 sq=-0.42 r2=0.17
+2026-06-14 21:54:51,012 [WARNING]   Skipped — no Polygon data
+2026-06-14 21:54:51,012 [INFO] [TSLA] SQ_LONG @ 2026-06-10 10:40 | C387.5 exp 20260610 sq=-0.39 r2=0.17
+2026-06-14 21:54:51,018 [INFO]   PnL: -54.0%  $-120.00 | Stop Loss (50%)  5m
+2026-06-14 21:54:51,018 [INFO] [TSLA] SQ_LONG @ 2026-06-12 11:35 | C395.0 exp 20260612 sq=-0.07 r2=0.00
+2026-06-14 21:54:51,019 [INFO]   PnL: +60.0%  $+246.00 | Trailing Stop  35m
+2026-06-14 21:54:51,019 [INFO] [TSLA] SQ_SHORT @ 2026-06-12 12:50 | P402.5 exp 20260612 sq=0.48 r2=0.41
+2026-06-14 21:54:51,024 [INFO]   PnL: -52.0%  $-130.00 | Stop Loss (50%)  75m
+2026-06-14 21:54:51,026 [INFO] Saved to option_backtest_sq_r2.json

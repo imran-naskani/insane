@@ -303,6 +303,8 @@ def download_price(ticker, start, end, timeframe=None):
 #  Feature Configuration
 # ----------------------------------------------------
 feature_params = {
+    "sma_intra_3": 3,
+    "sma_intra_8": 8,
     "sma_short": 20,
     "sma_mid": 50,
     "sma_long": 200,
@@ -353,9 +355,12 @@ def get_market_context(start, end, timeframe):
 def add_features(df, p, timeframe=None):
 
     # -------- Trend --------
-    df["SMA_Short"] = df["Close"].rolling(p["sma_short"]).mean()
-    df["SMA_Mid"]   = df["Close"].rolling(p["sma_mid"]).mean()
-    df["SMA_Long"]  = df["Close"].rolling(p["sma_long"]).mean()
+    typical = (df["High"] + df["Low"] + df["Close"]) / 3
+    df["SMA_Intra_3"] = typical.rolling(p["sma_intra_3"]).mean()
+    df["SMA_Intra_8"] = typical.rolling(p["sma_intra_8"]).mean()
+    df["SMA_Short"]   = df["Close"].rolling(p["sma_short"]).mean()
+    df["SMA_Mid"]     = df["Close"].rolling(p["sma_mid"]).mean()
+    df["SMA_Long"]    = df["Close"].rolling(p["sma_long"]).mean()
 
     df["Slope_Short"] = df["Close"].rolling(p["trend_slope_short"]) \
         .apply(trend_slope, raw=False)
