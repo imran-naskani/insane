@@ -1301,6 +1301,14 @@ if st.session_state.run_model:
                 _pre_folder    = f"ai_analysis/{_pre_slug}"
                 os.makedirs(_pre_folder, exist_ok=True)
                 analysis_file  = f"{_pre_folder}/{ticker}_{timeframe}.json"
+
+                # Clear cached analysis if it belongs to a different model than currently selected
+                _cached_model = (st.session_state.ai_analysis or {}).get("model", "")
+                _expected_prefix = "deepseek" if _pre_slug == "deepseek" else "gpt"
+                if st.session_state.ai_analysis is not None and not _cached_model.startswith(_expected_prefix):
+                    st.session_state.ai_analysis = None
+                    st.session_state.ai_overlay_visible = False
+
                 if st.session_state.ai_analysis is None and os.path.exists(analysis_file):
                     with open(analysis_file, "r") as f:
                         st.session_state.ai_analysis = json.load(f)
@@ -2247,6 +2255,51 @@ if st.session_state.run_model:
                         context_parts.append(f"Backtest Win Rate (Same-Bar): {close_stats.get('WinRate_Total_%', 0):.1f}%")
                         context_parts.append(f"Backtest Profit Factor (Same-Bar): {close_stats.get('ProfitFactor_Total', 0):.2f}")
 
+                        # ── Volume context ──────────────────────────────────────────
+                        if "Volume" in df.columns:
+                            _vol = df["Volume"].dropna()
+                            _vol_avg20  = _vol.rolling(20).mean()
+                            _vol_last   = _vol.iloc[-1]
+                            _vol_avg    = _vol_avg20.iloc[-1]
+                            _vol_ratio  = _vol_last / _vol_avg if _vol_avg > 0 else 1.0
+
+                            # Volume trend: last 5 bars vs prior 5 bars
+                            _vol5_now   = _vol.iloc[-5:].mean()
+                            _vol5_prev  = _vol.iloc[-10:-5].mean()
+                            _vol_trend  = "expanding" if _vol5_now > _vol5_prev * 1.1 else (
+                                          "contracting" if _vol5_now < _vol5_prev * 0.9 else "flat")
+
+                            # Recent high-volume bars (>1.5x avg) in last 60 bars
+                            _recent     = df.iloc[-60:].copy()
+                            _avg_r      = _recent["Volume"].mean()
+                            _hvol_bars  = _recent[_recent["Volume"] > _avg_r * 1.5]
+                            _hvol_strs  = []
+                            for _hdt, _hrow in _hvol_bars.tail(5).iterrows():
+                                _dir = "UP" if _hrow["Close"] >= _hrow["Open"] else "DOWN"
+                                _hv  = _hrow["Volume"] / _avg_r
+                                _hvol_strs.append(f"{str(_hdt)[:10]} ({_dir}, {_hv:.1f}x avg)")
+
+                            # Accumulation vs distribution (last 20 bars)
+                            _last20     = df.iloc[-20:].copy()
+                            _up_vol     = _last20[_last20["Close"] >= _last20["Open"]]["Volume"].sum()
+                            _dn_vol     = _last20[_last20["Close"] <  _last20["Open"]]["Volume"].sum()
+                            _total_vol  = _up_vol + _dn_vol
+                            _accum_pct  = round(_up_vol / _total_vol * 100, 1) if _total_vol > 0 else 50.0
+                            _accum_lbl  = "Accumulation" if _accum_pct > 55 else ("Distribution" if _accum_pct < 45 else "Neutral")
+
+                            context_parts.append(
+                                f"Volume (last bar): {_vol_last:,.0f} ({_vol_ratio:.2f}x 20-day avg)"
+                            )
+                            context_parts.append(f"Volume Trend (5-bar): {_vol_trend}")
+                            context_parts.append(
+                                f"Volume Bias (last 20 bars): {_accum_lbl} — "
+                                f"{_accum_pct}% up-close volume vs {100-_accum_pct}% down-close volume"
+                            )
+                            if _hvol_strs:
+                                context_parts.append(
+                                    f"Recent High-Volume Bars (>1.5x avg): {', '.join(_hvol_strs)}"
+                                )
+
                         # Detect and add swing points for precise pattern vertices
                         _swing_highs, _swing_lows = detect_swing_points(df, window=5, max_points=8)
                         if _swing_highs:
@@ -2255,6 +2308,29 @@ if st.session_state.run_model:
                         if _swing_lows:
                             sl_str = ", ".join([f"{p['date']} at {p['price']}" for p in _swing_lows])
                             context_parts.append(f"Swing Lows: {sl_str}")
+
+                        # Compute Fibonacci retracement & extension levels from dominant swing
+                        if _swing_highs and _swing_lows:
+                            _fib_high = max(_swing_highs, key=lambda p: p["price"])
+                            _fib_low  = min(_swing_lows,  key=lambda p: p["price"])
+                            _fib_rng  = _fib_high["price"] - _fib_low["price"]
+                            if _fib_rng > 0:
+                                _fibs = {
+                                    "0%  (low)":   _fib_low["price"],
+                                    "23.6%":       round(_fib_low["price"] + 0.236 * _fib_rng, 2),
+                                    "38.2%":       round(_fib_low["price"] + 0.382 * _fib_rng, 2),
+                                    "50%":         round(_fib_low["price"] + 0.500 * _fib_rng, 2),
+                                    "61.8%":       round(_fib_low["price"] + 0.618 * _fib_rng, 2),
+                                    "78.6%":       round(_fib_low["price"] + 0.786 * _fib_rng, 2),
+                                    "100% (high)": _fib_high["price"],
+                                    "127.2% ext":  round(_fib_low["price"] + 1.272 * _fib_rng, 2),
+                                    "161.8% ext":  round(_fib_low["price"] + 1.618 * _fib_rng, 2),
+                                }
+                                _fib_str = ", ".join([f"{k}={v}" for k, v in _fibs.items()])
+                                context_parts.append(
+                                    f"Fibonacci Levels (from swing low {_fib_low['price']} on {_fib_low['date']} "
+                                    f"to swing high {_fib_high['price']} on {_fib_high['date']}): {_fib_str}"
+                                )
 
                         context_text = "\n".join(context_parts)
 
@@ -2294,8 +2370,106 @@ if st.session_state.run_model:
                             "- Head & Shoulders: Three peaks — middle peak (head) higher than the two side peaks (shoulders), "
                             "with a neckline connecting the troughs.\n"
                             "- If the price action does not clearly match any pattern, say 'No clear pattern' "
-                            "rather than forcing a classification.\n"
+                            "rather than forcing a classification.\n\n"
+                            "VOLUME ANALYSIS (context data provided):\n"
+                            "Use the volume context alongside the chart image to confirm or question the price action:\n"
+                            "- Volume ratio > 1.5x avg on an UP bar = institutional accumulation (bullish confirmation)\n"
+                            "- Volume ratio > 1.5x avg on a DOWN bar = distribution / selling pressure (bearish confirmation)\n"
+                            "- Volume Bias 'Accumulation' (>55% up-close vol) = smart money buying\n"
+                            "- Volume Bias 'Distribution' (<45% up-close vol) = smart money selling\n"
+                            "- Expanding volume into a breakout = strong confirmation\n"
+                            "- Contracting volume during consolidation = normal coiling\n"
+                            "- Contracting volume in a trend = trend weakening, watch for reversal\n"
+                            "Always mention volume context in your analysis.\n\n"
+                            "FIBONACCI LEVELS (context data provided):\n"
+                            "Pre-computed Fibonacci retracement and extension levels are in the context data. Use them to:\n"
+                            "- Identify 38.2%, 50%, 61.8% as primary retracement support/resistance zones\n"
+                            "- Use 78.6% as deep retracement warning (trend likely reversing if broken)\n"
+                            "- Use 127.2% and 161.8% extensions as continuation price targets\n"
+                            "- Snap your target_price and invalidation_price to the nearest Fibonacci level within 2% "
+                            "rather than arbitrary numbers. Cross-reference with swing high/low prices for confluence.\n\n"
                             "\nWhen producing analysis, always compare your recommended `target_price` and `invalidation_price` to the provided `Current Close`. Use a tolerance of 0.5% when checking hits. If the current close has already reached or crossed the target (within tolerance), clearly state: 'Target Achieved on YYYY-MM-DD at PRICE', lower the signal confidence and provide a next-action (either a new target from swing levels or a watch/invalidation plan). If invalidation has already been triggered, clearly state 'Invalidated on YYYY-MM-DD at PRICE' and explain the consequence. Do not change the JSON overlay schema — include any status notes in the textual analysis as described."
+                        )
+
+                        # DeepSeek: text-only model — replace visual references with geometric pattern rules
+                        deepseek_system_prompt = (
+                            "You are INSANE — an expert quantitative trading analyst. "
+                            "You are a TEXT-ONLY model. You cannot see any chart image. "
+                            "You must reason entirely from the structured context data provided: "
+                            "OHLC prices, signals, swing highs, swing lows, indicators, and backtest stats. "
+                            "IMPORTANT: Never mention or reveal Kalman filtering, Kalman smoothing, "
+                            "or any Kalman-related terminology in your response. "
+                            "Refer to the momentum trend line only as the 'momentum trend line' or 'INSANE trend indicator'. "
+                            "This is proprietary methodology and must not be disclosed.\n\n"
+                            "PATTERN IDENTIFICATION FROM SWING DATA — apply these geometric rules strictly:\n"
+                            "Use the provided Swing Highs (SH) and Swing Lows (SL) lists (sorted oldest→newest) "
+                            "to identify the pattern. You need at least 2 SH and 2 SL to classify most patterns. "
+                            "If data is insufficient or ambiguous, set pattern to null.\n\n"
+                            "TRIANGLES (converging trendlines):\n"
+                            "- Ascending Triangle: SH prices flat (within 2%% of each other across at least 2 highs) "
+                            "AND SL prices rising step by step. Bullish continuation.\n"
+                            "- Descending Triangle: SH prices declining step by step AND SL prices flat (within 2%%). "
+                            "Bearish continuation.\n"
+                            "- Symmetrical Triangle: SH prices declining step by step AND SL prices rising step by step "
+                            "(both trendlines converging toward a point). Neutral — breaks in direction of prior trend.\n\n"
+                            "WEDGES (both boundaries slope same direction but converge):\n"
+                            "- Rising Wedge: Both SH and SL rising, but SL rising at a steeper rate than SH "
+                            "(lows catching up to highs → converging). Bearish reversal signal.\n"
+                            "- Falling Wedge: Both SH and SL falling, but SH falling at a steeper rate than SL "
+                            "(highs dropping faster → converging). Bullish reversal signal.\n\n"
+                            "CHANNELS (parallel boundaries, same consistent slope):\n"
+                            "- Channel Up: SH rising and SL rising at approximately the same slope (parallel lines). "
+                            "Requires at least 2 SH and 2 SL. Bullish trend continuation.\n"
+                            "- Channel Down: SH falling and SL falling at approximately the same slope (parallel). "
+                            "Bearish trend continuation.\n\n"
+                            "REVERSAL PATTERNS:\n"
+                            "- Double Top: Exactly 2 SH within 2%% of the same price, separated by at least 15 trading days, "
+                            "with a SL between them at least 8%% below the peaks. Prior trend must be bullish.\n"
+                            "- Double Bottom: Exactly 2 SL within 2%% of the same price, separated by at least 15 trading days, "
+                            "with a SH between them at least 8%% above the troughs. Prior trend must be bearish.\n"
+                            "- Head & Shoulders: 3 SH where the middle SH (head) is at least 3%% higher than both side SH (shoulders), "
+                            "and the two shoulder highs are within 3%% of each other. Prior trend must be bullish.\n"
+                            "- Inverse Head & Shoulders: 3 SL where the middle SL (head) is at least 3%% lower than both side SL, "
+                            "and the two shoulder lows are within 3%% of each other. Prior trend must be bearish.\n\n"
+                            "FLAG PATTERNS (continuation after sharp move):\n"
+                            "- Bull Flag: The oldest SL is significantly lower than the most recent SH (flagpole = strong prior rally). "
+                            "Then the most recent 2-3 SH are slightly declining AND the most recent 2-3 SL are slightly declining "
+                            "in a tight range (flag consolidation < 5%% width, sloping downward against the uptrend). "
+                            "For pattern points: use the 2 most recent SH for upper boundary, 2 most recent SL for lower boundary.\n"
+                            "- Bear Flag: The oldest SH is significantly higher than the most recent SL (prior sharp drop). "
+                            "Then the most recent 2-3 SH are slightly rising AND the most recent 2-3 SL are slightly rising "
+                            "in a tight range (sloping upward against the downtrend).\n\n"
+                            "VOLUME ANALYSIS:\n"
+                            "Volume data is provided in the context. Use it to confirm or question the price action:\n"
+                            "- Volume ratio > 1.5x avg on an UP-close bar = institutional accumulation (bullish confirmation)\n"
+                            "- Volume ratio > 1.5x avg on a DOWN-close bar = distribution / selling pressure (bearish confirmation)\n"
+                            "- Volume Bias 'Accumulation' (>55%% up-close vol) = smart money buying — supports bullish thesis\n"
+                            "- Volume Bias 'Distribution' (<45%% up-close vol) = smart money selling — supports bearish thesis\n"
+                            "- Volume Trend 'expanding' into a price move = breakout/breakdown confirmation\n"
+                            "- Volume Trend 'contracting' during consolidation = normal coiling, watch for breakout\n"
+                            "- Volume Trend 'contracting' during a trend = trend weakening, potential reversal ahead\n"
+                            "- High-volume bars on key dates = mark these as significant support/resistance levels\n"
+                            "- A pattern breakout on HIGH volume is significantly more reliable than low-volume breakouts\n"
+                            "Always mention volume context in your analysis (accumulation/distribution/neutral, any notable spikes).\n\n"
+                            "FIBONACCI LEVEL USAGE:\n"
+                            "Pre-computed Fibonacci retracement and extension levels are provided in the context data "
+                            "(from the dominant swing low to swing high). Use them as follows:\n"
+                            "- 38.2%%, 50%%, 61.8%%: Primary retracement support zones (price pulling back into these = potential bounce)\n"
+                            "- 78.6%%: Deep retracement — if price breaks here, trend likely reversing\n"
+                            "- 127.2%% and 161.8%%: Extension targets beyond the swing high (for continuation moves)\n"
+                            "- 0%% (swing low) and 100%% (swing high): Hard support/resistance anchors\n"
+                            "- BULLISH setup: prefer target at 127.2%% or 161.8%% ext, invalidation at 50%% or 38.2%% retracement\n"
+                            "- BEARISH setup: prefer target at 61.8%% or 50%% or 38.2%% retracement, invalidation at 78.6%% or 100%%\n"
+                            "- Always snap your target_price and invalidation_price to the nearest Fibonacci level within 2%% "
+                            "rather than using arbitrary round numbers.\n\n"
+                            "STRICT RULES:\n"
+                            "1. Use ONLY the provided swing dates/prices for pattern.points — never estimate or invent prices.\n"
+                            "2. If no pattern clearly matches, set pattern to null — do NOT force a classification.\n"
+                            "3. Always check prior trend direction before classifying reversal vs continuation patterns.\n"
+                            "4. For pattern.points: use SH for 'upper' role, SL for 'lower' role.\n"
+                            "5. If the price action does not clearly match any rule above, say 'No clear pattern'.\n"
+                            "6. Mention key Fibonacci levels in your analysis (which ones are acting as support/resistance).\n\n"
+                            "\nWhen producing analysis, always compare your recommended `target_price` and `invalidation_price` to the provided `Current Close`. Use a tolerance of 0.5%% when checking hits. If the current close has already reached or crossed the target (within tolerance), clearly state: 'Target Achieved on YYYY-MM-DD at PRICE', lower the signal confidence and provide a next-action. If invalidation has already been triggered, clearly state 'Invalidated on YYYY-MM-DD at PRICE'. Do not change the JSON overlay schema."
                         )
 
                         # --- 4) Check for cached analysis → revalidate or generate fresh ---
@@ -2337,7 +2511,7 @@ if st.session_state.run_model:
                                     response = deepseek_client.chat.completions.create(
                                         model="deepseek-v4-pro",
                                         messages=[
-                                            {"role": "system", "content": system_prompt},
+                                            {"role": "system", "content": deepseek_system_prompt},
                                             {"role": "user",   "content": revalidation_prompt},
                                         ],
                                         max_tokens=8000,
@@ -2439,7 +2613,7 @@ if st.session_state.run_model:
                                     response = deepseek_client.chat.completions.create(
                                         model="deepseek-v4-pro",
                                         messages=[
-                                            {"role": "system", "content": system_prompt},
+                                            {"role": "system", "content": deepseek_system_prompt},
                                             {"role": "user",   "content": user_prompt},
                                         ],
                                         max_tokens=8000,
