@@ -50,7 +50,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-TICKERS      = ["SPY", "TSLA"]
+TICKERS      = ["SPY", "TSLA", "^GSPC"]
 TIMEFRAME    = "5m"
 SIGNAL_DAYS  = 59       # within yfinance 60-day 5m limit; 31+ days for TOS_Trail warmup
 
@@ -62,11 +62,24 @@ API_SLEEP       = 12    # seconds between Polygon calls (5 req/min limit)
 STOP_LOSS_PCT  = 0.50
 TRAIL_ACTIVATE = 1.50
 TRAIL_FROM_HWM = 0.75
+
+# Per-ticker overrides (take precedence over globals above)
+STOP_LOSS_OVERRIDE  = {"^GSPC": 0.25}
+TRAIL_HWM_OVERRIDE  = {"^GSPC": 0.25}
 ENTRY_CUTOFF   = dt.time(14,  0)
 EOD_CUTOFF     = dt.time(14, 55)
 OTM_CUTOFF     = dt.time(13, 30)
 
-STRIKE_INC = {"SPY": 1.0, "TSLA": 2.5}
+STRIKE_INC = {"SPY": 1.0, "TSLA": 2.5, "^GSPC": 5.0}
+
+# Polygon uses "SPXW" for weekly SPX options (^GSPC yfinance ticker → SPXW)
+POLYGON_TICKER = {"^GSPC": "SPXW"}
+
+# Per-ticker trade filter: only allowed (signal_prefix, direction) combos
+# None = no filter (trade everything)
+ALLOWED_COMBOS = {
+    "^GSPC": {("ORB", "short"), ("MR_UPGRADED", "long")},
+}
 
 SESSION_START = pd.Timestamp("08:30").time()
 SESSION_END   = pd.Timestamp("15:00").time()
@@ -176,27 +189,37 @@ def generate_signals(ticker: str) -> list:
 
             elif (is_mr_long_rev or is_mr_long) and state["position"] != "long":
                 if state["position"] == "short" and state["position_src"] == "orb":
+                    # MR Flip: exit ORB SHORT — emitted for reversal detection, no new entry
                     if is_mr_long_rev and _orb_reversal_confirmed(
                             dv, state["orb_bar_loc"], "short", last_idx,
                             threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="long", position_src="mr", mr_entry_bar=last_idx)
-                        signal_dir, signal_type = "long", "MR_LONG"
+                        signal_dir, signal_type = "long", "MR_FLIP_LONG"
                 elif is_mr_long:
+                    # Standalone MR: track for upgrade, suppress alert/execution
                     state.update(position="long", position_src="mr", mr_entry_bar=last_idx)
-                    signal_dir, signal_type = "long", "MR_LONG"
 
             elif (is_mr_short_rev or is_mr_short) and state["position"] != "short":
                 if state["position"] == "long" and state["position_src"] == "orb":
+                    # MR Flip: exit ORB LONG — emitted for reversal detection, no new entry
                     if is_mr_short_rev and _orb_reversal_confirmed(
                             dv, state["orb_bar_loc"], "long", last_idx,
                             threshold=REVERSAL_ANGLE, r2_thr=r2_thr):
                         state.update(position="short", position_src="mr", mr_entry_bar=last_idx)
-                        signal_dir, signal_type = "short", "MR_SHORT"
+                        signal_dir, signal_type = "short", "MR_FLIP_SHORT"
                 elif is_mr_short:
+                    # Standalone MR: track for upgrade, suppress
                     state.update(position="short", position_src="mr", mr_entry_bar=last_idx)
-                    signal_dir, signal_type = "short", "MR_SHORT"
 
-            if signal_dir:
+            # MR→ORB upgrade: emit at upgrade bar time (this becomes the trade entry)
+            if state["position"] in ("long", "short") and state["position_src"] == "mr":
+                if mr_orb_upgrade_qualifies(dv, state["mr_entry_bar"], last_idx,
+                                            orb_deg, r2_thr, state["position"], _accum):
+                    state.update(position_src="orb", orb_bar_loc=last_idx)
+                    signal_dir  = state["position"]
+                    signal_type = f"MR_UPGRADED_{state['position'].upper()}"
+
+            if signal_dir and signal_type:
                 prev = state["last_alert"]
                 if prev is None or prev[1] != signal_type:
                     state["last_alert"] = (bar_time, signal_type)
@@ -235,10 +258,11 @@ def derive_option_contract(ticker: str, direction: str,
 
 
 def polygon_symbol(ticker: str, expiry: str, right: str, strike: float) -> str:
-    """Build Polygon option ticker: O:SPY260610C00736000"""
+    """Build Polygon option ticker: O:SPY260610C00736000 / O:SPXW260610C07550000"""
+    poly_tk  = POLYGON_TICKER.get(ticker, ticker)
     exp_yy   = expiry[2:]                     # "20260610" -> "260610"
     strike_i = int(round(strike * 1000))      # 736.0 -> 736000
-    return f"O:{ticker}{exp_yy}{right}{strike_i:08d}"
+    return f"O:{poly_tk}{exp_yy}{right}{strike_i:08d}"
 
 
 # ── POLYGON DATA FETCH (CACHED) ───────────────────────────────────────────────
@@ -343,16 +367,16 @@ def _make_result(direction: str, entry_price: float, exit_price: float,
 def simulate_trade(signal_bar_time: pd.Timestamp, option_bars: pd.DataFrame,
                    direction: str, day_signals: list,
                    use_stop_loss: bool = True,
-                   dv_session: pd.DataFrame = None,
-                   mr_entry_bar: int = None,
-                   ticker: str = None) -> dict | None:
+                   stop_loss_pct: float = STOP_LOSS_PCT,
+                   trail_from_hwm: float = TRAIL_FROM_HWM) -> dict | None:
     """
     Entry at NEXT BAR OPEN after signal bar.
     Exit fill also at NEXT BAR OPEN after the trigger bar.
     EOD (14:55) exits at that bar's close (no next bar).
-    use_stop_loss=False: ORB signals — let trade run to EOD, flip, or trail.
+    use_stop_loss=False: ORB — hold to EOD/trail/flip.
+    use_stop_loss=True:  MR_UPGRADED_ORB — 50% stop loss active (mirrors executor).
+    MR_FLIP signals in day_signals trigger Signal Reversal exit for the open trade.
     """
-    # Bars strictly after signal bar
     bars = option_bars[option_bars.index > signal_bar_time]
     if len(bars) == 0:
         return None
@@ -362,7 +386,7 @@ def simulate_trade(signal_bar_time: pd.Timestamp, option_bars: pd.DataFrame,
     if entry_price <= 0 or pd.isna(entry_price):
         return None
 
-    # Opposite-direction signals on same day (reversal exit triggers)
+    # Opposite-direction signals (including MR_FLIP) trigger reversal exit
     reversal_times = set()
     for s in day_signals:
         t = pd.Timestamp(s["bar_time"])
@@ -373,16 +397,6 @@ def simulate_trade(signal_bar_time: pd.Timestamp, option_bars: pd.DataFrame,
 
     hwm             = entry_price
     trailing_active = False
-    is_upgraded     = False   # MR→ORB upgrade state (disables stop loss once confirmed)
-
-    # Pre-compute ORB upgrade params (only used for MR_UPGRADED trades)
-    if dv_session is not None and ticker is not None:
-        _orb_deg = ORB_SLOPE_DEG.get(ticker, ORB_SLOPE_DEG_DEFAULT)
-        _r2_thr  = ORB_R2_THR.get(ticker, ORB_R2_THR_DEFAULT)
-        _acc     = ORB_ACCUM_START.get(ticker, ORB_ACCUM_START_DEFAULT)
-        _acc     = _acc if _acc is not None else ORB_ACCUM_START_DEFAULT
-    else:
-        _orb_deg = _r2_thr = _acc = None
 
     for i, (bar_time, row) in enumerate(bars.iterrows()):
         mid = float(row["close"])
@@ -396,40 +410,19 @@ def simulate_trade(signal_bar_time: pd.Timestamp, option_bars: pd.DataFrame,
             trailing_active = True
             log.debug(f"  Trailing stop armed at ${mid:.2f}")
 
-        # For MR_UPGRADED trades: check if upgrade has fired at this bar
-        # Once upgraded, stop loss is disabled for the remainder of the trade
-        if dv_session is not None and not is_upgraded:
-            matching = dv_session[dv_session.index <= bar_time]
-            last_idx = len(matching) - 1
-            if last_idx > mr_entry_bar:
-                try:
-                    if mr_orb_upgrade_qualifies(
-                            matching, mr_entry_bar, last_idx,
-                            _orb_deg, _r2_thr, direction, _acc):
-                        is_upgraded = True
-                        log.debug(f"  MR→ORB upgrade at {bar_time.strftime('%H:%M')} — stop loss off")
-                except Exception:
-                    pass
-
-        # EOD: exit at this bar's close (no next bar makes sense here)
         if bar_time.time() >= EOD_CUTOFF:
             return _make_result(direction, entry_price, mid, hwm,
                                 "EOD", entry_time, bar_time)
 
-        # Stop loss: active for MR_ONLY always; for MR_UPGRADED only before upgrade bar
-        sl_active = use_stop_loss and not is_upgraded
-
-        # Determine if an exit should trigger
         reason = None
         if bar_time in reversal_times:
             reason = "Signal Reversal"
-        elif sl_active and mid <= entry_price * STOP_LOSS_PCT:
-            reason = "Stop Loss (50%)"
-        elif trailing_active and mid <= hwm * TRAIL_FROM_HWM:
+        elif use_stop_loss and mid <= entry_price * stop_loss_pct:
+            reason = f"Stop Loss ({int(stop_loss_pct*100)}%)"
+        elif trailing_active and mid <= hwm * trail_from_hwm:
             reason = "Trailing Stop"
 
         if reason:
-            # Fill at NEXT bar open
             remaining = bars.iloc[i + 1:]
             if len(remaining) == 0:
                 return _make_result(direction, entry_price, mid, hwm,
@@ -439,7 +432,6 @@ def simulate_trade(signal_bar_time: pd.Timestamp, option_bars: pd.DataFrame,
             return _make_result(direction, entry_price, exit_price, hwm,
                                 reason, entry_time, exit_time)
 
-    # Ran out of bars without hitting an exit — treat as EOD
     last = bars.iloc[-1]
     return _make_result(direction, entry_price, float(last["close"]), hwm,
                         "EOD", entry_time, bars.index[-1])
@@ -477,26 +469,37 @@ def run_backtest(ticker: str) -> list:
 
         for sig in sorted(day_sigs, key=lambda s: s["bar_time"]):
             bar_time = pd.Timestamp(sig["bar_time"])
+            stype    = sig["signal_type"]
 
             if bar_time.time() >= OTM_CUTOFF:
-                # After 13:30 CT: executor uses 1DTE options (next-day expiry).
-                # Cross-day bar simulation is unreliable — stop processing for today.
                 break
 
-            # ── Executor rule: skip if same direction while still in a position ──
+            # MR_FLIP: exit-only — included in day_sigs so existing trade detects
+            # Signal Reversal, but no new position is opened here
+            if "MR_FLIP" in stype:
+                log.info(f"  {stype} @ {bar_time.strftime('%H:%M')} — exit only, no new entry")
+                continue
+
+            # Per-ticker combo filter
+            allowed = ALLOWED_COMBOS.get(ticker)
+            if allowed is not None:
+                prefix = "MR_UPGRADED" if stype.startswith("MR_UPGRADED") else "ORB"
+                if (prefix, sig["direction"]) not in allowed:
+                    log.info(f"  FILTER {stype} {sig['direction'].upper()} — not in allowed combos for {ticker}")
+                    continue
+
+            # Skip if same direction while still in a position
             if (last_exit_time is not None
                     and bar_time < last_exit_time
                     and sig["direction"] == last_direction):
-                log.info(f"  SKIP {sig['signal_type']} {sig['direction'].upper()} "
+                log.info(f"  SKIP {stype} {sig['direction'].upper()} "
                          f"— already {last_direction} open until {last_exit_time.strftime('%H:%M')}")
                 continue
-            # Opposite direction while open → this is a flip; allowed through.
-            # simulate_trade will exit the previous position via Signal Reversal.
 
             strike, expiry, right = derive_option_contract(
                 ticker, sig["direction"], sig["underlying_price"], bar_time)
 
-            log.info(f"[{ticker}] {sig['signal_type']} @ {bar_time.strftime('%Y-%m-%d %H:%M')} "
+            log.info(f"[{ticker}] {stype} @ {bar_time.strftime('%Y-%m-%d %H:%M')} "
                      f"| {right} {strike} exp {expiry}")
 
             opt_df = fetch_option_bars_polygon(ticker, strike, expiry, right)
@@ -504,55 +507,30 @@ def run_backtest(ticker: str) -> list:
                 log.warning(f"  Skipped - no Polygon data")
                 continue
 
-            is_orb = "ORB" in sig["signal_type"]
-
-            if is_orb:
+            if stype.startswith("ORB"):
                 trade_type    = "ORB"
-                use_stop_loss = False
-                dv_session    = None
-                mr_entry_bar  = None
+                use_stop_loss = False   # ORB: hold to EOD/trail/flip
             else:
-                before_entry = dv_full[dv_full.index <= bar_time]
-                mr_bar       = max(0, len(before_entry) - 1)
-                upgraded     = False
-                for last_idx in range(mr_bar + 1, len(dv_full)):
-                    try:
-                        if mr_orb_upgrade_qualifies(dv_full, mr_bar, last_idx,
-                                                    orb_deg, r2_thr, sig["direction"], acc):
-                            upgraded = True
-                            break
-                    except Exception:
-                        pass
-                if upgraded:
-                    trade_type    = "MR_UPGRADED_ORB"
-                    use_stop_loss = True
-                    dv_session    = dv_full
-                    mr_entry_bar  = mr_bar
-                else:
-                    trade_type    = "MR_ONLY"
-                    use_stop_loss = True
-                    dv_session    = None
-                    mr_entry_bar  = None
+                trade_type    = "MR_UPGRADED_ORB"
+                use_stop_loss = True    # executor always applies 50% stop
 
             result = simulate_trade(
                 bar_time, opt_df, sig["direction"], day_sigs,
                 use_stop_loss=use_stop_loss,
-                dv_session=dv_session,
-                mr_entry_bar=mr_entry_bar,
-                ticker=ticker,
+                stop_loss_pct=STOP_LOSS_OVERRIDE.get(ticker, STOP_LOSS_PCT),
+                trail_from_hwm=TRAIL_HWM_OVERRIDE.get(ticker, TRAIL_FROM_HWM),
             )
             if result is None:
                 log.warning(f"  Skipped - no valid bars after signal")
                 continue
 
-            # Update position tracker
             last_exit_time = pd.Timestamp(result["exit_time"])
             last_direction = sig["direction"]
 
             trades.append({
                 "ticker":      ticker,
                 "date":        date_str,
-                "signal_type": sig["signal_type"],
+                "signal_type": stype,
                 "trade_type":  trade_type,
                 "strike":      strike,
                 "expiry":      expiry,
@@ -600,7 +578,8 @@ if __name__ == "__main__":
         log.info(f"\n{'='*60}\n  Options backtest: {ticker}\n{'='*60}")
 
         trades  = run_backtest(ticker)
-        fname   = f"option_backtest_{ticker}.json"
+        safe_ticker = ticker.replace("^", "")
+        fname       = f"option_backtest_{safe_ticker}.json"
 
         # Merge with existing (append mode)
         existing_trades: list = []

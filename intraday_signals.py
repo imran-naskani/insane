@@ -498,19 +498,15 @@ def compute_chart_signals(df, ticker):
                         mr_dir       = None
                         continue  # silent upgrade — no signal on this bar
 
-                # Standalone MR: use full signals (wr2 active)
+                # Standalone MR: track for upgrade only — no chart marker
                 is_ml = bool(lmr.get(ts, False)) if ts in lmr.index else False
                 is_ms = bool(smr.get(ts, False)) if ts in smr.index else False
                 if not (is_ml or is_ms):
                     continue
                 if is_ml:
-                    df.at[ts, "Turn_Up"]       = True
-                    df.at[ts, "Signal_Source"] = "MR"
                     mr_entry_bar = ts_i
                     mr_dir       = "long"
                 elif is_ms:
-                    df.at[ts, "Turn_Down"]     = True
-                    df.at[ts, "Signal_Source"] = "MR"
                     mr_entry_bar = ts_i
                     mr_dir       = "short"
 

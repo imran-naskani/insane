@@ -1,4 +1,4 @@
-from ib_insync import IB, Stock, Option, LimitOrder, MarketOrder, util
+from ib_insync import IB, Stock, Index, Option, LimitOrder, MarketOrder, util
 import threading
 import logging
 import json
@@ -18,9 +18,12 @@ util.startLoop()
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
 EXECUTOR_TICKERS = {
-    "SPY":  Stock("SPY",  "SMART", "USD"),
-    "TSLA": Stock("TSLA", "SMART", "USD"),
+    "SPY":   Stock("SPY",  "SMART", "USD"),
+    "TSLA":  Stock("TSLA", "SMART", "USD"),
+    "^GSPC": Index("SPX",  "CBOE",  "USD"),   # SPX index — weekly SPXW options
 }
+
+DISPLAY_NAME = {"^GSPC": "SPX"}   # Telegram display labels
 
 ENTRY_CUTOFF      = dt.time(14,  0)   # no new entries after 14:00
 EOD_CUTOFF        = dt.time(14, 55)   # hard exit all positions
@@ -28,6 +31,10 @@ OTM_CUTOFF        = dt.time(13, 30)   # after this, use 1DTE instead of 0DTE
 STOP_LOSS_PCT     = 0.50              # exit if premium drops to 50% of entry
 TRAIL_ACTIVATE    = 1.50              # arm trailing once premium reaches 150% of entry
 TRAIL_FROM_HWM    = 0.75              # trail at 75% of high-water mark
+
+# Per-ticker overrides (SPX: tighter stop, looser trail to let winners run)
+STOP_LOSS_OVERRIDE = {"^GSPC": 0.25}
+TRAIL_HWM_OVERRIDE = {"^GSPC": 0.25}
 TRACK_INTERVAL    = 5                 # seconds between position checks
 ORDER_RETRY_SECS  = 5                 # seconds per fill attempt (re-fetches fresh mid each retry)
 ORDER_MAX_RETRIES = 6                 # 6 × 5s = 30s of limit attempts before market fallback
@@ -70,15 +77,17 @@ def _check_exit(
     current_price: float,
     high_water_mark: float,
     trailing_active: bool,
+    stop_loss_pct: float = STOP_LOSS_PCT,
+    trail_from_hwm: float = TRAIL_FROM_HWM,
 ) -> tuple:
     """
     Returns (should_exit: bool, reason: str | None).
     EOD check is NOT here — the caller handles it (needs the real clock).
     Priority: stop loss first, then trailing.
     """
-    if current_price <= entry_price * STOP_LOSS_PCT:
-        return True, "Stop Loss (50%)"
-    if trailing_active and current_price <= high_water_mark * TRAIL_FROM_HWM:
+    if current_price <= entry_price * stop_loss_pct:
+        return True, f"Stop Loss ({int(stop_loss_pct * 100)}%)"
+    if trailing_active and current_price <= high_water_mark * trail_from_hwm:
         return True, "Trailing Stop"
     return False, None
 
@@ -183,14 +192,16 @@ class OptionsExecutor:
 
     # ── Stubs — implemented in Tasks 4-6 ─────────────────────────────────────
 
-    def on_signal(self, ticker: str, direction: str) -> None:
-        """Called from alert engine. direction: 'long' | 'short'. Never raises."""
+    def on_signal(self, ticker: str, direction: str, open_new: bool = True) -> None:
+        """Called from alert engine. direction: 'long' | 'short'.
+        open_new=False: exit any opposite position but do not enter a new trade (MR Flip case).
+        Never raises."""
         try:
-            self._handle_signal(ticker, direction)
+            self._handle_signal(ticker, direction, open_new)
         except Exception as e:
             log.error(f"[executor] on_signal error ({ticker} {direction}): {e}", exc_info=True)
 
-    def _handle_signal(self, ticker: str, direction: str) -> None:
+    def _handle_signal(self, ticker: str, direction: str, open_new: bool = True) -> None:
         if ticker not in EXECUTOR_TICKERS:
             return
 
@@ -208,7 +219,10 @@ class OptionsExecutor:
                 return
             self._exit_position(ticker, "Signal Reversal")
 
-        self._open_position(ticker, direction, now)
+        if open_new:
+            self._open_position(ticker, direction, now)
+        else:
+            log.info(f"[executor] {ticker}: MR Flip — exited existing position, no new entry")
 
     def _open_position(self, ticker: str, direction: str, now: dt.datetime) -> None:
         contract = EXECUTOR_TICKERS[ticker]
@@ -283,7 +297,7 @@ class OptionsExecutor:
         self._save_positions()
 
         telegram.send_alert(
-            f"*{ticker}* | {right} ATM | Strike: {strike:.0f} | {expiry_label} | "
+            f"*{DISPLAY_NAME.get(ticker, ticker)}* | {right} ATM | Strike: {strike:.0f} | {expiry_label} | "
             f"Fill: ${fill_price:.2f} | "
             f"Signal: {'ORB/MR Long' if direction == 'long' else 'ORB/MR Short'}",
             channel="options",
@@ -305,11 +319,15 @@ class OptionsExecutor:
                 log.warning(f"[executor] {ticker}: no option chain from IB")
                 return None, None, None
 
-            # Among SMART chains pick the fullest one; fall back to whatever has most expirations
-            smart = [c for c in chains if c.exchange == "SMART"]
-            chain = (max(smart, key=lambda c: len(c.expirations)) if smart
-                     else max(chains, key=lambda c: len(c.expirations)))
-            log.info(f"[executor] {ticker}: using chain exchange={chain.exchange}, "
+            # SPX: use SPXW (weekly) chain to avoid ambiguity with SPX monthly
+            if ticker == "^GSPC":
+                spxw = [c for c in chains if getattr(c, "tradingClass", "") == "SPXW"]
+                chain = spxw[0] if spxw else chains[0]
+            else:
+                smart = [c for c in chains if c.exchange == "SMART"]
+                chain = (max(smart, key=lambda c: len(c.expirations)) if smart
+                         else max(chains, key=lambda c: len(c.expirations)))
+            log.info(f"[executor] {ticker}: using chain tradingClass={getattr(chain,'tradingClass','?')} "
                      f"{len(chain.expirations)} expirations, {len(chain.strikes)} strikes")
 
             now    = dt.datetime.now()
@@ -321,15 +339,28 @@ class OptionsExecutor:
             strike = _find_atm_strike(list(chain.strikes), current_price)
             right  = "C" if direction == "long" else "P"
 
-            opt = Option(
-                symbol=con.symbol,
-                lastTradeDateOrContractMonth=expiry,
-                strike=strike,
-                right=right,
-                exchange="SMART",
-                currency="USD",
-                multiplier="100",
-            )
+            # SPX: use SPXW symbol and tradingClass to avoid mini-option ambiguity
+            if ticker == "^GSPC":
+                opt = Option(
+                    symbol="SPXW",
+                    lastTradeDateOrContractMonth=expiry,
+                    strike=strike,
+                    right=right,
+                    exchange="SMART",
+                    currency="USD",
+                    multiplier="100",
+                    tradingClass="SPXW",
+                )
+            else:
+                opt = Option(
+                    symbol=con.symbol,
+                    lastTradeDateOrContractMonth=expiry,
+                    strike=strike,
+                    right=right,
+                    exchange="SMART",
+                    currency="USD",
+                    multiplier="100",
+                )
             self._ib.qualifyContracts(opt)
             return opt, strike, expiry
         except Exception as e:
@@ -448,8 +479,12 @@ class OptionsExecutor:
                     self._exit_position(ticker, "EOD")
                     continue
 
-                # Rule-based exits: stop loss then trailing
-                should_exit, reason = _check_exit(entry, mid, hwm, trail)
+                # Rule-based exits: stop loss then trailing (per-ticker thresholds)
+                should_exit, reason = _check_exit(
+                    entry, mid, hwm, trail,
+                    stop_loss_pct=STOP_LOSS_OVERRIDE.get(ticker, STOP_LOSS_PCT),
+                    trail_from_hwm=TRAIL_HWM_OVERRIDE.get(ticker, TRAIL_FROM_HWM),
+                )
                 if should_exit:
                     self._exit_position(ticker, reason)
 
@@ -459,20 +494,70 @@ class OptionsExecutor:
         if pos is None:
             return
 
-        exit_price = pos["entry_price"]   # fallback if market order fails
-        try:
-            self._ib.cancelMktData(pos["contract"])
-            self._ib.qualifyContracts(pos["contract"])
-            order = MarketOrder("SELL", pos["contracts"])
-            order.tif = "DAY"
-            trade = self._ib.placeOrder(pos["contract"], order)
+        # Fallback: last known market price (better than entry price)
+        ticker_obj  = pos.get("ticker_obj")
+        last_mid    = None
+        if ticker_obj:
+            last_mid = ticker_obj.midpoint()
+            if not last_mid or last_mid <= 0:
+                if ticker_obj.bid and ticker_obj.ask and ticker_obj.bid > 0:
+                    last_mid = (ticker_obj.bid + ticker_obj.ask) / 2
+        exit_price = last_mid if last_mid and last_mid > 0 else pos["entry_price"]
 
-            deadline = time.time() + 30
-            while time.time() < deadline:
-                time.sleep(1)   # event loop updates trade status in background
-                if trade.orderStatus.status == "Filled":
-                    exit_price = trade.orderStatus.avgFillPrice
-                    break
+        try:
+            self._ib.qualifyContracts(pos["contract"])
+
+            # Step 1-2: limit at mid, then walk down to bid (3 attempts each)
+            filled = False
+            for attempt in range(ORDER_MAX_RETRIES):
+                try:
+                    [snap] = self._ib.reqTickers(pos["contract"])
+                    bid, ask = snap.bid, snap.ask
+                except Exception:
+                    bid, ask = None, None
+
+                if bid and ask and bid > 0 and ask > 0:
+                    limit_price = round(
+                        (bid + ask) / 2 if attempt < ORDER_MAX_RETRIES // 2 else bid, 2
+                    )
+                    mode  = "mid" if attempt < ORDER_MAX_RETRIES // 2 else "bid"
+                    order = LimitOrder("SELL", pos["contracts"], limit_price)
+                    order.tif = "DAY"
+                    trade = self._ib.placeOrder(pos["contract"], order)
+                    log.info(f"[executor] {ticker}: exit limit@{mode} ${limit_price:.2f}  bid=${bid:.2f} ask=${ask:.2f}  (attempt {attempt+1})")
+
+                    deadline = time.time() + ORDER_RETRY_SECS
+                    while time.time() < deadline:
+                        self._ib.sleep(1)
+                        if trade.orderStatus.status == "Filled":
+                            exit_price = trade.orderStatus.avgFillPrice
+                            filled = True
+                            break
+                    if filled:
+                        break
+                    self._ib.cancelOrder(order)
+                    self._ib.sleep(1)
+                else:
+                    log.warning(f"[executor] {ticker}: no bid/ask on exit attempt {attempt+1}")
+                    self._ib.sleep(ORDER_RETRY_SECS)
+
+            # Step 3: market order fallback
+            if not filled:
+                log.warning(f"[executor] {ticker}: limit exits failed — market order fallback")
+                self._ib.cancelMktData(pos["contract"])
+                order = MarketOrder("SELL", pos["contracts"])
+                order.tif = "DAY"
+                trade = self._ib.placeOrder(pos["contract"], order)
+                deadline = time.time() + ORDER_RETRY_SECS
+                while time.time() < deadline:
+                    self._ib.sleep(1)
+                    if trade.orderStatus.status == "Filled":
+                        exit_price = trade.orderStatus.avgFillPrice
+                        filled = True
+                        break
+                if not filled:
+                    log.warning(f"[executor] {ticker}: market exit unfilled — using last mid ${exit_price:.2f}")
+
         except Exception as e:
             log.error(f"[executor] exit order error ({ticker}): {e}", exc_info=True)
 
@@ -481,12 +566,15 @@ class OptionsExecutor:
         hold_mins = int((dt.datetime.now() - fill_dt).total_seconds() / 60)
         right     = "CALL" if pos["direction"] == "long" else "PUT"
 
-        telegram.send_alert(
-            f"*{ticker}* | {right} EXIT | Reason: {reason}\n"
-            f"Entry: ${pos['entry_price']:.2f} → Exit: ${exit_price:.2f} | "
-            f"P&L: {pnl_pct:+.1f}% | Hold: {hold_mins}m",
-            channel="options",
-        )
+        if filled:
+            telegram.send_alert(
+                f"*{DISPLAY_NAME.get(ticker, ticker)}* | {right} EXIT | Reason: {reason}\n"
+                f"Entry: ${pos['entry_price']:.2f} → Exit: ${exit_price:.2f} | "
+                f"P&L: {pnl_pct:+.1f}% | Hold: {hold_mins}m",
+                channel="options",
+            )
+        else:
+            log.warning(f"[executor] {ticker}: exit unfilled — no Telegram sent, position cleared")
 
         self._append_trade(ticker, pos, exit_price, reason)
 

@@ -101,6 +101,14 @@ def get_open_price(ib):
     ib.cancelMktData(stock)
     return price
 
+def _tsla_chain(chains):
+    """Pick the standard TSLA chain (not 2TSLA mini) from reqSecDefOptParams results."""
+    # Prefer chain whose tradingClass matches TICKER exactly
+    for c in chains:
+        if getattr(c, "tradingClass", "") == TICKER:
+            return c
+    return chains[0]  # fallback
+
 def get_expiries(ib):
     """Return (0dte_expiry, next_expiry) as YYYYMMDD strings."""
     stock = Stock(TICKER, EXCHANGE, CURRENCY)
@@ -109,8 +117,7 @@ def get_expiries(ib):
     if not chains:
         raise RuntimeError("No option chains returned from IB")
 
-    # Take the first chain (SMART or CBOE)
-    chain = chains[0]
+    chain = _tsla_chain(chains)
     today_str = dt.date.today().strftime("%Y%m%d")
 
     # Filter to expiries >= today, sorted
@@ -141,7 +148,9 @@ def build_contracts(ib, atm_strike, strikes_avail, expiry_0dte, expiry_next):
     contracts = []
     for strike in strikes:
         for right in ["C", "P"]:
-            c = Option(TICKER, expiry_0dte, strike, right, EXCHANGE)
+            # tradingClass='TSLA' avoids ambiguity with '2TSLA' mini options
+            c = Option(TICKER, expiry_0dte, strike, right, EXCHANGE,
+                       currency=CURRENCY, tradingClass=TICKER)
             contracts.append(c)
 
     ib.qualifyContracts(*contracts)
@@ -263,7 +272,9 @@ def main():
     stock = Stock(TICKER, EXCHANGE, CURRENCY)
     ib.qualifyContracts(stock)
     chains = ib.reqSecDefOptParams(stock.symbol, "", stock.secType, stock.conId)
-    strikes_avail = sorted(chains[0].strikes) if chains else []
+    chain = _tsla_chain(chains) if chains else None
+    print(f"  Chain tradingClass: {getattr(chain, 'tradingClass', 'N/A')}  total chains: {len(chains)}")
+    strikes_avail = sorted(chain.strikes) if chain else []
     atm_strike    = nearest_strike(open_price, strikes_avail)
     print(f"  ATM strike: ${atm_strike}")
 

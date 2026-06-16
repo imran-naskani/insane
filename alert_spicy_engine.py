@@ -245,7 +245,7 @@ while True:
                         signal_type = "MR_LONG"
                     # else: gate blocks — suppress silently
                 elif is_mr_long:
-                    # Standalone MR: full signal (wr2 active)
+                    # Standalone MR: track position for upgrade, but suppress alert
                     state.update(position="long", position_src="mr",
                                  mr_entry_bar=last_idx)
                     signal      = "MR Signal -- LONG"
@@ -263,7 +263,7 @@ while True:
                         signal      = "MR Flip -- SHORT (ORB reversal confirmed)"
                         signal_type = "MR_SHORT"
                 elif is_mr_short:
-                    # Standalone MR: full signal (wr2 active)
+                    # Standalone MR: track position for upgrade, but suppress alert
                     state.update(position="short", position_src="mr",
                                  mr_entry_bar=last_idx)
                     signal      = "MR Signal -- SHORT"
@@ -368,26 +368,45 @@ while True:
                             f"Price: {dv['Close'].iloc[-1]:.2f}"
                         )
                         state["last_alert"] = (bar_time, upgrade_type)
+                        if _executor is not None and ticker in ("^GSPC", "TSLA"):
+                            exec_dir = "long" if upgrade_dir == "LONG" else "short"
+                            # SPX: only execute MR_UPGRADED LONG, not SHORT
+                            if ticker == "^GSPC" and exec_dir == "short":
+                                log.info(f"{ticker} @ {display_time}: MR_UPGRADED SHORT filtered for SPX")
+                            else:
+                                _executor.on_signal(ticker, exec_dir)
 
             # ── Dedup and collect ─────────────────────────────────────────
+            # "MR Signal" = standalone MR — tracked for upgrade but never alerted
+            # "MR Flip"   = ORB reversal — alerted normally
+            _standalone_mr = signal is not None and signal.startswith("MR Signal")
             if signal:
                 prev  = state["last_alert"]
                 allow = (prev is None) or (prev[1] != signal_type)
                 if allow:
-                    combined_msgs.append(
-                        f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
-                        f"{signal}\n"
-                        f"Time: {display_time}\n"
-                        f"Price: {dv['Close'].iloc[-1]:.2f}"
-                    )
                     state["last_alert"] = (bar_time, signal_type)
-                    if (
-                        _executor is not None
-                        and ticker in ("SPY", "TSLA")
-                        and signal_type in ("ORB_LONG", "MR_LONG", "ORB_SHORT", "MR_SHORT")
-                    ):
-                        exec_dir = "long" if "LONG" in signal_type else "short"
-                        _executor.on_signal(ticker, exec_dir)
+                    if not _standalone_mr:
+                        combined_msgs.append(
+                            f"*{'SPX' if ticker == '^GSPC' else ticker}*\n"
+                            f"{signal}\n"
+                            f"Time: {display_time}\n"
+                            f"Price: {dv['Close'].iloc[-1]:.2f}"
+                        )
+                        if (
+                            _executor is not None
+                            and ticker in ("^GSPC", "TSLA")
+                            and signal_type in ("ORB_LONG", "MR_LONG", "ORB_SHORT", "MR_SHORT")
+                        ):
+                            exec_dir  = "long" if "LONG" in signal_type else "short"
+                            # MR Flip = ORB reversal: exit existing position only, no new entry
+                            is_mr_flip = signal.startswith("MR Flip")
+                            # SPX: only execute ORB SHORT, not ORB LONG
+                            if ticker == "^GSPC" and signal_type == "ORB_LONG":
+                                log.info(f"{ticker} @ {display_time}: ORB LONG filtered for SPX")
+                            else:
+                                _executor.on_signal(ticker, exec_dir, open_new=not is_mr_flip)
+                    else:
+                        log.info(f"{ticker} @ {display_time}: standalone MR suppressed — tracking for upgrade")
             else:
                 log.debug(f"{ticker} @ {display_time}: no signal")
 
