@@ -1,20 +1,20 @@
 {
-  "TSLA": {
+  "^GSPC": {
     "contract_params": {
-      "symbol": "TSLA",
-      "lastTradeDateOrContractMonth": "20260617",
-      "strike": 397.5,
-      "right": "P",
+      "symbol": "SPX",
+      "lastTradeDateOrContractMonth": "20260618",
+      "strike": 7500.0,
+      "right": "C",
       "exchange": "SMART",
       "currency": "USD",
       "multiplier": "100"
     },
-    "symbol": "TSLA  260617P00397500",
-    "direction": "short",
-    "entry_price": 2.75,
-    "high_water_mark": 2.75,
+    "symbol": "SPXW  260618C07500000",
+    "direction": "long",
+    "entry_price": 9.9,
+    "high_water_mark": 9.9,
     "trailing_active": false,
-    "fill_time": "2026-06-17T09:05:03.548169",
+    "fill_time": "2026-06-18T11:40:06.288063",
     "contracts": 1
   }
 }
