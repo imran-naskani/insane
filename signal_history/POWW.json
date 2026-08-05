@@ -2022,11 +2022,31 @@
     {
         "date": "2026-06-18",
         "signal": "UP",
-        "strength": "Weak",
+        "strength": "Strong",
         "turn_up": true,
         "turn_down": false,
         "close": 2.140000104904175,
         "smooth": 2.0348208083074044,
         "slope": 0.0587171384793681
+    },
+    {
+        "date": "2026-07-13",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 2.380000114440918,
+        "smooth": 2.411265741262336,
+        "slope": -0.012536424016766246
+    },
+    {
+        "date": "2026-08-03",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 2.180000066757202,
+        "smooth": 2.1577251408557627,
+        "slope": 0.010207653404288086
     }
 ]

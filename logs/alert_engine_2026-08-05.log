@@ -1,0 +1,40 @@
+2026-08-05 08:28:01 [INFO] Connecting to 127.0.0.1:4002 with clientId 111...
+2026-08-05 08:28:03 [INFO] Disconnecting
+2026-08-05 08:28:03 [ERROR] API connection failed: ConnectionRefusedError(22, 'The remote computer refused the network connection', None, 1225, None)
+2026-08-05 08:28:03 [ERROR] Make sure API port on TWS/IBG is open
+2026-08-05 08:28:03 [WARNING] [executor] Could not connect to IB ([WinError 1225] The remote computer refused the network connection). Options execution disabled.
+2026-08-05 08:28:03 [INFO] INSANE Alert Engine started (5m) -- MR + ORB-Slope strategy
+2026-08-05 08:30:04 [INFO] TSLA: 0 session bars — waiting for ORB warmup
+2026-08-05 08:30:05 [INFO] SPY: 0 session bars — waiting for ORB warmup
+2026-08-05 08:30:06 [INFO] ^GSPC: 0 session bars — waiting for ORB warmup
+2026-08-05 08:35:03 [INFO] TSLA: 1 session bars — waiting for ORB warmup
+2026-08-05 08:35:05 [INFO] SPY: 1 session bars — waiting for ORB warmup
+2026-08-05 08:35:06 [INFO] ^GSPC: 1 session bars — waiting for ORB warmup
+2026-08-05 08:40:03 [INFO] TSLA: 2 session bars — waiting for ORB warmup
+2026-08-05 08:40:05 [INFO] SPY: 2 session bars — waiting for ORB warmup
+2026-08-05 08:40:06 [INFO] ^GSPC: 2 session bars — waiting for ORB warmup
+2026-08-05 08:45:03 [INFO] TSLA: 3 session bars — waiting for ORB warmup
+2026-08-05 08:45:05 [INFO] SPY: 3 session bars — waiting for ORB warmup
+2026-08-05 08:45:06 [INFO] ^GSPC: 3 session bars — waiting for ORB warmup
+2026-08-05 08:50:03 [INFO] TSLA: 4 session bars — waiting for ORB warmup
+2026-08-05 08:50:05 [INFO] SPY: 4 session bars — waiting for ORB warmup
+2026-08-05 08:50:06 [INFO] ^GSPC: 4 session bars — waiting for ORB warmup
+2026-08-05 09:40:06 [INFO] ^GSPC @ 09:35 CT: standalone MR suppressed — tracking for upgrade
+2026-08-05 09:40:07 [INFO] Combined alert sent
+2026-08-05 09:50:25 [ERROR] 
+1 Failed download:
+2026-08-05 09:50:25 [ERROR] ['SPY']: SSLError('Failed to perform, curl: (35) Recv failure: Connection was reset. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2026-08-05 09:50:45 [ERROR] 
+1 Failed download:
+2026-08-05 09:50:45 [ERROR] ['^GSPC']: SSLError('Failed to perform, curl: (35) Recv failure: Connection was reset. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2026-08-05 09:50:45 [WARNING] ^GSPC attempt 1/10 failed: negative dimensions are not allowed
+2026-08-05 09:51:06 [ERROR] 
+1 Failed download:
+2026-08-05 09:51:06 [ERROR] ['^GSPC']: SSLError('Failed to perform, curl: (35) Recv failure: Connection was reset. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2026-08-05 09:51:06 [WARNING] ^GSPC attempt 2/10 failed: negative dimensions are not allowed
+2026-08-05 10:25:07 [INFO] Combined alert sent
+2026-08-05 11:50:07 [INFO] Combined alert sent
+2026-08-05 12:30:05 [INFO] SPY @ 12:25 CT: standalone MR suppressed — tracking for upgrade
+2026-08-05 12:30:06 [INFO] ^GSPC @ 12:25 CT: standalone MR suppressed — tracking for upgrade
+2026-08-05 13:45:07 [INFO] Combined alert sent
+2026-08-05 14:35:07 [INFO] Combined alert sent
