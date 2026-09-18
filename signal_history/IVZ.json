@@ -1066,5 +1066,55 @@
         "close": 29.600000381469727,
         "smooth": 29.385184639592076,
         "slope": 0.33309955211675835
+    },
+    {
+        "date": "2026-08-19",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 32.209999084472656,
+        "smooth": 32.26609284150315,
+        "slope": -0.17796458246746027
+    },
+    {
+        "date": "2026-08-24",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 32.45000076293945,
+        "smooth": 32.14171333700588,
+        "slope": 0.1896399003949263
+    },
+    {
+        "date": "2026-08-31",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 32.779998779296875,
+        "smooth": 32.822407656420424,
+        "slope": -0.16094575124268573
+    },
+    {
+        "date": "2026-09-03",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 32.709999084472656,
+        "smooth": 32.40586727415553,
+        "slope": 0.2038571760429555
+    },
+    {
+        "date": "2026-09-08",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 32.34000015258789,
+        "smooth": 32.534959955361686,
+        "slope": -0.13412400155540283
     }
 ]

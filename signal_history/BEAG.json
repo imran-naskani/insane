@@ -628,5 +628,85 @@
         "close": 10.678999900817871,
         "smooth": 10.669551203121033,
         "slope": 0.0027178096115374473
+    },
+    {
+        "date": "2026-08-17",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 10.734999656677246,
+        "smooth": 10.737487955020836,
+        "slope": -0.002035945974514064
+    },
+    {
+        "date": "2026-08-21",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 10.800000190734863,
+        "smooth": 10.756347889454517,
+        "slope": 0.020003997487621383
+    },
+    {
+        "date": "2026-08-25",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 10.75,
+        "smooth": 10.76410977058255,
+        "slope": -0.006465909173298812
+    },
+    {
+        "date": "2026-08-27",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 10.800000190734863,
+        "smooth": 10.77372382085295,
+        "slope": 0.01204134539725299
+    },
+    {
+        "date": "2026-09-03",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 10.75,
+        "smooth": 10.77373548482219,
+        "slope": -0.005503149875528024
+    },
+    {
+        "date": "2026-09-04",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 10.779999732971191,
+        "smooth": 10.775979699138768,
+        "slope": 0.0054248686269424695
+    },
+    {
+        "date": "2026-09-10",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 10.770000457763672,
+        "smooth": 10.782904161176747,
+        "slope": -0.018452350860667543
+    },
+    {
+        "date": "2026-09-16",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 10.850000381469727,
+        "smooth": 10.772398070621536,
+        "slope": 0.04093566206642052
     }
 ]
