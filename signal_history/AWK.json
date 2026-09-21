@@ -648,11 +648,21 @@
     {
         "date": "2026-09-02",
         "signal": "UP",
-        "strength": "Weak",
+        "strength": "Strong",
         "turn_up": true,
         "turn_down": false,
         "close": 139.49000549316406,
         "smooth": 138.33244108903932,
         "slope": 0.7812418557003724
+    },
+    {
+        "date": "2026-09-18",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 135.89999389648438,
+        "smooth": 137.453773310983,
+        "slope": -1.057748420605236
     }
 ]
