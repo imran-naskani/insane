@@ -2442,11 +2442,31 @@
     {
         "date": "2026-10-22",
         "signal": "DOWN",
-        "strength": "Weak",
+        "strength": "Strong",
         "turn_up": false,
         "turn_down": true,
         "close": 15.210000038146973,
         "smooth": 15.30398615061106,
         "slope": -0.05246845871053907
+    },
+    {
+        "date": "2026-11-02",
+        "signal": "UP",
+        "strength": "Weak",
+        "turn_up": true,
+        "turn_down": false,
+        "close": 14.399999618530273,
+        "smooth": 14.29856785421335,
+        "slope": 0.17724597548328092
+    },
+    {
+        "date": "2026-11-05",
+        "signal": "DOWN",
+        "strength": "Weak",
+        "turn_up": false,
+        "turn_down": true,
+        "close": 14.319999694824219,
+        "smooth": 14.659155886640692,
+        "slope": -0.0891432622841748
     }
 ]
